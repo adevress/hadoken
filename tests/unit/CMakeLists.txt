@@ -1,4 +1,7 @@
 
+if(UNIT_TESTS)
+
+find_package(Boost 1.41.0 REQUIRED system unit_test_framework)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${Boost_INCLUDE_DIRS} )
@@ -22,3 +25,5 @@ add_test(NAME test_generic_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${C
 #target_link_libraries(MpiRuntime ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES} ${MPI_LIBRARIES} functionalizer)
 
 #add_test(NAME MpiTest_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/MpiRuntime)
+
+endif()
