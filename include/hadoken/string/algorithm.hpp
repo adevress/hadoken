@@ -1,3 +1,10 @@
+/**
+ * Copyright (C) 2016 Adrien Devresse
+ * All rights reserved.
+ *
+ * This software may be modified and distributed under the terms
+ * of the BSD license.  See the LICENSE file for details.
+*/
 #ifndef _HADOKEN_STRING_ALGO_
 #define _HADOKEN_STRING_ALGO_
 

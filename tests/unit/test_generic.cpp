@@ -8,6 +8,7 @@
 
 #include <hadoken/geometry/geometry.hpp>
 #include <hadoken/math/math_floating_point.hpp>
+#include <hadoken/utility/range.hpp>
 
 BOOST_AUTO_TEST_CASE( simple_rotation_tests )
 {
@@ -115,5 +116,127 @@ BOOST_AUTO_TEST_CASE( rotation_mvd_compat_test )
 
 }
 
+
+
+template<typename T, typename Mod, typename Check>
+void  test_check_range(T vec, size_t partition, const Mod & modifier, const Check & checker){
+    using namespace hadoken;
+
+    typedef range<T> range_vec;
+
+    range_vec my_range(vec.begin(), vec.end());
+
+
+    BOOST_CHECK_EQUAL(vec.size(), my_range.size());
+
+    std::vector< range_vec> ranges = my_range.split(partition);
+    BOOST_CHECK_EQUAL(ranges.size(), partition);
+    BOOST_CHECK(ranges[0].begin() == vec.begin());
+    BOOST_CHECK(ranges[partition-1].end() == vec.end());
+
+
+    // test validity of all iterators
+    for(typename std::vector<range_vec>::iterator it = ranges.begin(); it != ranges.end(); ++it){
+        std::for_each(it->begin(), it->end(), modifier);
+    }
+
+    std::for_each(vec.begin(), vec.end(), checker);
+
+    // test sequence
+    // no range should have a difference of more than 1 elem
+    std::size_t min_elem = std::numeric_limits<std::size_t>::max(), max_elem = std::numeric_limits<std::size_t>::min();
+    for(typename std::vector<range_vec>::iterator it = ranges.begin(); it < ranges.end(); ++it){
+        const std::size_t diff = std::distance(it->begin(), it->end());
+        min_elem = std::min(min_elem, diff);
+        max_elem = std::min(max_elem, diff);
+    }
+
+    BOOST_CHECK_GE(min_elem+1,max_elem);
+
+}
+
+std::vector<int> generate_vector(size_t size_vec){
+    std::vector<int> vec(size_vec);
+    for(size_t i=0; i< vec.size(); ++i)
+        vec[i] = i;
+    return vec;
+}
+
+
+void modification_vector(int & i){
+    i+= 100;
+}
+
+struct check_modification_vector{
+    check_modification_vector() : count(0) {}
+
+    void operator ()(int & i){
+        BOOST_CHECK_EQUAL(i, count+100);
+        count+=1;
+    }
+
+    int count;
+};
+
+
+std::map<int, int> generate_map(size_t size_vec){
+    std::map<int, int> map;
+    for(size_t i=0; i< size_vec; ++i)
+        map.insert(std::make_pair(i,i));
+    return map;
+}
+
+
+void modification_map(std::pair<int,int>  p){
+    BOOST_CHECK_EQUAL(p.first, p.second);
+}
+
+
+struct check_modification_map{
+    check_modification_map() : count(0) {}
+
+    void operator ()(std::pair<int,int>  p){
+        BOOST_CHECK_EQUAL(p.first, count);
+        count+=1;
+    }
+
+    int count;
+};
+
+// reproduce rotate MVD2 for compat
+BOOST_AUTO_TEST_CASE( range_simple_test_vector_int )
+{
+
+    {
+        // perfect split
+        check_modification_vector check;
+        test_check_range< std::vector<int> >(generate_vector(800), 4, modification_vector, check);
+    }
+
+    {
+        // under numbered elements
+        check_modification_vector check;
+        test_check_range< std::vector<int> >(generate_vector(1000), 50000, modification_vector, check);
+    }
+
+    {
+        // divide with rest
+        check_modification_vector check;
+        test_check_range< std::vector<int> >(generate_vector(700), 30, modification_vector, check);
+    }
+
+
+    {
+        // check not random iterator in map structure
+        check_modification_map check_map;
+        test_check_range< std::map<int, int> >(generate_map(800), 4, modification_map, check_map);
+    }
+
+    {
+        // check not random iterator with partition > size
+        check_modification_map check_map;
+        test_check_range< std::map<int, int> >(generate_map(1000), 50000, modification_map, check_map);
+    }
+}
 
 
