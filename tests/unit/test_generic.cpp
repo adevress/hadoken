@@ -210,32 +210,32 @@ BOOST_AUTO_TEST_CASE( range_simple_test_vector_int )
     {
         // perfect split
         check_modification_vector check;
-        test_check_range< std::vector<int> >(generate_vector(800), 4, modification_vector, check);
+        test_check_range< std::vector<int>, void (*)(int &), struct check_modification_vector >(generate_vector(800), 4, modification_vector, check);
     }
 
     {
         // under numbered elements
         check_modification_vector check;
-        test_check_range< std::vector<int> >(generate_vector(1000), 50000, modification_vector, check);
+        test_check_range< std::vector<int>, void (*)(int &), struct check_modification_vector  >(generate_vector(1000), 50000, modification_vector, check);
     }
 
     {
         // divide with rest
         check_modification_vector check;
-        test_check_range< std::vector<int> >(generate_vector(700), 30, modification_vector, check);
+        test_check_range< std::vector<int>, void (*)(int &), struct check_modification_vector >(generate_vector(700), 30, modification_vector, check);
     }
 
 
     {
         // check not random iterator in map structure
         check_modification_map check_map;
-        test_check_range< std::map<int, int> >(generate_map(800), 4, modification_map, check_map);
+        test_check_range< std::map<int, int>, void (*)(std::pair<int,int>), check_modification_map >(generate_map(800), 4, modification_map, check_map);
     }
 
     {
         // check not random iterator with partition > size
         check_modification_map check_map;
-        test_check_range< std::map<int, int> >(generate_map(1000), 50000, modification_map, check_map);
+        test_check_range< std::map<int, int>, void (*)(std::pair<int,int>), check_modification_map >(generate_map(1000), 50000, modification_map, check_map);
     }
 }
 

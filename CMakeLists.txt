@@ -13,6 +13,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
       ${PROJECT_SOURCE_DIR}/CMake/packages
       ${PROJECT_SOURCE_DIR}/CMake/config)
 
+set(Boost_NO_BOOST_CMAKE TRUE)
+
+include(BlueGenePortability)
 include(DefineInstallationPaths)
 include(ReleaseDebugAutoFlags)
 
