@@ -57,23 +57,29 @@ namespace geometry{
 
     namespace quaternion{
 
+        /// execute an hamilton product on two quaternions
+        /// the quaternions have to be in order (x,y,z,w)
+        /// @return product  result quaternion in order (x,y,z,w)
         template<typename QuadRes, typename Quad1, typename Quad2>
         inline QuadRes product(const Quad1 & q1, const Quad2 & q2, QuadRes res = QuadRes()){
-            const typename QuadRes::value_type w1 = q1[0], x1 = q1[1], y1 = q1[2], z1 = q1[3];
-            const typename QuadRes::value_type w2 = q2[0], x2 = q2[1], y2 = q2[2], z2 = q2[3];
+            const typename QuadRes::value_type w1 = q1[3], x1 = q1[0], y1 = q1[1], z1 = q1[2];
+            const typename QuadRes::value_type w2 = q2[3], x2 = q2[0], y2 = q2[1], z2 = q2[2];
 
-            res[0] = w1*w2 - x1*x2 - y1*y2 - z1*z2;
-            res[1] = w1*x2 + x1*w2 + y1*z2 - z1*y2;
-            res[2] = w1*y2 - x1*z2 + y1*w2 + z1*x2;
-            res[3] = w1*z2 + x1*y2 - y1*x2 + z1*w2;
+            res[0] = w1*x2 + x1*w2 + y1*z2 - z1*y2;
+            res[1] = w1*y2 - x1*z2 + y1*w2 + z1*x2;
+            res[2] = w1*z2 + x1*y2 - y1*x2 + z1*w2;
+            res[3] = w1*w2 - x1*x2 - y1*y2 - z1*z2;
             return res;
         }
 
+        ///
+        /// return the conjugate of a quaternion
+        ///
         template<typename QuadRes, typename Quad1>
         inline QuadRes conjugate(const Quad1 & q1, QuadRes res = QuadRes()){
-            res[0] = q1[0];
-            for(int i=1; i <4;++i )
+            for(int i=0; i <3;++i )
                 res[i]= - q1[i];
+            res[3] = q1[3];
             return res;
         }
 
@@ -82,19 +88,21 @@ namespace geometry{
 
 
     /// rotate a point in a 3D space using a quaternion
+    /// - quaternion can be any 1D array of size 4 in order (x,y,z,w )
+    /// - point can be any 1D array of size 3 in order (x,y,z)
     template<typename ValueType, typename Quaternion, typename Point>
     inline void rotate(const Quaternion & q_rotation, Point & point){
         typedef boost::array<ValueType, 4> QuatType;
         using namespace quaternion;
 
         QuatType q_input;
-        q_input[0] =0;
         for(int i=0; i <3;++i)
-            q_input[i+1] = point[i];
+            q_input[i] = point[i];
+        q_input[3] = 0;
 
         const QuatType res = product<QuatType>(product<QuatType>(q_rotation, q_input), conjugate<QuatType>(q_rotation));
         for(int i =0; i < 3;++i)
-            point[i] = res[i+1];
+            point[i] = res[i];
     }
 
 }

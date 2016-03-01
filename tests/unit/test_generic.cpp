@@ -22,7 +22,7 @@ BOOST_AUTO_TEST_CASE( simple_rotation_tests )
         std::cout <<  "dbl ep: " << std::numeric_limits<double>::epsilon()  << "\n";
         // rotate of pi/2 a point on z axis 2D
         const double angle = boost::math::constants::pi<double>()/2;
-        double rotation_quaternion[] = { cos(angle/2), 0, 0, sin(angle/2) };
+        double rotation_quaternion[] = { 0, 0, sin(angle/2), cos(angle/2) };
 
         double pos[] = { 2, 0, 0};
         rotate<double>(rotation_quaternion, pos);
@@ -40,12 +40,12 @@ BOOST_AUTO_TEST_CASE( simple_rotation_tests )
     {
         // rotate of pi/4 a point on y axis 2D
         const double angle = boost::math::constants::pi<double>()/4;
-        double rotation_quaternion[] = { cos(angle/2), 0, sin(angle/2),0 };
+        double rotation_quaternion[] = { 0, sin(angle/2), 0, cos(angle/2) };
 
         double pos[] = { 3, 0, 0};
         rotate<double>(rotation_quaternion, pos);
 
-        double res[] = {3*cos(angle),0, -3*sin(angle)};
+        double res[] = {3*cos(angle), 0, -3*sin(angle)};
         for(int i=0; i < 3; ++i){
             std::cout << "pos["<< i << "]: "<< pos[i] <<" \n";
             std::cout << "res["<< i << "]: "<< res[i] <<" \n";
@@ -98,8 +98,8 @@ BOOST_AUTO_TEST_CASE( rotation_mvd_compat_test )
 
             boost::array<double, 4> quat;
             std::fill(quat.begin(), quat.end(), 0);
-            quat[0] = cos( deg_rad_r*y_angle_deg/2 );
-            quat[2] = sin(deg_rad_r*y_angle_deg/2 );
+            quat[3] = cos( deg_rad_r*y_angle_deg/2 );
+            quat[1] = sin(deg_rad_r*y_angle_deg/2 );
 
             std::copy(xyz, xyz+3, res.begin());
             rotate<double>(quat, res);
