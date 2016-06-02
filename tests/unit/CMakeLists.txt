@@ -12,18 +12,30 @@ link_directories( ${Boost_LIBRARY_DIRS} )
 ## generic Test
 LIST(APPEND test_generic_src "test_generic.cpp")
 
-add_executable(test_generic ${test_generic_src})
+add_executable(test_generic ${test_generic_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
 target_link_libraries(test_generic ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 
 add_test(NAME test_generic_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_generic)
 
 
-## MpiRuntime Test
-#LIST(APPEND MpiRuntime_src "MpiRuntime.cpp")
+## random generator related tests
 
-#add_executable(MpiRuntime ${MpiRuntime_src})
-#target_link_libraries(MpiRuntime ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES} ${MPI_LIBRARIES} functionalizer)
+LIST(APPEND test_random_src "test_random.cpp")
 
-#add_test(NAME MpiTest_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/MpiRuntime)
+add_executable(test_random ${test_random_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_random ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES} )
+
+add_test(NAME test_random_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_random)
+
+
+## crypto generator related tests
+
+LIST(APPEND test_crypto_src "test_crypto.cpp")
+
+add_executable(test_crypto ${test_crypto_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_crypto ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES} )
+
+add_test(NAME test_crypto_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_crypto)
+
 
 endif()
