@@ -12,11 +12,15 @@
 #include <boost/array.hpp>
 
 
+#include <bitset>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
 #include <sstream>
 #include <algorithm>
+
+// endianness functions
+#include <netinet/in.h>
 
 //
 // SHA1 cryptographic hash implementation
@@ -41,18 +45,6 @@ namespace hadoken
 
         inline ~sha1() {}
 
-        inline sha1(const sha1& s) { *this = s; }
-
-        inline const sha1& operator = (const sha1& s) {
-            if(this != &s){
-                std::copy(s.m_digest.begin(), s.m_digest.end(), m_digest.begin());
-                std::copy(s.m_block.begin(), s.m_block.end(), m_block.begin());
-                m_blockByteIndex = s.m_blockByteIndex;
-                m_byteCount = s.m_byteCount;
-            }
-            return *this;
-        }
-
         inline void reset() {
             m_digest[0] = 0x67452301;
             m_digest[1] = 0xEFCDAB89;
@@ -64,18 +56,19 @@ namespace hadoken
         }
 
 
-        inline void process_byte(boost::uint8_t octet) {
-            this->m_block[this->m_blockByteIndex++] = octet;
-            ++this->m_byteCount;
-            if(m_blockByteIndex == 64) {
-                this->m_blockByteIndex = 0;
-                process_block();
-            }
+        inline void process(boost::uint8_t b) {
+            process_byte(b);
         }
 
-        inline void process_block(const void* const start, const void* const end) {
-            const boost::uint8_t* begin = static_cast<const boost::uint8_t*>(start);
-            const boost::uint8_t* finish = static_cast<const boost::uint8_t*>(end);
+        inline void process(boost::uint32_t value){
+            boost::uint32_t big_endian_value = htonl(value);
+            process_block(&big_endian_value, sizeof(boost::uint32_t));
+        }
+
+        template<typename Iterator>
+        inline void process_block(const Iterator start, const Iterator end) {
+            const boost::uint8_t* begin = static_cast<const boost::uint8_t*>(&(*start));
+            const boost::uint8_t* finish = static_cast<const boost::uint8_t*>(&(*end));
             while(begin != finish) {
                 process_byte(*begin);
                 begin++;
@@ -88,11 +81,15 @@ namespace hadoken
         }
 
 
+
+
+
+
+
         inline std::string to_string(){
             std::ostringstream ss;
 
-            digest8_t hash;
-            get_digest_bytes(hash);
+            digest8_t hash =  get_digest_bytes();
 
             ss << std::hex << std::setfill('0');
 
@@ -104,67 +101,84 @@ namespace hadoken
         }
 
 
-        inline void get_digest(digest32_t & digest) {
-            size_t bitCount = this->m_byteCount * 8;
+        inline digest32_t get_digest() {
+            digest32_t digest;
+            finalize();
 
-            process_byte(0x80);
-            if (this->m_blockByteIndex > 56) {
-                while (m_blockByteIndex != 0) {
-                    process_byte(0);
-                }
-                while (m_blockByteIndex < 56) {
-                    process_byte(0);
-                }
-            } else {
-                while (m_blockByteIndex < 56) {
-                    process_byte(0);
-                }
+            std::copy(m_digest.begin(), m_digest.end(), digest.begin());
+            return digest;
+        }
+
+
+        inline digest8_t get_digest_bytes() {
+            digest8_t digest;
+            digest32_t d32 =get_digest();
+
+            // big endian to little endiant
+            std::transform(d32.begin(), d32.end(), d32.begin(), ntohl);
+            ::memcpy(&digest[0], &(d32[0]), digest.size());
+
+            return digest;
+        }
+
+    private:
+        digest32_t m_digest;
+        boost::array<boost::uint8_t, 64> m_block;
+        size_t m_blockByteIndex;
+        size_t m_byteCount;
+        std::bitset<8> m_flags;
+
+        enum{
+            completed = 0x00
+        };
+
+        inline static boost::uint32_t left_rotate(boost::uint32_t value, size_t count) {
+            return (value << count) ^ (value >> (32-count));
+        }
+
+
+        inline void process_byte(boost::uint8_t b){
+            this->m_block[this->m_blockByteIndex++] = b;
+            ++this->m_byteCount;
+            if(m_blockByteIndex == 64) {
+                this->m_blockByteIndex = 0;
+                process_internal();
             }
-            process_byte(0);
-            process_byte(0);
-            process_byte(0);
-            process_byte(0);
-            process_byte( static_cast<unsigned char>((bitCount>>24) & 0xFF));
-            process_byte( static_cast<unsigned char>((bitCount>>16) & 0xFF));
-            process_byte( static_cast<unsigned char>((bitCount>>8 ) & 0xFF));
-            process_byte( static_cast<unsigned char>((bitCount)     & 0xFF));
-
-            memcpy(&digest[0], &m_digest[0], 5 * sizeof(boost::uint32_t));
         }
 
 
-        inline void get_digest_bytes(digest8_t & digest) {
-            digest32_t d32;
-            get_digest(d32);
-            size_t di = 0;
-            digest[di++] = ((d32[0] >> 24) & 0xFF);
-            digest[di++] = ((d32[0] >> 16) & 0xFF);
-            digest[di++] = ((d32[0] >> 8) & 0xFF);
-            digest[di++] = ((d32[0]) & 0xFF);
+        inline void finalize(){
+            if(m_flags[completed] == false){
+                size_t bitCount = this->m_byteCount * 8;
 
-            digest[di++] = ((d32[1] >> 24) & 0xFF);
-            digest[di++] = ((d32[1] >> 16) & 0xFF);
-            digest[di++] = ((d32[1] >> 8) & 0xFF);
-            digest[di++] = ((d32[1]) & 0xFF);
+                process_byte(0x80);
+                if (this->m_blockByteIndex > 56) {
+                    while (m_blockByteIndex != 0) {
+                        process_byte(0);
+                    }
+                    while (m_blockByteIndex < 56) {
+                        process_byte(0);
+                    }
+                } else {
+                    while (m_blockByteIndex < 56) {
+                        process_byte(0);
+                    }
+                }
+                process_byte(0);
+                process_byte(0);
+                process_byte(0);
+                process_byte(0);
+                process_byte( static_cast<unsigned char>((bitCount>>24) & 0xFF));
+                process_byte( static_cast<unsigned char>((bitCount>>16) & 0xFF));
+                process_byte( static_cast<unsigned char>((bitCount>>8 ) & 0xFF));
+                process_byte( static_cast<unsigned char>((bitCount)     & 0xFF));
 
-            digest[di++] = ((d32[2] >> 24) & 0xFF);
-            digest[di++] = ((d32[2] >> 16) & 0xFF);
-            digest[di++] = ((d32[2] >> 8) & 0xFF);
-            digest[di++] = ((d32[2]) & 0xFF);
-
-            digest[di++] = ((d32[3] >> 24) & 0xFF);
-            digest[di++] = ((d32[3] >> 16) & 0xFF);
-            digest[di++] = ((d32[3] >> 8) & 0xFF);
-            digest[di++] = ((d32[3]) & 0xFF);
-
-            digest[di++] = ((d32[4] >> 24) & 0xFF);
-            digest[di++] = ((d32[4] >> 16) & 0xFF);
-            digest[di++] = ((d32[4] >> 8) & 0xFF);
-            digest[di++] = ((d32[4]) & 0xFF);
+                m_flags[completed] = true;
+            }
         }
 
-    protected:
-        void process_block() {
+
+        inline void process_internal() {
             boost::uint32_t w[80];
             for (size_t i = 0; i < 16; i++) {
                 w[i]  = (m_block[i*4 + 0] << 24);
@@ -213,15 +227,7 @@ namespace hadoken
             m_digest[3] += d;
             m_digest[4] += e;
         }
-    private:
-        digest32_t m_digest;
-        boost::array<boost::uint8_t, 64> m_block;
-        size_t m_blockByteIndex;
-        size_t m_byteCount;
 
-        inline static boost::uint32_t left_rotate(boost::uint32_t value, size_t count) {
-            return (value << count) ^ (value >> (32-count));
-        }
     };
 
 

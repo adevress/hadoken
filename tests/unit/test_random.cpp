@@ -49,3 +49,42 @@ BOOST_AUTO_TEST_CASE( simple_random_tests )
                                   mapper_values.begin(), mapper_values.end());
 
 }
+
+
+
+BOOST_AUTO_TEST_CASE( simple_derivate)
+{
+    const std::size_t n_vals = 1000;
+
+    boost::random::uniform_int_distribution<std::size_t> dist;
+
+    std::vector<std::size_t> origin_values, derivated_values;
+    origin_values.reserve(n_vals);
+
+
+
+    const int seed = 0;
+    boost::random::mt11213b twister_engine_clone;
+    hadoken::random_engine_mapper engine_mapper(twister_engine_clone);
+    engine_mapper.seed(seed);
+
+
+    // create a derivation with a terrible seed init difference  1
+    hadoken::random_engine_mapper derivated_engine = engine_mapper.derivate(1);
+
+
+    // simple silly test to fullfill original twister
+    // random generator vector
+    for(std::size_t i =0; i < n_vals; ++i){
+        unsigned int v1 = dist(engine_mapper);
+        origin_values.push_back(v1);
+
+        unsigned int v2= dist(derivated_engine);
+        derivated_values.push_back(v2);
+
+        std::cout << "random_num_twins: " << v1 << " " << v2 << std::endl;
+
+        BOOST_CHECK_NE(v1, v2);
+    }
+
+}
