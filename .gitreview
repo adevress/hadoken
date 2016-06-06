@@ -1,0 +1,6 @@
+[gerrit]
+host=bbpcode.epfl.ch
+project=hpc/hadoken
+defaultbranch=master
+port=22
+

@@ -2,10 +2,10 @@
 #define RANDOM_ENGINE_MAPPER_MISC_HPP
 
 
-#include <cassert>
 #include "../random.hpp"
-#include <hadoken/crypto/sha/sha1.hpp>
 
+#include <cassert>
+#include <hadoken/crypto/sha/sha1.hpp>
 
 namespace hadoken {
 
@@ -36,7 +36,7 @@ private:
 template< typename Engine >
 class map_engine_intern: public abstract_engine{
 public:
-    map_engine_intern(const Engine & e, random_engine_mapper::result_type seed=0) : _e(e), _seed(seed) {
+    map_engine_intern(const Engine & e, random_engine_mapper::result_type seed = Engine::default_seed ) : _e(e), _seed(seed) {
 
     }
 
