@@ -7,6 +7,7 @@ set(VERSION_MAJOR "1")
 set(VERSION_MINOR "0")
 
 option(UNIT_TESTS "Enable or disable unit tests execution" TRUE)
+option(PERF_TESTS "Enable or disable performance tests execution" FALSE)
 option(DISABLE_INSTALL "Disable the installation for this component" TRUE)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
@@ -31,5 +32,6 @@ if(NOT DISABLE_INSTALL)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/hadoken DESTINATION ${INCLUDE_INSTALL_DIR}/)
 endif()
 
+add_subdirectory(tests/perf)
 add_subdirectory(tests/unit)
 

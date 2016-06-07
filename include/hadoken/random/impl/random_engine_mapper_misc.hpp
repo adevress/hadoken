@@ -36,8 +36,10 @@ private:
 template< typename Engine >
 class map_engine_intern: public abstract_engine{
 public:
-    map_engine_intern(const Engine & e, random_engine_mapper::result_type seed = Engine::default_seed ) : _e(e), _seed(seed) {
-
+    map_engine_intern(const Engine & e, random_engine_mapper::result_type seed = 0 ) : _e(e), _seed(seed) {
+        if(_seed != 0){
+            map_seed(_seed);
+        }
     }
 
     virtual void map_seed(){

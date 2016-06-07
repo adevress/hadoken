@@ -15,9 +15,9 @@ endif()
 
 set(CMAKE_C_FLAGS_RELEASE  "-O2 -Wall")
 set(CMAKE_C_FLAGS_DEBUG  "-g -Wall -Wextra -pedantic ${STACK_PROTECTION_FLAGS}")
-set(CMAKE_C_FLAGS_RELWITHDEBINFO " -Wall -g -O2 -Wall -Wextra ")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO " -Wall -Wextra -g -O2 -DNDEBUG ")
 
 
 set(CMAKE_CXX_FLAGS_RELEASE  "-O2 -Wall")
 set(CMAKE_CXX_FLAGS_DEBUG  "-g -Wall -Wextra  ${STACK_PROTECTION_FLAGS} ")
-set(CMAKE_CXX_FLAGS_RELWITHDEBINFO " -Wall -g -O2 -Wall -Wextra ")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO " -Wall -Wextra -g -O2 -DNDEBUG ")
