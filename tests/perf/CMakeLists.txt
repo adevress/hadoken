@@ -19,10 +19,5 @@ LIST(APPEND random_perf_src "random_perf.cpp")
 add_executable(random_perf ${random_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
 target_link_libraries(random_perf ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
 
-add_test(NAME random_perf_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/random_perf)
-
-
-
-
 
 endif()

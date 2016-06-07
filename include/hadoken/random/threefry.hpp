@@ -69,10 +69,11 @@
 
 namespace hadoken{
 
+
 // threefry_constants is an abstract template that will be
 // specialized with the KS_PARITY and Rotation constants
 // of the threefry generators.  These constants are carefully
-// chosen to achieve good randomization.  
+// chosen to achieve good randomization.
 //  threefry_constants<2, uint32_t>
 //  threefry_constants<2, uint64_t>
 //  threefry_constants<4, uint32_t>
@@ -136,29 +137,142 @@ threefry_constants<4, uint64_t>::Rotations1[]  = {
     16, 57, 40, 37, 33, 12, 22, 32};
 
 
-
 template <typename Uint>
 inline Uint threefry_rotl(Uint x, unsigned s){
     return (x<<s) | (x>>(std::numeric_limits<Uint>::digits-s));
 }
 
 
+/// the number of rounds is known at compile time
+/// It allows us to use recursive partial template
+/// specialization and to avoid branching on conditions
+///
+/// good compilers (GCC > 4.8, icc, clang ) transform this into
+/// a single function without branching
+///
+/// we get a performance gain x4 on Intel I7 compared to a loop version
+///
+
+template <std::size_t r_remain, std::size_t r_max,
+          typename Uint, typename Domain, typename Constants, std::size_t N>
+struct rounds_functor{
+    BOOST_STATIC_ASSERT( N==2 || N==4 );
+};
+
+template <std::size_t r_remain, std::size_t r_max,
+          typename Uint, typename Domain, typename Constants>
+struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 4>{
+    typedef Uint uint_type;
+    typedef Domain domain_type;
+
+    inline void operator() (const boost::array<uint_type, 5> & ks,
+                        domain_type & c){
+        const std::size_t r = r_max - r_remain;
+
+        if( ( r & 0x01)  ){
+            c[0] += c[3];
+            c[3] = threefry_rotl(c[3],Constants::Rotations0[r%8]);
+            c[3] ^= c[0];
+            c[2] += c[1];
+            c[1] = threefry_rotl(c[1],Constants::Rotations1[r%8]);
+            c[1] ^= c[2];
+
+
+            const std::size_t r_next = r+1;
+            const std::size_t r4 = r_next/4;
+            const std::size_t r_next_mod_4 = r_next%4;
+
+            if( r_next_mod_4  == 0 ){
+                c[0] += ks[(r4+0)%5];
+                c[1] += ks[(r4+1)%5];
+                c[2] += ks[(r4+2)%5];
+                c[3] += ks[(r4+3)%5] + r4;
+            }
+
+        }else{
+            c[0] += c[1];
+            c[1] = threefry_rotl(c[1], Constants::Rotations0[r%8]);
+            c[1] ^= c[0];
+            c[2] += c[3];
+            c[3] = threefry_rotl(c[3], Constants::Rotations1[r%8]);
+            c[3] ^= c[2];
+
+        }
+        rounds_functor<r_remain-1, r_max, uint_type, domain_type, Constants, 4> func;
+        func(ks, c);
+        return;
+    }
+
+
+};
+
+template <std::size_t r_max, typename Uint, typename Domain, typename Constants>
+struct rounds_functor<0, r_max, Uint, Domain, Constants, 4>{
+    typedef Uint uint_type;
+    typedef Domain domain_type;
+
+    inline void operator() (const boost::array<uint_type, 5> & ks,
+                        domain_type & c){
+        (void) ks;
+        (void) c;
+    }
+
+};
+
+
+template <std::size_t r_remain, std::size_t r_max,
+          typename Uint, typename Domain, typename Constants>
+struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 2>{
+    typedef Uint uint_type;
+    typedef Domain domain_type;
+
+    inline void operator() (const boost::array<uint_type, 3> & ks,
+                        domain_type & c){
+        const std::size_t r = r_max - r_remain;
+
+        c[0] += c[1];
+        c[1] = threefry_rotl(c[1],Constants::Rotations[r%8]);
+        c[1] ^= c[0];
+
+
+        const std::size_t r_next = r+1;
+        const std::size_t r4 = r_next/4;
+        const std::size_t r_next_mod_4 = r_next%4;
+
+        if(r_next_mod_4  == 0){
+            c[0] += ks[r4%3];
+            c[1] += ks[(r4+1)%3] + r4;
+        }
+
+        rounds_functor<r_remain-1, r_max, uint_type, domain_type, Constants, 2> func;
+        func(ks, c);
+        return;
+    }
+
+
+};
+
+
+template <std::size_t r_max, typename Uint, typename Domain, typename Constants>
+struct rounds_functor<0, r_max, Uint, Domain, Constants, 2>{
+    typedef Uint uint_type;
+    typedef Domain domain_type;
+
+    inline void operator() (const boost::array<uint_type, 3> & ks,
+                        domain_type & c){
+        (void) ks;
+        (void) c;
+    }
+
+};
 
 template <unsigned N, typename Uint, unsigned R=20, typename Constants=threefry_constants<N, Uint> >
 class threefry{
     BOOST_STATIC_ASSERT( N==2 || N==4 );
-    // should never be instantiated.
-    // Only the specializations on N=2 and 4 are
-    // permitted/implemented.
-};
-
-// specialize threefry<2, Uint, R>
-template<typename Uint, unsigned R, typename Constants>
-class threefry<2, Uint, R, Constants>{
 public:
-    typedef boost::array<Uint, 2> domain_type;
-    typedef boost::array<Uint, 2> range_type;
-    typedef boost::array<Uint, 2> key_type;
+    typedef boost::array<Uint, N> domain_type;
+    typedef boost::array<Uint, N> range_type;
+    typedef boost::array<Uint, N> key_type;
     typedef Uint                  uint_type;
 
     threefry() : k(){}
@@ -172,62 +286,6 @@ public:
     key_type getkey() const{
         return k;
     }
-
-
-    bool operator==(const threefry& rhs) const{
-        return (k == rhs.k);
-    }
-
-    bool operator!=(const threefry& rhs) const{
-        return (k != rhs.k);
-    }
-
-    range_type operator()(domain_type c){
-        uint_type ks[3];
-        ks[2] = Constants::KS_PARITY;
-        ks[0] = k[0]; ks[2] ^= k[0]; c[0] += k[0];
-        ks[1] = k[1]; ks[2] ^= k[1]; c[1] += k[1];
-
-        for(unsigned r=0; r<R; ){
-            c[0] += c[1]; c[1] = threefry_rotl(c[1],Constants::Rotations[r%8]); c[1] ^= c[0];
-            ++r;
-            if((r&3)==0){
-                unsigned r4 = r>>2;
-                c[0] += ks[r4%3]; 
-                c[1] += ks[(r4+1)%3] + r4;
-            }
-        }
-        return c;
-
-    }
-
-private:
-    key_type k;
-};
-
-// specialize threefry<4, Uint, R>
-template<typename Uint, unsigned R, typename Constants>
-class threefry<4, Uint, R, Constants>{
-public:
-    typedef boost::array<Uint, 4> domain_type;
-    typedef boost::array<Uint, 4> range_type;
-    typedef boost::array<Uint, 4> key_type;
-    typedef Uint                  uint_type;
-
-    threefry() : k(){}
-    threefry(key_type _k) : k(_k) {}
-    threefry(const threefry& v) : k(v.k){}
-
-    void setkey(key_type _k){
-        k = _k;
-    }
-
-    key_type getkey() const{
-        return k;
-    }
-
-
-
 
     bool operator==(const threefry& rhs) const{
         return k == rhs.k;
@@ -238,33 +296,18 @@ public:
     }
 
     range_type operator()(domain_type c){ 
-        uint_type ks[5];
-        ks[4] = Constants::KS_PARITY;
-        ks[0] = k[0]; ks[4] ^= k[0]; c[0] += k[0];
-        ks[1] = k[1]; ks[4] ^= k[1]; c[1] += k[1];
-        ks[2] = k[2]; ks[4] ^= k[2]; c[2] += k[2];
-        ks[3] = k[3]; ks[4] ^= k[3]; c[3] += k[3];
+        boost::array<uint_type, N+1>  ks;
 
+        std::copy(k.begin(), k.end(), ks.begin());
+        ks[N] = std::accumulate(k.begin(), k.end(), Constants::KS_PARITY, std::bit_xor<uint_type>());
+        std::transform(k.begin(), k.end(), c.begin(), c.begin(), std::plus<uint_type>());
 
-        for(unsigned r=0; r<R; ){
-            if((r&1)==0){
-                c[0] += c[1]; c[1] = threefry_rotl(c[1],Constants::Rotations0[r%8]); c[1] ^= c[0];
-                c[2] += c[3]; c[3] = threefry_rotl(c[3],Constants::Rotations1[r%8]); c[3] ^= c[2];
-            }else{
-                c[0] += c[3]; c[3] = threefry_rotl(c[3],Constants::Rotations0[r%8]); c[3] ^= c[0];
-                c[2] += c[1]; c[1] = threefry_rotl(c[1],Constants::Rotations1[r%8]); c[1] ^= c[2];
-            }
-            ++r;
-            if((r&3)==0){
-                unsigned r4 = r>>2;
-                c[0] += ks[(r4+0)%5]; 
-                c[1] += ks[(r4+1)%5];
-                c[2] += ks[(r4+2)%5];
-                c[3] += ks[(r4+3)%5] + r4;
-            }
-        }
-        return c; 
+        rounds_functor<R, R, uint_type, domain_type, Constants, N> func;
+        func(ks, c);
+
+        return c;
     }
+
 
 private:
 

@@ -27,6 +27,9 @@
 * 
 */
 
+
+
+
 #include <boost/test/floating_point_comparison.hpp>
 
 
@@ -215,7 +218,7 @@ std::size_t test_random_abstract_threefry(std::size_t iter){
     tp t1, t2;
 
     boost::random::uniform_int_distribution<std::size_t> dist;
-    hadoken::counter_engine<hadoken::threefry2x32> threefry_engine;
+    hadoken::counter_engine<hadoken::threefry4x64> threefry_engine;
     hadoken::random_engine_mapper abstract_engine(threefry_engine);
 
     t1 = cl::now();
@@ -241,7 +244,7 @@ std::size_t test_random_threefry(std::size_t iter){
 
     boost::random::uniform_int_distribution<std::size_t> dist;
 
-    hadoken::counter_engine<hadoken::threefry2x32> threefry_engine;
+    hadoken::counter_engine<hadoken::threefry4x64> threefry_engine;
 
     t1 = cl::now();
 

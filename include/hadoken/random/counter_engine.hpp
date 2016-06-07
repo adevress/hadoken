@@ -91,11 +91,6 @@ public:
         fix_invariant();
     }
 
-    template <typename SeedSeq>
-    explicit counter_engine(SeedSeq &s
-                    )
-        : b(), c(), elem() {
-    }
 
     void seed(result_type r){
         *this = counter_engine(r);
