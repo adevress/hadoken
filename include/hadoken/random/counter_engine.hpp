@@ -82,13 +82,7 @@ public:
     }
 
 
-
-
-    counter_engine(counter_engine& e) : b(e.b), c(e.c), elem(e.elem){
-        fix_invariant();
-    }
     counter_engine(const counter_engine& e) : b(e.b), c(e.c), elem(e.elem){
-        fix_invariant();
     }
 
 
@@ -127,11 +121,11 @@ public:
     }
 
 
-    const static result_type _Min = 0;
-    const static result_type _Max = ~((result_type)0);
+    const static result_type _min = 0;
+    const static result_type _max = ~((result_type)0);
 
-    static result_type min () { return _Min; }
-    static result_type max () { return _Max; }
+    static result_type min () { return _min; }
+    static result_type max () { return _max; }
 
     result_type operator()(){
         if( elem == 0 ){
@@ -152,8 +146,7 @@ public:
             skip++;
         }
         elem -= sub;
-        c.incr(skip);
-        fix_invariant();
+        incr_array(c.begin(), c.end(), skip);
     }
          
 
@@ -167,20 +160,6 @@ public:
         return c.getkey();
     }
 
-
-    std::pair<ctr_type, elem_type> getcounter() const {
-        return make_pair(c,  elem);
-    }
-
-    // And the inverse.
-    void setcounter(const ctr_type& _c, elem_type _elem){
-        static const size_t nelem = c.size();
-        if( elem > nelem )
-            throw std::range_error("counter_engine::setcounter called  with elem out of range");
-        c = _c;
-        elem = _elem;
-        fix_invariant();
-    }
 
 
 private:
@@ -205,13 +184,6 @@ private:
     void incr_array(Iterator start, Iterator finish, boost::uint64_t inc_val){
         for(boost::uint64_t i =0; i < inc_val; ++i){
             incr_array(start, finish);
-        }
-    }
-
-
-    void fix_invariant(){
-        if( elem != 0 ) {
-            v = b(c);
         }
     }
 
