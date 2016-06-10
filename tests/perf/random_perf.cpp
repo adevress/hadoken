@@ -261,7 +261,7 @@ std::size_t test_random_threefry(std::size_t iter){
 }
 
 
-int main(int argc, char *argv[]){
+int main(){
 
     const std::size_t n_exec = 10000000;
     std::size_t junk=0;

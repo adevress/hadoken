@@ -40,14 +40,8 @@
 #include <boost/array.hpp>
 #include <boost/integer.hpp>
 #include <boost/static_assert.hpp>
-#include <boost/cstdint.hpp>
 #include <boost/random/seed_seq.hpp>
-
 #include <boost/limits.hpp>
-#include <boost/mpl/range_c.hpp>
-#include <boost/mpl/for_each.hpp>
-
-
 
 
 ///
@@ -64,8 +58,6 @@
 ///
 ///  This implementation is freely inspired of Boost.Random123  (https://github.com/DEShawResearch/Random123-Boost )
 ///
-
-
 
 namespace hadoken{
 
@@ -91,51 +83,51 @@ struct threefry_constants{
 template <>
 struct threefry_constants<2, uint32_t>{
     static const uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
-    static const unsigned Rotations[8];
+    static const unsigned rotations[8];
 };
 const unsigned
-threefry_constants<2, uint32_t>::Rotations[]  =
+threefry_constants<2, uint32_t>::rotations[]  =
     {13, 15, 26, 6, 17, 29, 16, 24};
 
 // 4x32 contants
 template <>
 struct threefry_constants<4, uint32_t>{
     static const uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
-    static const unsigned Rotations0[8];
-    static const unsigned Rotations1[8];
+    static const unsigned rotations0[8];
+    static const unsigned rotations1[8];
 };
 
-const unsigned threefry_constants<4, uint32_t>::Rotations0[]  =
+const unsigned threefry_constants<4, uint32_t>::rotations0[]  =
     {10, 11, 13, 23, 6, 17, 25, 18};
 
 const unsigned
-threefry_constants<4, uint32_t>::Rotations1[]  = 
+threefry_constants<4, uint32_t>::rotations1[]  =
     {26, 21, 27, 5, 20, 11, 10, 20};
 
 // 2x64 constants
 template <>
 struct threefry_constants<2, uint64_t>{
     static const uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
-    static const unsigned Rotations[8];
+    static const unsigned rotations[8];
 };
 const unsigned
-threefry_constants<2, uint64_t>::Rotations[]  =
+threefry_constants<2, uint64_t>::rotations[]  =
     {16, 42, 12, 31, 16, 32, 24, 21};
 
 // 4x64 constants
 template <>
 struct threefry_constants<4, uint64_t>{
     static const uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
-    static const unsigned Rotations0[8];
-    static const unsigned Rotations1[8];
+    static const unsigned rotations0[8];
+    static const unsigned rotations1[8];
 };
 
 const unsigned
-threefry_constants<4, uint64_t>::Rotations0[]  = 
+threefry_constants<4, uint64_t>::rotations0[]  =
     {14, 52, 23, 5, 25, 46, 58, 32};
 
 const unsigned
-threefry_constants<4, uint64_t>::Rotations1[]  = {
+threefry_constants<4, uint64_t>::rotations1[]  = {
     16, 57, 40, 37, 33, 12, 22, 32};
 
 
@@ -174,15 +166,12 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 4>{
 
         if( ( r & 0x01)  ){
             c[0] += c[3];
-            c[3] = threefry_rotl(c[3],Constants::Rotations0[r%8]);
-            c[3] ^= c[0];
             c[2] += c[1];
-            c[1] = threefry_rotl(c[1],Constants::Rotations1[r%8]);
-            c[1] ^= c[2];
-
+            c[3] = threefry_rotl(c[3],Constants::rotations0[r%8]) ^ c[0];
+            c[1] = threefry_rotl(c[1],Constants::rotations1[r%8]) ^ c[2];
 
             const std::size_t r_next = r+1;
-            const std::size_t r4 = r_next/4;
+            const std::size_t r4 = r_next>>2;
             const std::size_t r_next_mod_4 = r_next%4;
 
             if( r_next_mod_4  == 0 ){
@@ -194,11 +183,9 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 4>{
 
         }else{
             c[0] += c[1];
-            c[1] = threefry_rotl(c[1], Constants::Rotations0[r%8]);
-            c[1] ^= c[0];
             c[2] += c[3];
-            c[3] = threefry_rotl(c[3], Constants::Rotations1[r%8]);
-            c[3] ^= c[2];
+            c[1] = threefry_rotl(c[1], Constants::rotations0[r%8]) ^ c[0];
+            c[3] = threefry_rotl(c[3], Constants::rotations1[r%8]) ^ c[2];
 
         }
         rounds_functor<r_remain-1, r_max, uint_type, domain_type, Constants, 4> func;
@@ -234,12 +221,12 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 2>{
         const std::size_t r = r_max - r_remain;
 
         c[0] += c[1];
-        c[1] = threefry_rotl(c[1],Constants::Rotations[r%8]);
+        c[1] = threefry_rotl(c[1], Constants::rotations[r%8]);
         c[1] ^= c[0];
 
 
         const std::size_t r_next = r+1;
-        const std::size_t r4 = r_next/4;
+        const std::size_t r4 = r_next>>2;
         const std::size_t r_next_mod_4 = r_next%4;
 
         if(r_next_mod_4  == 0){
@@ -300,8 +287,9 @@ public:
         return k != rhs.k;
     }
 
-    range_type operator()(domain_type c){ 
+    range_type operator()(const domain_type & counter){
         boost::array<uint_type, N+1>  ks;
+        domain_type c(counter);
 
         std::copy(k.begin(), k.end(), ks.begin());
         ks[N] = std::accumulate(k.begin(), k.end(), Constants::KS_PARITY, std::bit_xor<uint_type>());
@@ -321,13 +309,17 @@ private:
 
 
 
-typedef threefry<2, boost::uint32_t> threefry2x32;
-typedef threefry<4, boost::uint32_t> threefry4x32;
 
-
-typedef threefry<2, boost::uint64_t> threefry2x64;
 typedef threefry<4, boost::uint64_t> threefry4x64;
+typedef threefry<2, boost::uint64_t> threefry2x64;
 
+
+typedef threefry<4, boost::uint32_t> threefry4x32;
+typedef threefry<2, boost::uint32_t> threefry2x32;
+
+/// threefry4x64 is crush-resistant and the fastest one most
+/// of the current platforms: use it by default
+typedef threefry<4, boost::uint64_t> threefry_default;
 
 
 }
