@@ -51,7 +51,7 @@ namespace impl {
 ///
 /// generate in a deterministic way a new
 ///
-boost::uint32_t generate_deterministic_seed(boost::uint32_t origin_seed, boost::uint32_t key);
+inline boost::uint32_t generate_deterministic_seed(boost::uint32_t origin_seed, boost::uint32_t key);
 
 
 ///
@@ -70,7 +70,7 @@ public:
 
     /// default constructor
     /// generate empty mapper
-    random_engine_mapper();
+    explicit inline random_engine_mapper();
     ///
     /// map a specialized random generator in the C++11 / boost format
     ///  to a generic random_engine_mapper that can be used in any distribution
