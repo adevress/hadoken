@@ -59,7 +59,7 @@ BOOST_AUTO_TEST_CASE( simple_random_tests )
     }
 
     boost::random::mt11213b twister_engine_clone;
-    hadoken::random_engine_mapper engine_mapper(twister_engine_clone);
+    hadoken::random_engine_mapper_32 engine_mapper(twister_engine_clone);
 
     std::vector<int> mapper_values;
     mapper_values.reserve(n_vals);
@@ -93,12 +93,12 @@ BOOST_AUTO_TEST_CASE( simple_derivate)
 
     const int seed = 424242;
     boost::random::mt11213b twister_engine_clone;
-    hadoken::random_engine_mapper engine_mapper(twister_engine_clone);
+    hadoken::random_engine_mapper_32 engine_mapper(twister_engine_clone);
     engine_mapper.seed(seed);
 
 
     // create a derivation with a terrible seed init difference  1
-    hadoken::random_engine_mapper derivated_engine = engine_mapper.derivate(1);
+    hadoken::random_engine_mapper_32 derivated_engine = engine_mapper.derivate(1);
 
 
     // simple silly test to fullfill original twister
@@ -130,17 +130,17 @@ BOOST_AUTO_TEST_CASE( determinism_derivate)
 
     const int seed = 1234;
     boost::random::mt11213b twister_engine_clone;
-    hadoken::random_engine_mapper engine_mapper(twister_engine_clone);
+    hadoken::random_engine_mapper_32 engine_mapper(twister_engine_clone);
     engine_mapper.seed(seed);
 
 
 
     // create two derivation with the same key, they should behave in the same way
-    hadoken::random_engine_mapper derivated_engine = engine_mapper.derivate(42);
-    hadoken::random_engine_mapper derivated_engine_same = engine_mapper.derivate(42);
+    hadoken::random_engine_mapper_32 derivated_engine = engine_mapper.derivate(42);
+    hadoken::random_engine_mapper_32 derivated_engine_same = engine_mapper.derivate(42);
     
     // create a second one as double derivative as reference
-    hadoken::random_engine_mapper derivated_engine_differ = derivated_engine_same.derivate(43);
+    hadoken::random_engine_mapper_32 derivated_engine_differ = derivated_engine_same.derivate(43);
 
    
 
@@ -268,8 +268,8 @@ BOOST_AUTO_TEST_CASE( threefry_basic_64)
 
 
 typedef boost::mpl::list<hadoken::threefry2x32,
-                        hadoken::threefry2x64,
                         hadoken::threefry4x32,
+                        hadoken::threefry2x64,
                         hadoken::threefry4x64> threefry_types;
 
 BOOST_AUTO_TEST_CASE_TEMPLATE( threefry_distribute, T, threefry_types )
@@ -290,3 +290,117 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( threefry_distribute, T, threefry_types )
         BOOST_CHECK_LE(mean, 51);
 
 }
+
+
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( engine_discard, T, threefry_types )
+{
+
+    // basic consistency test
+    {
+
+        hadoken::counter_engine<T> threefry_engine, threefry_engine_origin, threefry_engine_clone;
+
+        threefry_engine.seed(42);
+        threefry_engine_origin.seed(42);
+        threefry_engine_clone.seed(42);
+
+        threefry_engine_clone.discard(100);
+        threefry_engine_origin.discard(0);
+
+
+        typename hadoken::counter_engine<T>::result_type res = threefry_engine(),
+                res_origin = threefry_engine_origin(), res_clone = threefry_engine_clone();
+
+
+        BOOST_CHECK_NE(res, res_clone);
+        BOOST_CHECK_EQUAL(res, res_origin);
+    }
+
+
+    // discard and verify result with 1 by 1 inc
+    {
+        hadoken::counter_engine<T> threefry_engine, threefry_engine_clone;
+        const std::size_t inc_n = 1000;
+
+        threefry_engine.seed(42);
+        threefry_engine_clone.seed(42);
+
+        std::size_t junk =0;
+
+        for(std::size_t i =0; i < inc_n; ++i){
+            junk += threefry_engine();
+        }
+
+        threefry_engine_clone.discard(inc_n);
+
+        BOOST_CHECK_EQUAL(threefry_engine(), threefry_engine_clone());
+    }
+
+
+
+    //  same again but with prime number, to test discard by undivisible (size(elem))
+    {
+        hadoken::counter_engine<T> threefry_engine, threefry_engine_clone;
+        const std::size_t inc_n = 1181;
+
+        threefry_engine.seed(42);
+        threefry_engine_clone.seed(42);
+
+        std::size_t junk =0;
+
+        for(std::size_t i =0; i < inc_n; ++i){
+            junk += threefry_engine();
+        }
+
+        threefry_engine_clone.discard(inc_n);
+
+        BOOST_CHECK_EQUAL(threefry_engine(), threefry_engine_clone());
+    }
+
+    // test increment that overflow a normal 32 buffers
+    {
+
+        hadoken::counter_engine<T> threefry_engine, threefry_engine_clone;
+
+        threefry_engine.seed(42);
+        threefry_engine_clone.seed(42);
+
+
+        typename hadoken::counter_engine<T>::ctr_type ctr, ctr_clone;
+        ctr = threefry_engine.getcounter();
+        ctr_clone = threefry_engine_clone.getcounter();
+
+        BOOST_CHECK_EQUAL_COLLECTIONS(ctr.begin(), ctr.end(), ctr_clone.begin(), ctr_clone.end());
+
+        // discard and verify result with 1 by 1 inc
+        boost::uintmax_t max_val = std::numeric_limits<boost::uintmax_t>::max();
+
+        const std::size_t factor = 50;
+        boost::uintmax_t small_inc = max_val / 16 / factor;
+        boost::uintmax_t big_inc = small_inc * factor;
+
+
+        BOOST_CHECK_EQUAL(big_inc, small_inc*factor);
+
+
+        for(std::size_t i =0; i < factor; ++i){
+            threefry_engine.discard(small_inc);
+        }
+        threefry_engine_clone.discard(big_inc);
+
+        ctr = threefry_engine.getcounter();
+        ctr_clone = threefry_engine_clone.getcounter();
+
+        BOOST_CHECK_EQUAL_COLLECTIONS(ctr.begin(), ctr.end(), ctr_clone.begin(), ctr_clone.end());
+
+        BOOST_CHECK_EQUAL(threefry_engine(), threefry_engine_clone());
+    }
+
+
+
+
+
+}
+

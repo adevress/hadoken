@@ -137,16 +137,19 @@ public:
     }
 
     void discard(boost::uintmax_t skip){
-        // don't forget:  elem counts down
-        size_t nelem = c.size();
-        size_t sub = skip % nelem;
-        skip /= nelem;
-        if (elem < sub) {
-            elem += nelem;
-            skip++;
+        while(elem != 0 && skip > 0){
+            skip--;
+            elem--;
         }
-        elem -= sub;
-        incr_array(c.begin(), c.end(), skip);
+        const size_t nelem = c.size();
+        boost::uintmax_t counter_increment = skip / nelem;
+        boost::uintmax_t counter_rest = skip %  nelem;
+        incr_array(c.begin(), c.end(), counter_increment);
+
+        while(counter_rest--){
+            // call generator for remaining turns
+            (void) (*this) ();
+        }
     }
          
 
@@ -158,6 +161,11 @@ public:
 
     key_type getseed() const{
         return c.getkey();
+    }
+
+
+    ctr_type getcounter() const {
+        return c;
     }
 
 
@@ -181,9 +189,23 @@ private:
     }
 
     template<typename Iterator>
-    void incr_array(Iterator start, Iterator finish, boost::uint64_t inc_val){
-        for(boost::uint64_t i =0; i < inc_val; ++i){
-            incr_array(start, finish);
+    void incr_array(Iterator start, Iterator finish, boost::uintmax_t inc_val){
+        static const typename cbrng_type::uint_type max_elem = std::numeric_limits<typename cbrng_type::uint_type>::max();
+
+        if(inc_val ==0 || start == finish){
+            return;
+        }
+
+        boost::uintmax_t current_inc_val = inc_val & max_elem;
+        const boost::uintmax_t next_inc_val = inc_val >> (sizeof(max_elem)*8);
+
+        const typename cbrng_type::uint_type past_val = *start;
+        *start += current_inc_val;
+
+        if(*start < past_val){ // overflow occured, inc +1 next elem
+            incr_array(start+1, finish, next_inc_val+1);
+        }else{
+            incr_array(start+1, finish, next_inc_val);
         }
     }
 

@@ -15,28 +15,34 @@ namespace impl{
 
 
 
-
-class abstract_engine{
+template< typename Uint >
+class abstract_engine {
 public:
+
+    typedef Uint result_type;
+
     abstract_engine(){};
     virtual ~abstract_engine(){};
 
     virtual void map_seed()= 0;
-    virtual void map_seed(random_engine_mapper::result_type seed) =0;
+    virtual void map_seed(result_type seed) =0;
 
-    virtual random_engine_mapper::result_type generate() =0;
+    virtual result_type generate() =0;
 
     virtual abstract_engine* clone() =0;
 
-    virtual abstract_engine* derivate(random_engine_mapper::result_type key) =0;
+    virtual abstract_engine* derivate(result_type key) =0;
 
 private:
 };
 
-template< typename Engine >
-class map_engine_intern: public abstract_engine{
+
+template< typename Uint, typename Engine >
+class map_engine_intern: public abstract_engine<Uint>{
 public:
-    map_engine_intern(const Engine & e, random_engine_mapper::result_type seed = 0 ) : _e(e), _seed(seed) {
+    typedef Uint result_type;
+
+    map_engine_intern(const Engine & e, result_type seed = 0 ) : _e(e), _seed(seed) {
         if(_seed != 0){
             map_seed(_seed);
         }
@@ -46,25 +52,26 @@ public:
         _e.seed();
     }
 
-    virtual void map_seed(random_engine_mapper::result_type s){
+    virtual void map_seed(result_type s){
         _e.seed(s);
         _seed = s;
     }
 
-    virtual random_engine_mapper::result_type generate(){
+    virtual result_type generate(){
         return _e();
     }
 
-    virtual abstract_engine* clone(){
+    virtual abstract_engine<result_type>* clone(){
            return new map_engine_intern(_e, _seed);
     }
 
-    virtual abstract_engine* derivate(random_engine_mapper::result_type key){
-        map_engine_intern<Engine>* ret = new map_engine_intern<Engine>(_e);
+    virtual abstract_engine<result_type>* derivate(result_type key){
+        map_engine_intern<result_type, Engine>* ret = new map_engine_intern<result_type, Engine>(_e);
 
         // compute a new  seed determinitically
         hadoken::sha1::digest32_t digest = generate_deterministic_seed_160(_seed, key);
-        const random_engine_mapper::result_type new_seed = digest[0];
+        result_type new_seed;
+        std::memcpy(&new_seed, &(digest[0]), sizeof(result_type));
 
         // use it
         ret->map_seed(new_seed);
@@ -87,44 +94,51 @@ public:
 
 private:
     Engine _e;
-    random_engine_mapper::result_type _seed;
+    result_type _seed;
 };
 
 
 }
 
-template<typename Engine>
-random_engine_mapper::random_engine_mapper(const Engine & e) : _engine(new impl::map_engine_intern<Engine>(e)){
+template< typename Uint >
+template< typename Engine >
+random_engine_mapper<Uint>::random_engine_mapper(const Engine & e) : _engine(new impl::map_engine_intern<Uint, Engine>(e)){
 
 }
 
-random_engine_mapper::random_engine_mapper() : _engine() {
+
+template< typename Uint >
+random_engine_mapper<Uint>::random_engine_mapper() : _engine() {
 
 }
 
-random_engine_mapper::random_engine_mapper(const random_engine_mapper & other) : _engine(NULL){
+template< typename Uint >
+random_engine_mapper<Uint>::random_engine_mapper(const random_engine_mapper<Uint> & other) : _engine(NULL){
     if(other._engine.get() != NULL){
         _engine.reset(other._engine->clone());
     }
 }
 
-void random_engine_mapper::seed(){
+template< typename Uint >
+void random_engine_mapper<Uint>::seed(){
     assert(_engine.get());
     _engine->map_seed();
 }
 
-void random_engine_mapper::seed(random_engine_mapper::result_type seed){
+template< typename Uint >
+void random_engine_mapper<Uint>::seed(result_type seed){
     assert(_engine.get());
     _engine->map_seed(seed);
 }
 
-random_engine_mapper::result_type random_engine_mapper::operator ()(){
+template< typename Uint >
+typename random_engine_mapper<Uint>::result_type random_engine_mapper<Uint>::operator ()(){
     assert(_engine.get());
     return _engine->generate();
 }
 
-
-random_engine_mapper random_engine_mapper::derivate(result_type key){
+template< typename Uint >
+random_engine_mapper<Uint> random_engine_mapper<Uint>::derivate(result_type key){
     assert(_engine.get());
     random_engine_mapper res;
     res._engine.reset(_engine->derivate(key));
@@ -154,8 +168,11 @@ hadoken::sha1::digest32_t generate_deterministic_seed_160(boost::uint32_t origin
 
 
 
-boost::uint32_t generate_deterministic_seed(boost::uint32_t origin_seed, boost::uint32_t key){
-    return generate_deterministic_seed_160(origin_seed, key)[0];
+boost::uint64_t generate_deterministic_seed(boost::uint64_t origin_seed, boost::uint64_t key){
+    boost::uint64_t res_64;
+    const hadoken::sha1::digest32_t array = generate_deterministic_seed_160(origin_seed, key);
+    std::memcpy(&res_64, &(array[0]), sizeof(res_64));
+    return res_64;
 }
 
 

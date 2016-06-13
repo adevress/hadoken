@@ -81,7 +81,7 @@ std::size_t test_random_abstract_mersenne_twister(std::size_t iter){
 
     boost::random::uniform_int_distribution<std::size_t> dist;
     boost::random::mt19937 twister_engine;
-    hadoken::random_engine_mapper abstract_engine(twister_engine);
+    hadoken::random_engine_mapper_32 abstract_engine(twister_engine);
 
     t1 = cl::now();
 
@@ -138,7 +138,7 @@ std::size_t test_random_abstract_ranlux(std::size_t iter){
 
     boost::random::uniform_int_distribution<std::size_t> dist;
     boost::random::ranlux24 ranlux_engine;
-    hadoken::random_engine_mapper abstract_engine(ranlux_engine);
+    hadoken::random_engine_mapper_32 abstract_engine(ranlux_engine);
 
     t1 = cl::now();
 
@@ -193,7 +193,7 @@ std::size_t test_random_abstract_tau88(std::size_t iter){
 
     boost::random::uniform_int_distribution<std::size_t> dist;
     boost::random::taus88 tau_engine;
-    hadoken::random_engine_mapper abstract_engine(tau_engine);
+    hadoken::random_engine_mapper_32 abstract_engine(tau_engine);
 
     t1 = cl::now();
 
@@ -219,7 +219,7 @@ std::size_t test_random_abstract_threefry(std::size_t iter){
 
     boost::random::uniform_int_distribution<std::size_t> dist;
     hadoken::counter_engine<hadoken::threefry4x64> threefry_engine;
-    hadoken::random_engine_mapper abstract_engine(threefry_engine);
+    hadoken::random_engine_mapper_64 abstract_engine(threefry_engine);
 
     t1 = cl::now();
 

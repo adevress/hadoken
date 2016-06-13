@@ -43,7 +43,7 @@ namespace hadoken {
 
 // internals
 namespace impl {
-    class abstract_engine;
+template< typename Uint > class abstract_engine;
 }
 
 
@@ -51,7 +51,7 @@ namespace impl {
 ///
 /// generate in a deterministic way a new
 ///
-boost::uint32_t generate_deterministic_seed(boost::uint32_t origin_seed, boost::uint32_t key);
+boost::uint64_t generate_deterministic_seed(boost::uint64_t origin_seed, boost::uint64_t key);
 
 
 ///
@@ -62,11 +62,12 @@ boost::uint32_t generate_deterministic_seed(boost::uint32_t origin_seed, boost::
 /// interface at runtime
 ///
 ///
+template< typename Uint >
 class random_engine_mapper {
 public:
 
 
-    typedef boost::uint32_t result_type;
+    typedef Uint result_type;
 
     /// default constructor
     /// generate empty mapper
@@ -77,6 +78,7 @@ public:
     ///
     template<typename Engine>
     inline random_engine_mapper(const Engine & intern);
+
     inline random_engine_mapper(const random_engine_mapper & other);
 
 
@@ -114,9 +116,12 @@ public:
     }
     
 private:    
-    boost::scoped_ptr<impl::abstract_engine> _engine;
+    boost::scoped_ptr< impl::abstract_engine<result_type> > _engine;
 };
 
+
+typedef random_engine_mapper<boost::uint32_t> random_engine_mapper_32;
+typedef random_engine_mapper<boost::uint64_t> random_engine_mapper_64;
 
 }
 
