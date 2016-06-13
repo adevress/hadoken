@@ -118,6 +118,8 @@ BOOST_AUTO_TEST_CASE( simple_derivate)
 }
 
 
+
+
 BOOST_AUTO_TEST_CASE( determinism_derivate)
 {
     const std::size_t n_vals = 1000;
@@ -175,6 +177,60 @@ BOOST_AUTO_TEST_CASE( determinism_derivate)
 }
 
 
+
+BOOST_AUTO_TEST_CASE( derivate_counter_based_determinism)
+{
+    const std::size_t n_vals = 1000;
+
+    boost::random::uniform_int_distribution<std::size_t> dist;
+
+    std::vector<std::size_t> origin_values, derivated_values, derivated_values_same, derivated_values_differ;
+    origin_values.reserve(n_vals);
+
+
+    const int seed = 1234;
+    hadoken::counter_engine<hadoken::threefry4x64> engine_counter;
+    engine_counter.seed(seed);
+
+
+
+    // create two derivation with the same key, they should behave in the same way
+    hadoken::counter_engine<hadoken::threefry4x64>  derivated_engine = engine_counter.derivate(42);
+    hadoken::counter_engine<hadoken::threefry4x64>  derivated_engine_same = engine_counter.derivate(42);
+
+    // create a second one as double derivative as reference
+    hadoken::counter_engine<hadoken::threefry4x64>  derivated_engine_differ = derivated_engine_same.derivate(43);
+
+
+
+    // simple silly test to fullfill original twister
+    // random generator vector
+    for(std::size_t i =0; i < n_vals; ++i){
+        unsigned int v1 = dist(engine_counter);
+        origin_values.push_back(v1);
+
+        unsigned int v2= dist(derivated_engine);
+        derivated_values.push_back(v2);
+
+    unsigned int v3 = dist(derivated_engine_same);
+    derivated_values_same.push_back(v3);
+
+    unsigned int v4 = dist(derivated_engine_differ);
+    derivated_values_differ.push_back(v4);
+
+
+        BOOST_CHECK_NE(v1, v2);
+    BOOST_CHECK_NE(v1, v3);
+    BOOST_CHECK_NE(v1, v4);
+
+    BOOST_CHECK_EQUAL(v2, v3);
+
+    BOOST_CHECK_NE(v2, v4);
+    BOOST_CHECK_NE(v2, v4);
+
+    std::cout << "randum_num_diff: " << v1 << " " << v2 << " " << v3 << " " << v4 << "\n";
+    }
+}
 
 
 BOOST_AUTO_TEST_CASE( threefry_basic_32)

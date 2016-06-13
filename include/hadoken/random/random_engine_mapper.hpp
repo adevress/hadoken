@@ -71,7 +71,7 @@ public:
 
     /// default constructor
     /// generate empty mapper
-    random_engine_mapper();
+    explicit inline random_engine_mapper();
     ///
     /// map a specialized random generator in the C++11 / boost format
     ///  to a generic random_engine_mapper that can be used in any distribution

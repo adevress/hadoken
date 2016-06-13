@@ -39,6 +39,7 @@
 #include <cstring>
 #include <sstream>
 #include <algorithm>
+#include <iomanip>
 
 // endianness functions
 #include <netinet/in.h>

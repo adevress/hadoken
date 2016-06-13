@@ -61,6 +61,7 @@
 
 namespace hadoken{
 
+namespace {
 
 // threefry_constants is an abstract template that will be
 // specialized with the KS_PARITY and Rotation constants
@@ -95,8 +96,8 @@ struct threefry_constants<4, uint32_t>{
     static const unsigned rotations0[8];
     static const unsigned rotations1[8];
 };
-const unsigned
-threefry_constants<4, uint32_t>::rotations0[]  =
+
+const unsigned threefry_constants<4, uint32_t>::rotations0[]  =
     {10, 11, 13, 23, 6, 17, 25, 18};
 
 const unsigned
@@ -120,6 +121,7 @@ struct threefry_constants<4, uint64_t>{
     static const unsigned rotations0[8];
     static const unsigned rotations1[8];
 };
+
 const unsigned
 threefry_constants<4, uint64_t>::rotations0[]  =
     {14, 52, 23, 5, 25, 46, 58, 32};
@@ -133,6 +135,7 @@ template <typename Uint>
 inline Uint threefry_rotl(Uint x, unsigned s){
     return (x<<s) | (x>>(std::numeric_limits<Uint>::digits-s));
 }
+
 
 
 /// the number of rounds is known at compile time
@@ -253,6 +256,8 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 2>{
 
 };
 
+} // anonymous namespace
+
 template <unsigned N, typename Uint, unsigned R=20, typename Constants=threefry_constants<N, Uint> >
 class threefry{
     BOOST_STATIC_ASSERT( N==2 || N==4 );
@@ -266,11 +271,11 @@ public:
     threefry(key_type _k) : k(_k) {}
     threefry(const threefry& v) : k(v.k){}
 
-    void setkey(key_type _k){
+    void set_key(key_type _k){
         k = _k;
     }
 
-    key_type getkey() const{
+    key_type get_key() const{
         return k;
     }
 

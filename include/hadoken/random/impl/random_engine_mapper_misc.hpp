@@ -9,7 +9,7 @@
 
 namespace hadoken {
 
-hadoken::sha1::digest32_t generate_deterministic_seed_160(boost::uint32_t origin_seed, boost::uint32_t key);
+inline hadoken::sha1::digest32_t generate_deterministic_seed_160(boost::uint32_t origin_seed, boost::uint32_t key);
 
 namespace impl{
 
@@ -148,7 +148,7 @@ random_engine_mapper<Uint> random_engine_mapper<Uint>::derivate(result_type key)
 
 
 
-hadoken::sha1::digest32_t generate_deterministic_seed_160(boost::uint32_t origin_seed, boost::uint32_t key){
+inline hadoken::sha1::digest32_t generate_deterministic_seed_160(boost::uint32_t origin_seed, boost::uint32_t key){
     // let's add a bit of salt to our meal today
     boost::array<boost::uint8_t, 16> salt = { { 0x6c, 0x77, 0xad, 0xb8, 0x3e, 0xf8, 0x21, 0x61, 0xc3, 0xd8, 0x2e, 0x4c, 0x13, 0xfd, 0x75, 0xd3 } };
 

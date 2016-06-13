@@ -78,7 +78,7 @@ public:
     explicit counter_engine(result_type r) : b(), c(), elem() {
         key_type key;
         std::fill(key.begin(), key.end(), typename key_type::value_type(r));
-        b.setkey(key);
+        b.set_key(key);
     }
 
 
@@ -137,6 +137,7 @@ public:
     }
 
     void discard(boost::uintmax_t skip){
+        // any buffered turn need to be dropped
         while(elem != 0 && skip > 0){
             skip--;
             elem--;
@@ -146,11 +147,47 @@ public:
         boost::uintmax_t counter_rest = skip %  nelem;
         incr_array(c.begin(), c.end(), counter_increment);
 
+        // call generator for remaining turns
         while(counter_rest--){
-            // call generator for remaining turns
+
             (void) (*this) ();
         }
     }
+
+    counter_engine<cbrng_type> derivate(const key_type & key){
+        // for counter engine, derivate need to return a unique counter
+        // from a tuple <old_counter_state, old_key, new_key>
+
+        // to achive this we rely on the block cipher properties
+        // of the counter based random generators
+        // new_key = cipher_block(key, cipher_block(old_key, old_counter_state))
+
+        counter_engine<cbrng_type> derivate_counter(*this);
+        // call the new counter with the old key and old counter value
+        // to get a value function of the counter state and the counter key
+        (void) derivate_counter();
+
+        // now we setup the new key
+        derivate_counter.b.set_key(key);
+
+        // do a simple rotation based on the elem value
+        // to take into consideration "elem" without
+        std::rotate(derivate_counter.v.begin(), derivate_counter.v.begin()+elem, derivate_counter.v.end());
+
+        // and using previous rotate generated block as element
+        key_type new_key= derivate_counter.b(derivate_counter.v);
+        // use the new key as counter
+        derivate_counter.seed(new_key);
+
+        return derivate_counter;
+    }
+
+    counter_engine<cbrng_type> derivate(result_type r){
+            key_type key;
+            std::fill(key.begin(), key.end(), typename key_type::value_type(r));
+            return derivate(key);
+        }
+
          
 
 
@@ -160,7 +197,7 @@ public:
 
 
     key_type getseed() const{
-        return c.getkey();
+        return c.get_key();
     }
 
 
