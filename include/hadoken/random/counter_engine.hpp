@@ -234,7 +234,7 @@ private:
         }
 
         boost::uintmax_t current_inc_val = inc_val & max_elem;
-        const boost::uintmax_t next_inc_val = inc_val >> (sizeof(max_elem)*8);
+        const boost::uintmax_t next_inc_val = ( (sizeof(boost::uintmax_t) != sizeof(typename cbrng_type::uint_type)) ? (inc_val >> (sizeof(max_elem)*8)) : 0);
 
         const typename cbrng_type::uint_type past_val = *start;
         *start += current_inc_val;
