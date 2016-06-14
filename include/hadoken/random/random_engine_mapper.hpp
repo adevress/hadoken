@@ -47,13 +47,6 @@ template< typename Uint > class abstract_engine;
 }
 
 
-
-///
-/// generate in a deterministic way a new
-///
-boost::uint64_t generate_deterministic_seed(boost::uint64_t origin_seed, boost::uint64_t key);
-
-
 ///
 /// runtime abstraction layer for the C++11 / boost.Random
 /// random engine system
@@ -101,7 +94,7 @@ public:
     ///  - Two different keys, even close in range guarantee two independent random streams
     ///
     ///
-    inline random_engine_mapper derivate(result_type key);
+    inline random_engine_mapper derivate(result_type key) const;
 
     /// minimum value returned by engine
     /// map to minimum value of the type
@@ -122,6 +115,18 @@ private:
 
 typedef random_engine_mapper<boost::uint32_t> random_engine_mapper_32;
 typedef random_engine_mapper<boost::uint64_t> random_engine_mapper_64;
+
+
+
+
+// specialize random_engine_derivate
+// for random mapper
+
+template <typename Uint>
+inline random_engine_mapper<Uint> random_engine_derivate(const random_engine_mapper<Uint> & engine, const typename random_engine_mapper<Uint>::result_type & key ){
+    return engine.derivate(key);
+}
+
 
 }
 

@@ -2,14 +2,14 @@
 #define RANDOM_ENGINE_MAPPER_MISC_HPP
 
 
-#include "../random.hpp"
+
 
 #include <cassert>
-#include <hadoken/crypto/sha/sha1.hpp>
+
+#include <hadoken/random/random_engine_mapper.hpp>
+#include <hadoken/random/random_derivate.hpp>
 
 namespace hadoken {
-
-inline hadoken::sha1::digest32_t generate_deterministic_seed_160(boost::uint32_t origin_seed, boost::uint32_t key);
 
 namespace impl{
 
@@ -31,7 +31,7 @@ public:
 
     virtual abstract_engine* clone() =0;
 
-    virtual abstract_engine* derivate(result_type key) =0;
+    virtual abstract_engine* derivate(result_type key) const =0;
 
 private:
 };
@@ -42,10 +42,7 @@ class map_engine_intern: public abstract_engine<Uint>{
 public:
     typedef Uint result_type;
 
-    map_engine_intern(const Engine & e, result_type seed = 0 ) : _e(e), _seed(seed) {
-        if(_seed != 0){
-            map_seed(_seed);
-        }
+    map_engine_intern(const Engine & e) : _e(e){
     }
 
     virtual void map_seed(){
@@ -54,7 +51,6 @@ public:
 
     virtual void map_seed(result_type s){
         _e.seed(s);
-        _seed = s;
     }
 
     virtual result_type generate(){
@@ -62,39 +58,17 @@ public:
     }
 
     virtual abstract_engine<result_type>* clone(){
-           return new map_engine_intern(_e, _seed);
+           return new map_engine_intern(_e);
     }
 
-    virtual abstract_engine<result_type>* derivate(result_type key){
-        map_engine_intern<result_type, Engine>* ret = new map_engine_intern<result_type, Engine>(_e);
-
-        // compute a new  seed determinitically
-        hadoken::sha1::digest32_t digest = generate_deterministic_seed_160(_seed, key);
-        result_type new_seed;
-        std::memcpy(&new_seed, &(digest[0]), sizeof(result_type));
-
-        // use it
-        ret->map_seed(new_seed);
-
-        // use the digest to increase entropy even more
-        // we get the number of 1 bits in our digest and
-        // initialize our random engine from 0 to n
-        for(hadoken::sha1::digest32_t::iterator it = digest.begin();
-            it < digest.end(); ++it){
-
-            std::bitset<32> bits(*it);
-            const std::size_t iteration = bits.count();
-            for(std::size_t i =0; i <iteration; ++i){
-                ret->generate();
-            }
-        }
-
+    virtual abstract_engine<result_type>* derivate(result_type key) const{
+        Engine derivated_engine = random_engine_derivate(_e, key);
+        map_engine_intern<result_type, Engine>* ret = new map_engine_intern<result_type, Engine>(derivated_engine);
         return ret;
     }
 
 private:
     Engine _e;
-    result_type _seed;
 };
 
 
@@ -138,7 +112,7 @@ typename random_engine_mapper<Uint>::result_type random_engine_mapper<Uint>::ope
 }
 
 template< typename Uint >
-random_engine_mapper<Uint> random_engine_mapper<Uint>::derivate(result_type key){
+random_engine_mapper<Uint> random_engine_mapper<Uint>::derivate(result_type key) const{
     assert(_engine.get());
     random_engine_mapper res;
     res._engine.reset(_engine->derivate(key));
@@ -148,32 +122,6 @@ random_engine_mapper<Uint> random_engine_mapper<Uint>::derivate(result_type key)
 
 
 
-inline hadoken::sha1::digest32_t generate_deterministic_seed_160(boost::uint32_t origin_seed, boost::uint32_t key){
-    // let's add a bit of salt to our meal today
-    boost::array<boost::uint8_t, 16> salt = { { 0x6c, 0x77, 0xad, 0xb8, 0x3e, 0xf8, 0x21, 0x61, 0xc3, 0xd8, 0x2e, 0x4c, 0x13, 0xfd, 0x75, 0xd3 } };
-
-    hadoken::sha1 sha_compute;
-    //  we want to generate a new seed determinitically 'seed = f(old_seed, key)'
-    //  the new seed need to be free or any  statistics correlation from old_seed and key
-    //
-    // we do
-    //   new_seed = sha1( concat(salt, key, origin_seed) )
-    //
-    // we return then the first 32 bits from the generations
-    sha_compute.process_block(salt.begin(), salt.end());
-    sha_compute.process(key);
-    sha_compute.process(origin_seed);
-    return sha_compute.get_digest();
-}
-
-
-
-boost::uint64_t generate_deterministic_seed(boost::uint64_t origin_seed, boost::uint64_t key){
-    boost::uint64_t res_64;
-    const hadoken::sha1::digest32_t array = generate_deterministic_seed_160(origin_seed, key);
-    std::memcpy(&res_64, &(array[0]), sizeof(res_64));
-    return res_64;
-}
 
 
 

@@ -41,8 +41,8 @@
 #include <algorithm>
 #include <iomanip>
 
-// endianness functions
-#include <netinet/in.h>
+
+#include <hadoken/utility/endian.hpp>
 
 //
 // SHA1 cryptographic hash implementation
@@ -83,8 +83,13 @@ namespace hadoken
         }
 
         inline void process(boost::uint32_t value){
-            boost::uint32_t big_endian_value = htonl(value);
+            boost::uint32_t big_endian_value = hadoken::hton(value);
             process_block(&big_endian_value, sizeof(boost::uint32_t));
+        }
+
+        inline void process(boost::uint64_t value){
+            boost::uint64_t big_endian_value = hadoken::hton(value);
+            process_block(&big_endian_value, sizeof(boost::uint64_t));
         }
 
         template<typename Iterator>

@@ -20,4 +20,9 @@ add_executable(random_perf ${random_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADE
 target_link_libraries(random_perf ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
 
 
+LIST(APPEND derivate_random_perf_src "random_perf_derivate.cpp")
+
+add_executable(derivate_random_perf ${derivate_random_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(derivate_random_perf ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
+
 endif()

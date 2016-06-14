@@ -41,6 +41,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 
 
+#include <hadoken/random/random_derivate.hpp>
+
 ///
 /// This work is inspired of algorithm
 ///  presented in the publication
@@ -59,15 +61,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 namespace hadoken{
 
 template<typename CBRNG>
-struct counter_engine {
+class counter_engine {
+public:
     typedef CBRNG cbrng_type;
     typedef typename CBRNG::domain_type ctr_type;
     typedef typename CBRNG::key_type key_type;
     typedef typename ctr_type::value_type result_type;
     typedef size_t elem_type;
-
-
-public:
 
     explicit counter_engine(const key_type &uk) :  b(uk), c(), elem(){}
     explicit counter_engine(key_type &uk) : b(uk), c(), elem(){}
@@ -154,7 +154,7 @@ public:
         }
     }
 
-    counter_engine<cbrng_type> derivate(const key_type & key){
+    counter_engine<cbrng_type> derivate(const key_type & key) const{
         // for counter engine, derivate need to return a unique counter
         // from a tuple <old_counter_state, old_key, new_key>
 
@@ -182,7 +182,7 @@ public:
         return derivate_counter;
     }
 
-    counter_engine<cbrng_type> derivate(result_type r){
+    counter_engine<cbrng_type> derivate(result_type r) const{
             key_type key;
             std::fill(key.begin(), key.end(), typename key_type::value_type(r));
             return derivate(key);
@@ -252,6 +252,15 @@ private:
     ctr_type v;
 
 };
+
+
+// specialize random_engine_derivate
+// for counter base random generator
+template<typename CBRNG>
+inline counter_engine<CBRNG> random_engine_derivate(const counter_engine<CBRNG> & engine, const typename counter_engine<CBRNG>::result_type & key ){
+    return engine.derivate(key);
+}
+
 
 } //_HADOKEN_COUNTER_ENGINE_HPP_
 
