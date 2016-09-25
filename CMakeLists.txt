@@ -21,6 +21,8 @@ include(BlueGenePortability)
 include(DefineInstallationPaths)
 include(ReleaseDebugAutoFlags)
 
+include(DetectCXX11Support)
+
 
 file(GLOB HADOKEN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*)
 file(GLOB HADOKEN_HEADERS_1 ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*/*)

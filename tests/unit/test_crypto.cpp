@@ -30,7 +30,9 @@
 #define BOOST_TEST_MODULE cryptoTests
 #define BOOST_TEST_MAIN
 
-#include <boost/test/included/unit_test.hpp>
+#include <iostream>
+
+#include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 #include <string>
@@ -98,6 +100,7 @@ BOOST_AUTO_TEST_CASE( hash_integer )
         sha_compute.process(boost::uint32_t(value));
 
         std::string res = sha_compute.to_string();
+
 
 
         std::cout << "integer_hash " << res << "\n";

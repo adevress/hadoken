@@ -8,6 +8,11 @@ include_directories(SYSTEM ${Boost_INCLUDE_DIRS} )
 
 link_directories( ${Boost_LIBRARY_DIRS} )
 
+if(NOT Boost_USE_STATIC_LIBS)
+        add_definitions(-DBOOST_TEST_DYN_LINK=TRUE)
+endif()
+
+
 
 ## generic Test
 LIST(APPEND test_generic_src "test_generic.cpp")
@@ -36,6 +41,23 @@ add_executable(test_crypto ${test_crypto_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADE
 target_link_libraries(test_crypto ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES} )
 
 add_test(NAME test_crypto_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_crypto)
+
+
+##  C++11 only
+if(CMAKE_CXX_SUPPORT_CXX11)
+
+add_definitions(-std=c++11 )
+
+## format related tests
+LIST(APPEND test_format_src "test_format.cpp")
+
+add_executable(test_format ${test_format_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_format ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_format_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_format)
+
+
+endif()
 
 
 endif()

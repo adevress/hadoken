@@ -29,7 +29,8 @@
 #define BOOST_TEST_MODULE randomTests
 #define BOOST_TEST_MAIN
 
-#include <boost/test/included/unit_test.hpp>
+#include <boost/test/unit_test.hpp>
+#include <boost/mpl/list.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
 

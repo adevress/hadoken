@@ -30,7 +30,10 @@
 #define BOOST_TEST_MODULE genericTests
 #define BOOST_TEST_MAIN
 
-#include <boost/test/included/unit_test.hpp>
+#include <iostream>
+#include <map>
+
+#include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/array.hpp>
 #include <boost/math/constants/constants.hpp>
