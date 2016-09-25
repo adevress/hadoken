@@ -37,6 +37,9 @@
 #ifndef _HADOKEN_RANDOM_THREEFRY_
 #define _HADOKEN_RANDOM_THREEFRY_
 
+#include <numeric>
+#include <algorithm>
+
 #include <boost/array.hpp>
 #include <boost/integer.hpp>
 #include <boost/static_assert.hpp>
