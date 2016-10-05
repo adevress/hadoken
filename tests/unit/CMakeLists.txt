@@ -56,6 +56,15 @@ target_link_libraries(test_format ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 
 add_test(NAME test_format_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_format)
 
+## containers Test
+LIST(APPEND test_container_src "test_container.cpp")
+
+add_executable(test_container ${test_container_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_container ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_container_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_container)
+
+
 
 endif()
 
