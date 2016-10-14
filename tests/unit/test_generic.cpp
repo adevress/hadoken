@@ -154,7 +154,7 @@ template<typename T, typename Mod, typename Check>
 void  test_check_range(T vec, size_t partition, const Mod & modifier, const Check & checker){
     using namespace hadoken;
 
-    typedef range<T> range_vec;
+    typedef range<typename T::iterator> range_vec;
 
     range_vec my_range(vec.begin(), vec.end());
 
