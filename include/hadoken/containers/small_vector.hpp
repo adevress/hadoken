@@ -63,11 +63,7 @@ public:
     ///
     /// \brief default constructor, empty small_vector
     ///
-    small_vector() :
-        _begin(_internal_array),
-        _end(_internal_array),
-        _end_memory(_begin),
-        _internal_array() {}
+    small_vector();
 
     ~small_vector();
 
@@ -180,6 +176,9 @@ public:
     ///
     const_reference operator[] (std::size_t pos) const noexcept;
 
+    ///
+    /// \brief swap content of two small_vectors
+    ///
     void swap(small_vector & other);
 
 private:

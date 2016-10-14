@@ -56,6 +56,17 @@ target_link_libraries(test_format ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 
 add_test(NAME test_format_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_format)
 
+
+
+## geometry related tests
+LIST(APPEND test_geometry_src "test_geometry.cpp")
+
+add_executable(test_geometry ${test_geometry_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_geometry ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_geometry_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_geometry)
+
+
 ## containers Test
 LIST(APPEND test_container_src "test_container.cpp")
 

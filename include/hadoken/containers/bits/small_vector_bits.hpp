@@ -4,6 +4,7 @@
 #include <stdexcept>
 #include <limits>
 #include <cassert>
+#include <algorithm>
 
 #include  "../small_vector.hpp"
 
@@ -22,14 +23,53 @@ void _range_check(Iterator it1, Iterator it2, std::size_t pos){
     }
 }
 
+void inline _deallocate(void * ptr){
+    ::operator delete(ptr);
+}
+
+template<typename Iterator, typename ObType, typename Extra = void>
+struct destroyer_func{
+    static void _destroyer(Iterator it){
+        static_assert(std::is_pod<ObType>::value, "invalid pod type");
+        (void) it;
+    }
+};
+
+template<typename Iterator, typename ObType >
+struct destroyer_func<Iterator,ObType, typename std::enable_if<std::is_pod<ObType>::value == false>::type>{
+    static void _destroyer(Iterator it){
+        static_assert(std::is_pod<ObType>::value == false, "should be pod type");
+        it->~ObType();
+    }
+};
+
+template<typename Iterator, typename ObType>
+inline void _unitialize_move(Iterator begin, Iterator end, Iterator output){
+    for(; begin < end; begin++, output++){
+        output = new (output) ObType(std::move(*begin));
+        destroyer_func<Iterator, ObType>::_destroyer(begin);
+    }
+}
 
 }
+
+template<typename T, std::size_t N>
+small_vector<T,N>::small_vector() :
+       _begin(_internal_array),
+       _end(_internal_array),
+       _end_memory(_begin),
+       _internal_array() {}
 
 
 template<typename T, std::size_t N>
 small_vector<T,N>::~small_vector(){
     if(_begin != _end_memory){
-        delete [] _begin;
+
+        // destroy object if not simple layout
+        for(auto it = _begin; it < _end; ++it){
+            destroyer_func<pointer,T>::_destroyer(it);
+        }
+        _deallocate(_begin);
     }
 }
 
@@ -49,6 +89,7 @@ void small_vector<T,N>::push_back(const_reference v){
         _resize_to_fit(pos+1);
     }
 
+    _end = new (_end) T();
     *_end = v;
     _end++;
 }
@@ -57,7 +98,7 @@ void small_vector<T,N>::push_back(const_reference v){
 template<typename T, std::size_t N>
 void small_vector<T,N>::emplace_back(value_type && v){
     const std::size_t pos = (_end - _begin);
-    if( _is_static() == false || pos >= N){
+    if( pos >= std::max<std::size_t>(N, _end_memory - _begin)){
         _resize_to_fit(pos+1);
     }
 
@@ -102,7 +143,7 @@ std::size_t small_vector<T,N>::capacity() const noexcept{
 template<typename T, std::size_t N>
 typename small_vector<T,N>::reference
 small_vector<T,N>::operator[] (std::size_t pos) noexcept{
-    assert(pos < (_end - _begin));
+    assert(std::ptrdiff_t(pos) < (_end - _begin));
     return *( _begin + static_cast<std::ptrdiff_t>(pos)) ;
 }
 
@@ -110,7 +151,7 @@ small_vector<T,N>::operator[] (std::size_t pos) noexcept{
 template<typename T, std::size_t N>
 typename small_vector<T,N>::const_reference
 small_vector<T,N>::operator[] (std::size_t pos) const noexcept{
-    assert(pos < (_end - _begin));
+    assert(std::ptrdiff_t(pos) < (_end - _begin));
     return  _begin + static_cast<std::ptrdiff_t>(pos);
 }
 
@@ -135,7 +176,9 @@ void small_vector<T,N>::swap(small_vector<T,N> & other){
     using namespace std;
 
     if(_is_static()){
-        swap(_internal_array, other._internal_array);
+        for(std::size_t i =0; i < N; ++i){
+            swap(_internal_array[i], other._internal_array[i]);
+        }
     }
 
     swap(_begin, other._begin);
@@ -149,22 +192,20 @@ template<typename T, std::size_t N>
 void small_vector<T,N>::_resize_to_fit(std::size_t s){
     const std::size_t size_alloc = static_cast<std::size_t>(_end_memory - _begin);
 
-    if(size_alloc <= s){
-        const std::size_t n_elems = static_cast<std::size_t>(_end - _begin);
-        const std::size_t required_size= std::max((size_alloc << 1), std::max(s, N*2));
+    const std::size_t n_elems = static_cast<std::size_t>(_end - _begin);
+    const std::size_t required_size= std::max((size_alloc << 1), std::max(s, N*2));
 
-        // first reallocation from short buffer to extensible buffer needed
-        pointer pdata_old = ( _is_static() ) ? nullptr : _begin;
-        pointer pdata = static_cast<pointer>(::operator new[](required_size * sizeof(T)));
+    // first reallocation from short buffer to extensible buffer needed
+    pointer pdata_old = ( _is_static() ) ? nullptr : _begin;
+    pointer pdata = static_cast<pointer>(static_cast<void*>(::operator new(required_size * sizeof(T))));
 
-        std::move(_begin, _end, pdata);
+    _unitialize_move<T*, T>(_begin, _end, pdata);
 
-        delete[] pdata_old;
+    _deallocate(pdata_old);
 
-        _begin = pdata;
-        _end = _begin + n_elems;
-        _end_memory = _begin + required_size;
-    }
+    _begin = pdata;
+    _end = _begin + n_elems;
+    _end_memory = _begin + required_size;
 
 }
 

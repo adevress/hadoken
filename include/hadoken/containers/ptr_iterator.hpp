@@ -64,6 +64,15 @@ public:
   T& operator*() noexcept{
       return *p;
   }
+
+  T* operator->() noexcept{
+      return p;
+  }
+
+  bool operator<(const iterator_ptr& other) noexcept{
+      return ( p < other.p);
+  }
+
 };
 
 

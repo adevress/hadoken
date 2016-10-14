@@ -35,11 +35,24 @@
 #include <stdexcept>
 
 #include <boost/test/unit_test.hpp>
+#include <boost/mpl/list.hpp>
 
 
 #include <hadoken/containers/small_vector.hpp>
 
-BOOST_AUTO_TEST_CASE( small_vector_base )
+#include "test_helpers.hpp"
+
+typedef boost::mpl::list<
+    short int, short unsigned int,
+    int, unsigned int,
+    long, unsigned long,
+    long long, unsigned long long,
+    double, float, long double,
+    std::string
+ > small_vector_types;
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( small_vector_test, T, small_vector_types )
 {
 
     using namespace hadoken::containers;
@@ -47,7 +60,9 @@ BOOST_AUTO_TEST_CASE( small_vector_base )
     constexpr std::size_t small_size = 16;
     const std::size_t size_push =500;
 
-    small_vector<int, small_size> values;
+    content_generator<T> gen;
+
+    small_vector<T, small_size> values;
 
     BOOST_CHECK_EQUAL(values.size(), 0);
     BOOST_CHECK_EQUAL(values.empty(), true);
@@ -68,7 +83,12 @@ BOOST_AUTO_TEST_CASE( small_vector_base )
 
     for(std::size_t i =0;  i < size_push; ++i ){
 
-        values.push_back(i);
+        // alternate emplace back and push_back
+        if(i%3 == 0){
+            values.emplace_back(gen(i));
+         }else{
+            values.push_back(gen(i));
+        }
 
         if(i < small_size){
             //std::cout << " capa " <<  values.capacity() << " " << i << std::endl;
@@ -84,7 +104,44 @@ BOOST_AUTO_TEST_CASE( small_vector_base )
 
 
     for(std::size_t i =0;  i < values.size(); ++i ){
-        BOOST_CHECK_EQUAL(values[i], i);
-        BOOST_CHECK_EQUAL(values.at(i), i);
+        BOOST_CHECK_EQUAL(values[i], gen(i));
+        BOOST_CHECK_EQUAL(values.at(i), gen(i));
+    }
+}
+
+
+BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
+{
+    using namespace hadoken::containers;
+
+    using content_type = std::unique_ptr<std::string>;
+
+    constexpr std::size_t small_size = 16;
+    const std::size_t size_push =500;
+
+    content_generator<content_type> gen;
+
+    small_vector<content_type, small_size> values;
+
+    for(std::size_t i =0;  i < size_push; ++i ){
+
+        values.emplace_back(gen(i));
+
+        if(i < small_size){
+            //std::cout << " capa " <<  values.capacity() << " " << i << std::endl;
+            BOOST_CHECK_EQUAL(values.capacity(), 0);
+        }else{
+            BOOST_CHECK_LE(i, values.capacity());
+        }
+    }
+
+    BOOST_CHECK_EQUAL(values.size(), size_push);
+    BOOST_CHECK_EQUAL(std::distance(values.begin(), values.end()), size_push);
+    BOOST_CHECK_EQUAL(values.empty(), false);
+
+
+    for(std::size_t i =0;  i < values.size(); ++i ){
+        BOOST_CHECK_EQUAL(*values[i], *gen(i));
+        BOOST_CHECK_EQUAL(*values.at(i), *gen(i));
     }
 }
