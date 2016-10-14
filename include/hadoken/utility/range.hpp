@@ -33,24 +33,45 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#include <type_traits>
 
 namespace hadoken {
 
 
-template <typename Container>
+namespace{
+
+template <typename Iterator, typename Extra = void>
+inline void iterator_check_range(Iterator first_elem, Iterator end_elem){
+    (void) first_elem;
+    (void) end_elem;
+}
+
+template <typename Iterator, typename std::enable_if<std::is_same<
+                                                         typename std::iterator_traits<Iterator>::iterator_category,
+                                                         std::random_access_iterator_tag>::value >::type>
+inline void iterator_check_range(Iterator first_elem, Iterator end_elem){
+    assert(first_elem < end_elem || first_elem == end_elem);
+}
+
+
+
+}
+
+
+template <typename Iterator>
 class range{
 public:
-    typedef typename Container::iterator iterator;
+    typedef Iterator iterator_type;
 
-    inline range(const iterator & first_elem, const iterator & end_elem) : first_(first_elem), end_(end_elem){
-        //assert(first_elem <= end_elem);
+    inline range(const iterator_type & first_elem, const iterator_type & end_elem) : first_(first_elem), end_(end_elem){
+        iterator_check_range<iterator_type>(first_elem, end_elem);
     }
 
-    inline iterator & begin(){
+    inline iterator_type & begin(){
         return first_;
     }
 
-    inline iterator & end(){
+    inline iterator_type & end(){
         return end_;
     }
 
@@ -62,17 +83,17 @@ public:
         return std::distance(first_, end_);
     }
 
-    inline std::vector<range<Container> > split(std::size_t number_parts, std::size_t min_size=1){
+    inline std::vector<range<Iterator> > split(std::size_t number_parts, std::size_t min_size=1){
         assert(number_parts > 0);
         assert(min_size >= 1);
 
-        std::vector<range<Container> > ranges;
+        std::vector<range<Iterator> > ranges;
         const std::size_t size_range = size();
         const std::size_t avg_size= size_range/number_parts;
         std::size_t remain_elems = size_range%number_parts;
         ranges.reserve(number_parts);
 
-        iterator first = begin(), last = begin();
+        iterator_type first = begin(), last = begin();
 
         do{
             std::size_t segment_size = avg_size + ((remain_elems > 0)?1:0);
@@ -89,7 +110,7 @@ public:
 
 
 private:
-    iterator first_, end_;
+    iterator_type first_, end_;
 };
 
 }
