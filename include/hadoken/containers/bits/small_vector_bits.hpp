@@ -15,7 +15,7 @@ namespace containers{
 namespace {
 
 
-
+// boundary check
 template<typename Iterator>
 void _range_check(Iterator it1, Iterator it2, std::size_t pos){
     if( pos >= static_cast<std::size_t>(it2 - it1) ){
@@ -23,13 +23,16 @@ void _range_check(Iterator it1, Iterator it2, std::size_t pos){
     }
 }
 
+// untyped deallocator
 void inline _deallocate(void * ptr){
     ::operator delete(ptr);
 }
 
+// destroy object without deallocate
+// specialize for improved efficiency with POD types
 template<typename Iterator, typename ObType, typename Extra = void>
 struct destroyer_func{
-    static void _destroyer(Iterator it){
+    inline void operator()(Iterator it){
         static_assert(std::is_pod<ObType>::value, "invalid pod type");
         (void) it;
     }
@@ -37,19 +40,36 @@ struct destroyer_func{
 
 template<typename Iterator, typename ObType >
 struct destroyer_func<Iterator,ObType, typename std::enable_if<std::is_pod<ObType>::value == false>::type>{
-    static void _destroyer(Iterator it){
+    inline void operator()(Iterator it){
         static_assert(std::is_pod<ObType>::value == false, "should be pod type");
         it->~ObType();
     }
 };
 
-template<typename Iterator, typename ObType>
-inline void _unitialize_move(Iterator begin, Iterator end, Iterator output){
-    for(; begin < end; begin++, output++){
-        output = new (output) ObType(std::move(*begin));
-        destroyer_func<Iterator, ObType>::_destroyer(begin);
+// move object to an area of unitialized memory
+// then destroy the old copy
+template<typename Iterator, typename ObType, typename Extra = void >
+struct unitialize_move_func{
+
+    inline void operator()(Iterator begin, Iterator end, Iterator output){
+        static_assert(std::is_pod<ObType>::value == false, "invalid pod type");
+
+        destroyer_func<Iterator, ObType> _destroyer;
+
+        for(; begin < end; begin++, output++){
+            output = new (output) ObType(std::move(*begin));
+            _destroyer(begin);
+        }
     }
-}
+};
+
+template<typename Iterator, typename ObType >
+struct unitialize_move_func<Iterator, ObType, typename std::enable_if<std::is_pod<ObType>::value == true>::type>{
+
+    inline void operator()(Iterator begin, Iterator end, Iterator output){
+        std::uninitialized_copy(begin, end, output);
+    }
+};
 
 }
 
@@ -67,7 +87,8 @@ small_vector<T,N>::~small_vector(){
 
         // destroy object if not simple layout
         for(auto it = _begin; it < _end; ++it){
-            destroyer_func<pointer,T>::_destroyer(it);
+            destroyer_func<pointer,T> _destroyer;
+            _destroyer(it);
         }
         _deallocate(_begin);
     }
@@ -89,8 +110,7 @@ void small_vector<T,N>::push_back(const_reference v){
         _resize_to_fit(pos+1);
     }
 
-    _end = new (_end) T();
-    *_end = v;
+    _end = new (_end) T(v);
     _end++;
 }
 
@@ -102,7 +122,7 @@ void small_vector<T,N>::emplace_back(value_type && v){
         _resize_to_fit(pos+1);
     }
 
-    *_end = std::move(v);
+    _end = new (_end) T(std::move(v));
     _end++;
 }
 
@@ -199,7 +219,9 @@ void small_vector<T,N>::_resize_to_fit(std::size_t s){
     pointer pdata_old = ( _is_static() ) ? nullptr : _begin;
     pointer pdata = static_cast<pointer>(static_cast<void*>(::operator new(required_size * sizeof(T))));
 
-    _unitialize_move<T*, T>(_begin, _end, pdata);
+    unitialize_move_func<T*, T> _mover;
+
+    _mover(_begin, _end, pdata);
 
     _deallocate(pdata_old);
 
