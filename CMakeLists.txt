@@ -20,8 +20,10 @@ set(Boost_NO_BOOST_CMAKE TRUE)
 include(BlueGenePortability)
 include(DefineInstallationPaths)
 include(ReleaseDebugAutoFlags)
-
 include(DetectCXX11Support)
+
+
+find_package(Threads)
 
 
 file(GLOB HADOKEN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*)
