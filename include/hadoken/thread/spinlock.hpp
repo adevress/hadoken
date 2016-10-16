@@ -30,6 +30,7 @@
 #define _HADOKEN_SPINLOCK_HPP_
 
 #include <atomic>
+#include <thread>
 
 namespace hadoken {
 
@@ -50,6 +51,7 @@ public:
     void lock() noexcept {
         bool expected = false;
         while(_lock.compare_exchange_weak(expected, true) == false){
+            std::this_thread::yield();
             expected = false;
         }
     }
