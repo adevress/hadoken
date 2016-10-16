@@ -44,8 +44,8 @@ using namespace boost::chrono;
 typedef  system_clock::time_point tp;
 typedef  system_clock cl;
 
-constexpr std::size_t static_vec_size = 32;
-const std::size_t n_elems= 800;
+constexpr std::size_t static_vec_size = 64;
+const std::size_t n_elems= 64;
 
 std::size_t test_std_vector(std::size_t iter){
 
