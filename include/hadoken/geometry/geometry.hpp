@@ -87,19 +87,19 @@ namespace cartesian {
 
     /// accessor x coordinate
     template<typename Point>
-    typename Point::coordinate_type get_x(const Point & p){
+    typename coordinate_type<Point>::type get_x(const Point & p){
         return bg::get<0>(p);
     }
 
     /// accessor y coordinate
     template<typename Point>
-    typename Point::coordinate_type get_y(const Point & p){
+    typename coordinate_type<Point>::type get_y(const Point & p){
         return bg::get<1>(p);
     }
 
     /// accessor z coordinate
     template<typename Point>
-    typename Point::coordinate_type get_z(const Point & p){
+    typename coordinate_type<Point>::type get_z(const Point & p){
         return bg::get<2>(p);
     }
 

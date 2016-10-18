@@ -57,6 +57,13 @@ bool almost_equal(const FloatType f1, const FloatType f2,
 }
 
 
+
+template <typename FloatType>
+inline bool delta_less(const FloatType f1, const FloatType f2, const FloatType delta = std::numeric_limits<FloatType>::epsilon()*100){
+    return (f1 < (f2 + delta)) && ( (f1 + delta) < f2);
+}
+
+
 }
 
 }
