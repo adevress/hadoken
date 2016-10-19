@@ -129,34 +129,56 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( dummy_override_distance, T, floating_point_type )
 
 
 //
-// simple stupid test for 3D distance and centroid computation with multipoint
-/*
-BOOST_AUTO_TEST_CASE_TEMPLATE( multipoint_distance_fp, T, floating_point_type )
+// operator test for point_base
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( point_base_test, T, floating_point_type )
 {
     namespace geo = hadoken::geometry::cartesian;
 
-    geo::point<T> p1 = { 0, 0, 0 };
+    using local_point = geo::point_base<T,3>;
 
-    geo::point<T> p2 = { 2, 0, 0 }, p3 =  { -2, 0, 0}, p4 = { 0, 2, 0}, p5 = { 0, -2, 0 };
+    local_point p1 = { 0, 0, 10 };
 
-    geo::multipoint<T> mp;
-    mp.push_back(p2);
-    mp.push_back(p3);
-    mp.push_back(p4);
-    mp.push_back(p5);
+    local_point p2 = { 2, 0, 0 }, p3 =  { -2, 0, 0}, p4 = { 0, 2, 0}, p5 = { 0, -2, 0 };
 
-    auto distance_to_mp = geo::distance(p1, mp);
-    auto distance_to_p2 = geo::distance(p1, p2);
 
-    std::cout << "distance to mp " << distance_to_mp << " distance_to_p2 " << distance_to_p2 << std::endl;
-    BOOST_CHECK_CLOSE(distance_to_mp, distance_to_p2, 0.01);
+    auto ptest = p1 + p2;
 
-    auto centroid = geo::centroid<geo::point<T>>(mp);
-    auto distance_to_centroid = geo::distance(p1, centroid);
-    BOOST_CHECK_CLOSE(distance_to_centroid, 0, 0.01);
+
+    BOOST_CHECK_CLOSE(ptest(0), 2, 0.001);
+    BOOST_CHECK_CLOSE(ptest(1), 0, 0.001);
+    BOOST_CHECK_CLOSE(ptest(2), 10, 0.001);
+
+    ptest -= p2;
+
+    BOOST_CHECK_CLOSE(ptest(0), p1(0), 0.001);
+    BOOST_CHECK_CLOSE(ptest(1), p1(1), 0.001);
+    BOOST_CHECK_CLOSE(ptest(2), p1(2), 0.001);
+
+    ptest = p2 - p3 + p3 - p2;
+    BOOST_CHECK(ptest.close_to(local_point({0, 0, 0})));
+    BOOST_CHECK(ptest.close_to(local_point({0, 0, 1})) == false);
+
+    ptest = p1;
+    ptest += ptest;
+    BOOST_CHECK(ptest.close_to(p1 +p1));
+    ptest -= ptest;
+    BOOST_CHECK(ptest.close_to(local_point({0, 0, 0})));
+
+    BOOST_CHECK_CLOSE(std::accumulate(p2.begin(), p2.end(), 0), 2.0,  0.001);
+
+    std::ostringstream ss;
+    ss << p1 << " " << p2 << std::endl;
+
+    std::cout << "point " << p1 << std::endl;
+
+    // check boost geometry mapping
+    BOOST_CHECK_EQUAL(geo::get_x(p1), p1(0));
+    BOOST_CHECK_EQUAL(geo::get_y(p1), p1(1));
+    BOOST_CHECK_EQUAL(geo::get_z(p1), p1(2));
+    BOOST_CHECK_CLOSE(geo::distance(p1, p1), 0, 0.001);
+
 }
-
-*/
 
 
 

@@ -30,10 +30,12 @@
 #define _HADOKEN_GEOMETRY_HPP_
 
 
-#include <boost/geometry.hpp>
+#include <boost/geometry/geometries/geometries.hpp>
 
+#include <boost/geometry/algorithms/distance.hpp>
 
 #include <hadoken/geometry/objects/sphere.hpp>
+#include <hadoken/geometry/objects/point_base.hpp>
 
 #if __cplusplus >= 2011L
 
@@ -53,9 +55,13 @@ namespace cartesian {
 
     /// object models
 
+    /// default point type
+    template<typename CoordType, std::size_t N>
+    using point = point_base<CoordType, N>;
+
     /// default point model with type specification
     template<typename CoordType>
-    using point3 = model::point<CoordType, 3, bg::cs::cartesian>;
+    using point3 = point_base<CoordType, 3>;
 
     /// default point in double precision
     using point3d = point3<double>;
