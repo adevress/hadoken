@@ -47,14 +47,14 @@ struct sphere_object_tag {};
 ///  sphere object in a 3D cartesian space
 ///
 template<typename Point, typename CoordType>
-class sphere{
+class sphere_base{
 public:
     sphere_object_tag object_type;
 
     typedef Point point_type;
     typedef CoordType coordinate_type;
 
-    inline sphere(const point_type & center, coordinate_type radius): _center(center), _radius(radius) {}
+    inline sphere_base(const point_type & center, coordinate_type radius): _center(center), _radius(radius) {}
 
     inline coordinate_type get_radius() const{
         return _radius;

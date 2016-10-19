@@ -88,6 +88,13 @@ public:
         return _point[i];
     }
 
+    /// set operator
+    inline value_type& operator()(const std::size_t i){
+        assert(i < N);
+        return _point[i];
+    }
+
+
     /// floating point equal
     inline bool close_to(const point_type & other, CoordType delta = std::numeric_limits<CoordType>::epsilon()*100 ) const {
         bool res = true;
@@ -122,6 +129,13 @@ public:
     /// operator plus equal overload for point / point
     point_type& operator+=(const point_type & other){
         *this = *this + other;
+        return *this;
+    }
+
+    point_type& operator/=(const value_type scalar){
+        for(auto & v : _point){
+            v /= scalar;
+        }
         return *this;
     }
 
@@ -169,27 +183,6 @@ namespace boost { namespace geometry
 #ifndef DOXYGEN_NO_TRAITS_SPECIALIZATIONS
 namespace traits
 {
-#ifndef DOXYGEN_NO_DETAIL
-namespace detail
-{
-// Create class and specialization to indicate the tag
-// for normal cases and the case that the type of the c-array is arithmetic
-template <bool>
-struct boost_array_tag
-{
-    typedef geometry_not_recognized_tag type;
-};
-
-
-template <>
-struct boost_array_tag<true>
-{
-
-};
-
-
-} // namespace detail
-#endif // DOXYGEN_NO_DETAIL
 
 
 // Assign the point-tag, preventing arrays of points getting a point-tag
@@ -197,7 +190,6 @@ template <typename CoordinateType, std::size_t DimensionCount>
 struct tag<hadoken::geometry::cartesian::point_base<CoordinateType, DimensionCount> >{
     typedef point_tag type;
 };
-
 
 template <typename CoordinateType, std::size_t DimensionCount>
 struct coordinate_type<hadoken::geometry::cartesian::point_base<CoordinateType, DimensionCount> >
@@ -225,14 +217,11 @@ struct access<hadoken::geometry::cartesian::point_base<CoordinateType, Dimension
     }
 };
 
-
 template <class T, std::size_t N>
 struct coordinate_system<hadoken::geometry::cartesian::point_base<T, N> >
 {
     typedef boost::geometry::cs::cartesian type;
 };
-
-
 
 } // namespace traits
 
