@@ -182,3 +182,29 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( point_base_test, T, floating_point_type )
 
 
 
+//
+// basic tests on cross product
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( cross_product_base_test, T, floating_point_type )
+{
+    namespace geo = hadoken::geometry::cartesian;
+
+    using local_vector = geo::vector3<T>;
+
+
+    BOOST_CHECK(geo::cross_product(local_vector(5.5, 0, 0), local_vector(0, 5.5, 0)).close_to(local_vector(0, 0, 5.5*5.5 )));
+    BOOST_CHECK(geo::cross_product(local_vector(-3.3, 0, 0), local_vector(0, -3.3, 0)).close_to(local_vector(0, 0, 3.3*3.3 )));
+    BOOST_CHECK(geo::cross_product(local_vector(0, 5.5, 0), local_vector(5.5, 0, 0)).close_to(local_vector(0, 0, - 5.5*5.5 )));
+
+
+    local_vector v1(9.9, 1.1, 4.4);
+    local_vector v1_inv = v1;
+    v1_inv *= -1.0;
+
+    BOOST_CHECK(geo::cross_product(v1, v1).close_to(local_vector(0, 0, 0 )));
+    BOOST_CHECK(geo::cross_product(v1, v1_inv).close_to(local_vector(0, 0, 0 )));
+}
+
+
+
+

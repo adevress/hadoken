@@ -132,9 +132,18 @@ public:
         return *this;
     }
 
+    /// operator /= overload for point / scalar
     point_type& operator/=(const value_type scalar){
         for(auto & v : _point){
             v /= scalar;
+        }
+        return *this;
+    }
+
+    /// operator *= overload for point / scalar
+    point_type& operator*=(const value_type scalar){
+        for(auto & v : _point){
+            v *= scalar;
         }
         return *this;
     }
