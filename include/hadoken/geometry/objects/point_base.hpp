@@ -118,6 +118,13 @@ public:
         return res;
     }
 
+    /// operator plus overload for point / scalar
+    point_type operator*(const value_type scalar) const{
+        point_type res;
+        std::transform(begin(), end(), res.begin(), [scalar](const value_type v){ return scalar * v; });
+        return res;
+    }
+
 
     /// operator minus equal overload for point / point
     point_type& operator-=(const point_type & other){
@@ -142,9 +149,7 @@ public:
 
     /// operator *= overload for point / scalar
     point_type& operator*=(const value_type scalar){
-        for(auto & v : _point){
-            v *= scalar;
-        }
+        *this = *this * scalar;
         return *this;
     }
 

@@ -38,14 +38,45 @@ namespace hadoken{
 namespace math{
 
 
+
 ///
-/// @brief compare two floating point number, it supports relative and absolute precision range
+/// @brief compare two floating point number, with absolute range precision check
 /// @param f1: first float to compare
 /// @param f2: second float to compare
 /// @return true if f1 and f2 are close enought, otherwise, false
 ///
-/// default precision is setup to 10 times the system epsilon value
+/// default precision is setup to 100 times the system epsilon value
 ///
+template <typename FloatType>
+bool close_to_abs(const FloatType f1, const FloatType f2,
+                  const FloatType epsilon_abs = std::numeric_limits<FloatType>::epsilon()*100){
+    return (std::abs<FloatType>(f1 -f2) <= epsilon_abs);
+
+}
+
+///
+/// @brief compare two floating point number, with relative range precision check
+/// @param f1: first float to compare
+/// @param f2: second float to compare
+/// @return true if f1 and f2 are close enought, otherwise, false
+///
+///
+template <typename FloatType>
+bool close_to_rel(const FloatType f1, const FloatType f2,
+                  const FloatType epsilon_rel = std::numeric_limits<FloatType>::epsilon()){
+    return ( (std::abs<FloatType>(f1 -f2) <=  (std::max(std::abs(f1), std::abs(f2)))) * epsilon_rel );
+}
+
+
+
+
+template <typename FloatType>
+inline bool delta_less(const FloatType f1, const FloatType f2, const FloatType delta = std::numeric_limits<FloatType>::epsilon()*100){
+    return (f1 < (f2 + delta)) && ( (f1 + delta) < f2);
+}
+
+
+
 template <typename FloatType>
 bool almost_equal(const FloatType f1, const FloatType f2,
                   const FloatType epsilon_rel  = std::numeric_limits<FloatType>::epsilon()*10,
@@ -54,13 +85,6 @@ bool almost_equal(const FloatType f1, const FloatType f2,
             || (std::abs(f1 -f2) <= epsilon_abs)  /* absolute */
             || ( (std::abs(f1 -f2)/ (std::max(std::abs(f1), std::abs(f2)))) <= epsilon_rel ) ; /* relative */
 
-}
-
-
-
-template <typename FloatType>
-inline bool delta_less(const FloatType f1, const FloatType f2, const FloatType delta = std::numeric_limits<FloatType>::epsilon()*100){
-    return (f1 < (f2 + delta)) && ( (f1 + delta) < f2);
 }
 
 

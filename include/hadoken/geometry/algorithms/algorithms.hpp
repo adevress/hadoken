@@ -102,8 +102,14 @@ typename coordinate_type<Vector>::type norm(const Vector & v1){
 
 template<typename Vector>
 Vector normalize(const Vector & v1){
+    using coord_type = typename coordinate_type<Vector>::type;
     Vector res(v1);
-    res /= norm<Vector>(v1);
+    const coord_type norm_value = norm<Vector>(v1);
+
+    if(hadoken::math::close_to_abs<coord_type>(norm_value, 0.0)){
+        throw std::logic_error("try to normalize a vector of norm 0");
+    }
+    res /= norm_value;
     return res;
 }
 
