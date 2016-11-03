@@ -62,16 +62,17 @@ template <typename Iterator>
 class range{
 public:
     typedef Iterator iterator_type;
+    typedef range<Iterator> range_type;
 
     inline range(const iterator_type & first_elem, const iterator_type & end_elem) : first_(first_elem), end_(end_elem){
         iterator_check_range<iterator_type>(first_elem, end_elem);
     }
 
-    inline iterator_type & begin(){
+    inline const iterator_type & begin() const{
         return first_;
     }
 
-    inline iterator_type & end(){
+    inline const iterator_type & end() const{
         return end_;
     }
 
@@ -79,39 +80,59 @@ public:
     /// \brief size
     /// \return number of element in the range
     ///
-    inline size_t size(){
+    inline size_t size() const{
         return std::distance(first_, end_);
     }
 
-    inline std::vector<range<Iterator> > split(std::size_t number_parts, std::size_t min_size=1){
-        assert(number_parts > 0);
-        assert(min_size >= 1);
-
-        std::vector<range<Iterator> > ranges;
-        const std::size_t size_range = size();
-        const std::size_t avg_size= size_range/number_parts;
-        std::size_t remain_elems = size_range%number_parts;
-        ranges.reserve(number_parts);
-
-        iterator_type first = begin(), last = begin();
-
-        do{
-            std::size_t segment_size = avg_size + ((remain_elems > 0)?1:0);
-            segment_size = std::max<std::size_t>(segment_size, min_size);
-            segment_size = std::min<std::size_t>(segment_size, std::distance(first, end()));
-            std::advance(last, segment_size);
-            ranges.push_back( range(first, last));
-            first = last;
-            remain_elems = ((remain_elems > 0)?(remain_elems-1):0);
-        } while(ranges.size() < number_parts);
-
-        return ranges;
+    bool operator==(const range_type & other) const{
+        return (first_ == other.first_) && (end_ == other.end_);
     }
-
 
 private:
     iterator_type first_, end_;
 };
+
+
+/// spliting strategy, try to split in continuous ranges
+class split_strategy_packed {};
+
+constexpr split_strategy_packed sp_packed;
+
+
+template<typename SplitStrategy, typename Range>
+inline std::vector<Range> split_range(SplitStrategy && strategy, const Range & range, std::size_t number_parts){
+    (void) strategy;
+
+    assert(number_parts > 0);
+
+    std::vector<Range> ranges;
+    const std::size_t min_size = 1;
+    const std::size_t size_range = range.size();
+    const std::size_t avg_size= size_range/number_parts;
+    std::size_t remain_elems = size_range%number_parts;
+    ranges.reserve(number_parts);
+
+    typename Range::iterator_type first = range.begin(), last = range.begin();
+
+    do{
+        std::size_t segment_size = avg_size + ((remain_elems > 0)?1:0);
+        segment_size = std::max<std::size_t>(segment_size, min_size);
+        segment_size = std::min<std::size_t>(segment_size, std::distance(first, range.end()));
+        std::advance(last, segment_size);
+        ranges.push_back( Range(first, last));
+        first = last;
+        remain_elems = ((remain_elems > 0)?(remain_elems-1):0);
+    } while(ranges.size() < number_parts);
+
+    return ranges;
+}
+
+
+template<typename SplitStrategy, typename Range>
+inline Range take_splice(SplitStrategy && strategy, const Range & range, std::size_t my_splice, std::size_t total_slices){
+    assert(my_splice <= total_slices);
+    return split_range(std::forward<SplitStrategy>(strategy), range, total_slices)[my_splice];
+}
 
 }
 

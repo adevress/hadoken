@@ -161,7 +161,7 @@ void  test_check_range(T vec, size_t partition, const Mod & modifier, const Chec
 
     BOOST_CHECK_EQUAL(vec.size(), my_range.size());
 
-    std::vector< range_vec> ranges = my_range.split(partition);
+    std::vector< range_vec> ranges = split_range(split_strategy_packed(), my_range, partition);
     BOOST_CHECK_EQUAL(ranges.size(), partition);
     BOOST_CHECK(ranges[0].begin() == vec.begin());
     BOOST_CHECK(ranges[partition-1].end() == vec.end());
@@ -184,6 +184,11 @@ void  test_check_range(T vec, size_t partition, const Mod & modifier, const Chec
     }
 
     BOOST_CHECK_GE(min_elem+1,max_elem);
+
+    const int i = my_range.size() /2;
+    range<typename T::iterator> my_slice = take_splice(split_strategy_packed(), my_range, i, partition);
+
+    BOOST_CHECK(my_slice == ranges[i]);
 
 }
 
