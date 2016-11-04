@@ -50,50 +50,62 @@ BOOST_AUTO_TEST_CASE( parallel_for_each_simple_test)
     using namespace hadoken;
     using cl = std::chrono::system_clock;
 
-    std::vector<int> values;
-    parallel::for_each(parallel::seq, values.begin(), values.end(), [](int & v){ v += 42; });
+    std::vector<double> values;
+    parallel::for_each(parallel::seq, values.begin(), values.end(), [](double & v){ v += 42; });
 
-    parallel::for_each(parallel::parallel_execution_policy(), values.begin(), values.end(), [](int & v){ v += 422; });
+    parallel::for_each(parallel::parallel_execution_policy(), values.begin(), values.end(), [](double & v){ v += 422; });
 
-    parallel::for_each(parallel::parallel_vector_execution_policy(), values.begin(), values.end(), [](int & v){ v += 4222; });
+    parallel::for_each(parallel::parallel_vector_execution_policy(), values.begin(), values.end(), [](double & v){ v += 4222; });
 
 
-    values = std::vector<int>(128000, 0);
+    values = std::vector<double>(128000, 128);
 
     auto t1 = cl::now();
 
-    parallel::for_each(parallel::seq, values.begin(), values.end(), [](int & v){ v += 10; });
+	auto fops = [](double & v){
+        double res = std::pow(v, 4);
+        res = std::sqrt(res);
+        v = res;
+
+     };
+
+
+    parallel::for_each(parallel::seq, values.begin(), values.end(), fops);
+
 
     auto t2 = cl::now();
 
     for(auto i : values){
-        BOOST_CHECK_EQUAL(i, 10);
+        BOOST_CHECK_CLOSE(i, 128*128, 0.01);
     }
 
 
     std::cout << "sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
 
+    values = std::vector<double>(128000, 128);
+
     t1 = cl::now();
 
-    parallel::for_each(parallel::parallel_execution_policy(), values.begin(), values.end(), [](int & v){ v += 100; });
+    parallel::for_each(parallel::parallel_execution_policy(), values.begin(), values.end(), fops);
     //__gnu_parallel::for_each(values.begin(), values.end(), [](int & v){ v += 100; });
 
     t2 = cl::now();
 
 
     for(auto i : values){
-        BOOST_CHECK_EQUAL(i, 110);
+         BOOST_CHECK_CLOSE(i, 128*128, 0.01);
     }
 
     std::cout << "parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
 
 
-    parallel::for_each(parallel::parallel_vector_execution_policy(), values.begin(), values.end(), [](int & v){ v += 1000; });
+    values = std::vector<double>(128000, 128);
+
+    parallel::for_each(parallel::parallel_vector_execution_policy(), values.begin(), values.end(), fops);
 
 
+ 
     for(auto i : values){
-        BOOST_CHECK_EQUAL(i, 1110);
-    }
-
-}
+         BOOST_CHECK_CLOSE(i, 128*128, 0.01);
+    }}
 
