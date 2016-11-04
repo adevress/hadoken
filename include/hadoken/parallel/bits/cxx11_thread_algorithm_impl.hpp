@@ -26,8 +26,8 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef _HADOKEN_PARALLEL_ALGORITHM_BITS_HPP_
-#define _HADOKEN_PARALLEL_ALGORITHM_BITS_HPP_
+#ifndef _HADOKEN_CXX11_THREAD_ALGORITHM_BITS_HPP_
+#define _HADOKEN_CXX11_THREAD_ALGORITHM_BITS_HPP_
 
 #include <type_traits>
 #include <future>
@@ -61,27 +61,30 @@ std::size_t get_parallel_task(){
 /// for_each algorithm
 template<typename Iterator, typename Function>
 inline Function _simple_cxx11_parallel(Iterator begin_it, Iterator end_it, Function fun){
-    small_vector<std::future<void>, 64> waiters;
+    small_vector<std::future<void>, 32> waiters;
 
     const std::size_t n_task = get_parallel_task();
 
     range<Iterator> global_range(begin_it, end_it);
 
-    waiters.emplace_back(std::async(std::launch::deferred, [&](){
-        auto my_range = hadoken::take_splice(split_strategy_packed(), global_range, 0, n_task);
-        std::for_each(my_range.begin(), my_range.end(), fun);
-    }));
 
+    // start task for range 1-N on other cores
     for(std::size_t i = 1; i < n_task; ++i){
         waiters.emplace_back(std::async(std::launch::async, [i,&global_range, &n_task, &fun](){
-            auto my_range = hadoken::take_splice(split_strategy_packed(), global_range, i, n_task);
+            auto my_range = hadoken::take_splice(global_range, i, n_task);
             std::for_each(my_range.begin(), my_range.end(), fun);
         }));
     }
 
+    // execute the range 0 locally
+    auto my_range = hadoken::take_splice(global_range, 0, n_task);
+    std::for_each(my_range.begin(), my_range.end(), fun);
+
+    // wait for the folks
     for(auto && w : waiters){
         w.wait();
     }
+
     return fun;
 }
 

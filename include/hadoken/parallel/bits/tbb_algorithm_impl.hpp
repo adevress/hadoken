@@ -26,22 +26,17 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef _HADOKEN_PARALLEL_ALGORITHM_HPP_
-#define _HADOKEN_PARALLEL_ALGORITHM_HPP_
+#ifndef _HADOKEN_TBB_ALGORITHM_BITS_HPP_
+#define _HADOKEN_TBB_ALGORITHM_BITS_HPP_
 
-#include <algorithm>
+#include <type_traits>
+#include <stdexcept>
+
+#include <tbb/parallel_for_each.h>
+
+#include <hadoken/parallel/algorithm.hpp>
 
 
-
-#ifdef HADOKEN_PARALLEL_USE_TBB
-
-#include <hadoken/parallel/bits/tbb_algorithm_impl.hpp>
-
-#else
-
-#include <hadoken/parallel/bits/cxx11_thread_algorithm_impl.hpp>
-
-#endif
 
 namespace hadoken{
 
@@ -49,38 +44,48 @@ namespace hadoken{
 namespace parallel{
 
 
-/// sequential execution, no parallelism
-class sequential_execution_policy{};
-
-/// parallel execution allowed
-class parallel_execution_policy{};
-
-/// parallel execution allowed, vector execution allowed
-class parallel_vector_execution_policy{};
-
-
-/// constexpr for sequential execution
-constexpr sequential_execution_policy seq{};
-
-/// constexpr for parallel execution
-constexpr sequential_execution_policy par{};
-
-/// constexpr for parallel vector execution
-constexpr sequential_execution_policy par_vec{};
+class sequential_execution_policy;
+class parallel_execution_policy;
+class parallel_vector_execution_policy;
 
 
 
-/// for_each algorithm with execution specifier
+namespace detail{
+
+using namespace hadoken::containers;
+
+
+/// for_each algorithm
+template<typename Iterator, typename Function>
+inline Function _tbb_parallel_for_each(Iterator begin_it, Iterator end_it, Function fun){
+    using namespace tbb;
+    parallel_for_each(begin_it, end_it, fun);
+    return fun;
+}
+
+
+
+} // detail
+
+
+/// for_each algorithm
 template<typename ExecPolicy, typename Iterator, typename Function>
-inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun);
+inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun){
+    (void) policy;
+    if(std::is_same<ExecPolicy, parallel_execution_policy>::value
+            || std::is_same<ExecPolicy, parallel_vector_execution_policy>::value ){
+        return detail::_tbb_parallel_for_each(begin_it, end_it, fun);
+    }
+
+   return std::for_each(begin_it, end_it, fun);
+}
 
 
-} // parallel
+} // concurrent
 
 
 
 } // hadoken
-
 
 
 #endif

@@ -93,15 +93,9 @@ private:
 };
 
 
-/// spliting strategy, try to split in continuous ranges
-class split_strategy_packed {};
 
-constexpr split_strategy_packed sp_packed;
-
-
-template<typename SplitStrategy, typename Range>
-inline std::vector<Range> split_range(SplitStrategy && strategy, const Range & range, std::size_t number_parts){
-    (void) strategy;
+template<typename Range>
+inline std::vector<Range> split_range(const Range & range, std::size_t number_parts){
 
     assert(number_parts > 0);
 
@@ -128,10 +122,22 @@ inline std::vector<Range> split_range(SplitStrategy && strategy, const Range & r
 }
 
 
-template<typename SplitStrategy, typename Range>
-inline Range take_splice(SplitStrategy && strategy, const Range & range, std::size_t my_splice, std::size_t total_slices){
+template<typename Range>
+inline Range take_splice(const Range & range, std::size_t slice_id, std::size_t total_slices){
     assert(my_splice <= total_slices);
-    return split_range(std::forward<SplitStrategy>(strategy), range, total_slices)[my_splice];
+    const std::size_t n_elem = range.size();
+    const std::size_t elem_per_slice_base = n_elem / total_slices;
+    const std::size_t elem_per_slice_modulo = n_elem % total_slices;
+    const std::size_t additional_elem = (slice_id < elem_per_slice_modulo) ? 1 : 0;
+
+    typename Range::iterator_type first = range.begin();
+    std::advance(first, elem_per_slice_base * slice_id + std::min(elem_per_slice_modulo, slice_id) );
+
+    typename Range::iterator_type last = first;
+    std::advance(last, elem_per_slice_base + additional_elem);
+
+
+    return Range(first, last);
 }
 
 }
