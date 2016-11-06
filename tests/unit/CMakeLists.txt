@@ -2,6 +2,7 @@
 if(UNIT_TESTS)
 
 find_package(Boost 1.41.0 REQUIRED system unit_test_framework)
+find_package(TBB)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS} )
@@ -90,10 +91,21 @@ add_test(NAME test_thread_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CM
 LIST(APPEND test_parallel_src "test_parallel.cpp")
 
 
-add_executable(test_parallel ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
-target_link_libraries(test_parallel ${CMAKE_THREAD_LIBS_INIT}  ${CMAKE_parallel_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+add_executable(test_parallel_base ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_parallel_base ${CMAKE_THREAD_LIBS_INIT}  ${CMAKE_parallel_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 
-add_test(NAME test_parallel_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel)
+add_test(NAME test_parallel_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_base)
+
+if(TBB_FOUND)
+
+add_executable(test_parallel_tbb ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_parallel_tbb  ${CMAKE_THREAD_LIBS_INIT} ${TBB_LIBRARIES} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_parallel_unit_tbb COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_tbb)
+
+
+endif()
+
 
 endif()
 
