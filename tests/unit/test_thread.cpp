@@ -33,11 +33,14 @@
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
+#include <functional>
 #include <future>
 
 #include <boost/test/unit_test.hpp>
 
 #include <hadoken/thread/spinlock.hpp>
+#include <hadoken/executor/simple_thread_executor.hpp>
+#include <hadoken/executor/thread_pool_executor.hpp>
 
 
 BOOST_AUTO_TEST_CASE( spin_lock_simple_test)
@@ -80,5 +83,44 @@ BOOST_AUTO_TEST_CASE( spin_lock_simple_test)
 
     BOOST_CHECK_EQUAL(counter, 10*200);
 
+
+}
+
+
+
+BOOST_AUTO_TEST_CASE( executor_simple_thread_test)
+{
+    hadoken::simple_thread_executor exec_thread;
+
+    std::plus<int> add;
+
+    std::packaged_task<int (int, int)> task(add);
+
+    auto f = task.get_future();
+
+    exec_thread.execute([&](){
+        task(40, 2);
+    });
+
+    BOOST_CHECK_EQUAL(f.get(), 42);
+
+}
+
+
+BOOST_AUTO_TEST_CASE( executor_pool_thread_test)
+{
+    hadoken::thread_pool_executor exec_thread;
+
+    std::plus<int> add;
+
+    std::packaged_task<int (int, int)> task(add);
+
+    auto f = task.get_future();
+
+    exec_thread.execute([&](){
+        task(40, 2);
+    });
+
+    BOOST_CHECK_EQUAL(f.get(), 42);
 
 }
