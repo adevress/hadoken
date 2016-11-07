@@ -35,7 +35,7 @@ namespace hadoken{
 
 namespace ublas{
 
-
+using namespace boost::numeric::ublas;
 
 ///
 /// Execute a predicate on every element of the matrix

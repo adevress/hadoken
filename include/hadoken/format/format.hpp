@@ -23,7 +23,7 @@ inline void scat(std::ostream & ostream){
 /// Proviate an alternative syntax to iostream for convenience
 ///
 ///  e.g
-///  format::scat(std::cout, "hello world", "I am ", 2500, "years old today");
+///  format::scat(std::cout, "hello world ", "I am ", 2500, " years old today");
 ///
 ///  support any type handled by ostream
 ///

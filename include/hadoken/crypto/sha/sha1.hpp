@@ -142,7 +142,8 @@ namespace hadoken
             digest32_t d32 =get_digest();
 
             // big endian to little endiant
-            std::transform(d32.begin(), d32.end(), d32.begin(), ntohl);
+            typedef boost::uint32_t (*endian_ntoh) (boost::uint32_t);
+            std::transform(d32.begin(), d32.end(), d32.begin(), static_cast< endian_ntoh >(hadoken::ntoh));
             ::memcpy(&digest[0], &(d32[0]), digest.size());
 
             return digest;
