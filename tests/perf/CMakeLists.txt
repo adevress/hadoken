@@ -2,6 +2,7 @@
 if(PERF_TESTS)
 
 find_package(Boost 1.41.0 REQUIRED system chrono)
+find_package(TBB)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${Boost_INCLUDE_DIRS} )
@@ -47,14 +48,23 @@ add_executable(lock_perf ${lock_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1
 target_link_libraries(lock_perf ${CMAKE_THREAD_LIBS_INIT}  ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
 
 
-
 ## executors perf test
 LIST(APPEND executor_perf_src "executor_perf.cpp")
 
-add_definitions( -std=c++11 )
-
 add_executable(executor_perf ${executor_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
 target_link_libraries(executor_perf ${CMAKE_THREAD_LIBS_INIT}  ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
+
+## parallel perf test
+LIST(APPEND parallel_perf_src "parallel_perf.cpp")
+
+add_executable(parallel_perf ${parallel_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(parallel_perf ${CMAKE_THREAD_LIBS_INIT}  ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
+
+if(TBB_FOUND)
+add_executable(parallel_perf_tbb ${parallel_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(parallel_perf_tbb ${CMAKE_THREAD_LIBS_INIT} ${TBB_LIBRARIES} ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
+target_compile_definitions(parallel_perf_tbb PRIVATE "-DHADOKEN_PARALLEL_USE_TBB=1")
+endif()
 
 endif()
 

@@ -26,30 +26,36 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef SIMPLE_THREAD_EXECUTOR_HPP
-#define SIMPLE_THREAD_EXECUTOR_HPP
+#ifndef HADOKEN_SYSTEM_EXECUTOR_HPP
+#define HADOKEN_SYSTEM_EXECUTOR_HPP
 
-#include <thread>
+#include <hadoken/executor/thread_pool_executor.hpp>
+#include <hadoken/utility/singleton.hpp>
+
 
 namespace hadoken{
+
 
 ///
 /// \brief Executor implementation for a simple thread
 ///
-class simple_thread_executor{
+class system_executor{
 public:
-    simple_thread_executor() {}
-    ~simple_thread_executor(){
+    system_executor() {
+        singleton<thread_pool_executor>::init();
+    }
+
+    ~system_executor(){
 
     }
 
-    void execute(std::function<void (void)> fun){
-       std::thread exec(std::move(fun));
-       exec.detach();
+    void execute(std::function<void (void)> task){
+        singleton<thread_pool_executor>::instance().execute(std::move(task));
     }
 
 
 private:
+    singleton<thread_pool_executor> _s;
 };
 
 

@@ -35,6 +35,7 @@
 #include <tbb/parallel_for_each.h>
 
 #include <hadoken/parallel/algorithm.hpp>
+#include <hadoken/containers/small_vector.hpp>
 
 
 

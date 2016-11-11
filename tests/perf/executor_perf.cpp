@@ -42,6 +42,7 @@
 
 #include <hadoken/executor/thread_pool_executor.hpp>
 #include <hadoken/executor/simple_thread_executor.hpp>
+#include <hadoken/executor/system_executor.hpp>
 
 
 using namespace boost::chrono;
@@ -88,12 +89,16 @@ std::size_t executor_test(std::size_t n_exec, const std::string & executor_name)
 
 int main(){
 
-    const std::size_t n_exec = 200000;
+    const std::size_t n_exec = 20000;
     std::size_t junk=0;
 
     hadoken::format::scat(std::cout, "test executors for ", n_exec, " iterations ");
 
     junk += executor_test<hadoken::thread_pool_executor>(n_exec, "pool_executor");
+
+    junk += executor_test<hadoken::simple_thread_executor>(n_exec, "simple_executor");
+
+    junk += executor_test<hadoken::system_executor>(n_exec, "system_executor");
 
 
     std::cout << "end junk " << junk << std::endl;

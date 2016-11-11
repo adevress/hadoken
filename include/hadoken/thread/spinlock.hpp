@@ -42,7 +42,7 @@ namespace thread{
 /// spinlock implementation
 ///
 /// follow the STL requirement for BasicLockable and
-/// can consequently be used by STL lock_guard
+/// can consequently be used by STL/boost lock_guard and unique_lock
 ///
 class spin_lock{
 public:

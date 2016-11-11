@@ -33,10 +33,12 @@
 #include <future>
 #include <thread>
 #include <stdexcept>
+#include <atomic>
 
 #include <hadoken/containers/small_vector.hpp>
 #include <hadoken/parallel/algorithm.hpp>
 #include <hadoken/utility/range.hpp>
+#include <hadoken/executor/system_executor.hpp>
 
 namespace hadoken{
 
@@ -61,29 +63,38 @@ std::size_t get_parallel_task(){
 /// for_each algorithm
 template<typename Iterator, typename Function>
 inline Function _simple_cxx11_parallel(Iterator begin_it, Iterator end_it, Function fun){
-    small_vector<std::future<void>, 32> waiters;
-
     const std::size_t n_task = get_parallel_task();
+
+    std::atomic<std::size_t> completed_task(0);
 
     range<Iterator> global_range(begin_it, end_it);
 
+    system_executor sexec;
 
-    // start task for range 1-N on other cores
+    std::mutex mut;
+    std::condition_variable cond;
+
+    // start task for tasks 1-N on other cores
     for(std::size_t i = 1; i < n_task; ++i){
-        waiters.emplace_back(std::async(std::launch::async, [i,&global_range, &n_task, &fun](){
+
+         sexec.execute([i, &cond, &completed_task, &mut, &global_range, &n_task, &fun](){
             auto my_range = hadoken::take_splice(global_range, i, n_task);
             std::for_each(my_range.begin(), my_range.end(), fun);
-        }));
+            cond.notify_one();
+            completed_task++;
+        });
     }
 
-    // execute the range 0 locally
+    // execute the task 0 locally
     auto my_range = hadoken::take_splice(global_range, 0, n_task);
     std::for_each(my_range.begin(), my_range.end(), fun);
 
     // wait for the folks
-    for(auto && w : waiters){
-        w.wait();
+    while(completed_task.load() < (n_task -1)){
+        std::unique_lock<std::mutex> _l(mut);
+        cond.wait_for(_l, std::chrono::microseconds(10));
     }
+
 
     return fun;
 }

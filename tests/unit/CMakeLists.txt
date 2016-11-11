@@ -100,6 +100,7 @@ if(TBB_FOUND)
 
 add_executable(test_parallel_tbb ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
 target_link_libraries(test_parallel_tbb  ${CMAKE_THREAD_LIBS_INIT} ${TBB_LIBRARIES} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+target_compile_definitions(test_parallel_tbb PRIVATE "-DHADOKEN_PARALLEL_USE_TBB=1")
 
 add_test(NAME test_parallel_unit_tbb COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_tbb)
 
