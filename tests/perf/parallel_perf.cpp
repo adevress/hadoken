@@ -199,6 +199,11 @@ int main(){
 
     junk += for_each_set<hadoken_parallel_for_each>(avg_size_vector, n_exec, "parallel_for_each");
 
+    junk += for_each_set<std_for_each>(avg_size_vector*10, n_exec/10, "serial_for_each");
+
+    junk += for_each_set<hadoken_parallel_for_each>(avg_size_vector*10, n_exec/10, "parallel_for_each");
+
+
     std::cout << "end junk " << junk << std::endl;
 
 }

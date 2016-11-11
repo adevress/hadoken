@@ -9,6 +9,7 @@ set(VERSION_MINOR "0")
 option(UNIT_TESTS "Enable or disable unit tests execution" TRUE)
 option(PERF_TESTS "Enable or disable performance tests execution" FALSE)
 option(DISABLE_INSTALL "Disable the installation for this component" TRUE)
+option(TEST_WITH_TBB "Use Intel TBB to test parallel algorithms" FALSE)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
       ${PROJECT_SOURCE_DIR}/CMake/portability
@@ -25,6 +26,10 @@ include(DetectCXX11Support)
 
 find_package(Threads)
 
+if(TEST_WITH_TBB)
+find_package(TBB)
+include_directories(${TBB_INCLUDE_DIR})
+endif()
 
 file(GLOB HADOKEN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*)
 file(GLOB HADOKEN_HEADERS_1 ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*/*)

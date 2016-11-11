@@ -2,7 +2,6 @@
 if(UNIT_TESTS)
 
 find_package(Boost 1.41.0 REQUIRED system unit_test_framework)
-find_package(TBB)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(SYSTEM ${Boost_INCLUDE_DIRS} )
