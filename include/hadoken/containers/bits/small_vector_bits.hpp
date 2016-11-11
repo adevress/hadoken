@@ -134,12 +134,19 @@ typename small_vector<T,N>::reference small_vector<T,N>::front(){
 }
 
 
+
 template<typename T, std::size_t N>
 typename small_vector<T,N>::const_reference small_vector<T,N>::front() const noexcept{
    assert((_end - _begin) >= 1);
    return *_begin;
 }
 
+
+template<typename T, std::size_t N>
+typename small_vector<T,N>::reference small_vector<T,N>::back(){
+   assert((_end - _begin) >= 1);
+   return *(_begin + std::min<std::size_t>(size(), 1) -1);
+}
 
 template<typename T, std::size_t N>
 typename small_vector<T,N>::pointer

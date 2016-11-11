@@ -95,6 +95,7 @@ public:
         return const_iterator(_end);
     }
 
+
     ///
     /// \brief return const_iterator to first value of the small_vector
     ///
@@ -133,6 +134,9 @@ public:
     /// \return reference to the first element of the vector
     ///
     const_reference front() const noexcept;
+
+
+    reference & back();
 
     ///
     /// \brief pointer to first element
