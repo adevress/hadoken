@@ -26,52 +26,34 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef _HADOKEN_SPINLOCK_HPP_
-#define _HADOKEN_SPINLOCK_HPP_
+#ifndef SIMPLE_THREAD_EXECUTOR_HPP
+#define SIMPLE_THREAD_EXECUTOR_HPP
 
-#include <atomic>
 #include <thread>
 
-namespace hadoken {
-
-namespace thread{
+namespace hadoken{
 
 ///
-/// \brief The spin_lock class
+/// \brief Executor implementation for a simple thread
 ///
-/// spinlock implementation
-///
-/// follow the STL requirement for BasicLockable and
-/// can consequently be used by STL/boost lock_guard and unique_lock
-///
-class spin_lock{
+class simple_thread_executor{
 public:
-    spin_lock() : _lock(false) {}
+    simple_thread_executor() {}
+    ~simple_thread_executor(){
 
-    void lock() noexcept {
-        bool expected = false;
-        while(_lock.compare_exchange_weak(expected, true) == false){
-#if  ((defined _GLIBCXX_THREAD) && !(defined _GLIBCXX_USE_SCHED_YIELD))
-
-#else
-            std::this_thread::yield();
-#endif 
-            expected = false;
-        }
     }
 
-    void unlock() noexcept{
-        _lock.store(false);
+    void execute(std::function<void (void)> fun){
+       std::thread exec(std::move(fun));
+       exec.detach();
     }
+
 
 private:
-    std::atomic<bool> _lock;
 };
 
 
-} // thread
+}
 
 
-} //hadoken
-
-#endif // SPINLOCK_HPP
+#endif // SIMPLE_THREAD_EXECUTOR_HPP

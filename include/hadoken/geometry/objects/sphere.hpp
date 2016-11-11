@@ -40,21 +40,16 @@ namespace cartesian {
 
 
 struct sphere_object_tag {};
+struct circle_object_tag {};
 
-///
-/// \class sphere
-///
-///  sphere object in a 3D cartesian space
-///
 template<typename Point, typename CoordType>
-class sphere{
+class sphere_traits{
 public:
-    sphere_object_tag object_type;
 
     typedef Point point_type;
     typedef CoordType coordinate_type;
 
-    inline sphere(const point_type & center, coordinate_type radius): _center(center), _radius(radius) {}
+    inline sphere_traits(const point_type & center, coordinate_type radius): _center(center), _radius(radius) {}
 
     inline coordinate_type get_radius() const{
         return _radius;
@@ -64,9 +59,49 @@ public:
         return _center;
     }
 
-private:
+protected:
     point_type _center;
     coordinate_type _radius;
+};
+
+
+///
+/// \class sphere_base
+///
+///  sphere object in a 3D cartesian space
+///
+template<typename Point, typename CoordType>
+class sphere_base: public sphere_traits<Point, CoordType>{
+public:
+    sphere_object_tag object_type;
+
+    sphere_base(const Point & center, CoordType radius): sphere_traits<Point, CoordType>(center, radius) {}
+
+private:
+};
+
+
+///
+/// \class circle_base
+///
+///  oriented circle object in a 3D cartesian space
+///
+template<typename Point, typename Vector, typename CoordType>
+class circle_base: public sphere_traits<Point, CoordType>{
+public:
+    circle_object_tag object_type;
+    typedef Vector vector_type;
+
+    inline circle_base(const Point & center, CoordType radius, const Vector & axis) :
+        sphere_traits<Point, CoordType>(center, radius),
+        _axis(axis) {}
+
+    inline vector_type get_axis() const{
+        return _axis;
+    }
+
+private:
+    vector_type _axis;
 };
 
 

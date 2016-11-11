@@ -63,10 +63,10 @@ class parallel_vector_execution_policy{};
 constexpr sequential_execution_policy seq{};
 
 /// constexpr for parallel execution
-constexpr sequential_execution_policy par{};
+constexpr parallel_execution_policy par{};
 
 /// constexpr for parallel vector execution
-constexpr sequential_execution_policy par_vec{};
+constexpr parallel_vector_execution_policy par_vec{};
 
 
 

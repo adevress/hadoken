@@ -26,52 +26,44 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef _HADOKEN_SPINLOCK_HPP_
-#define _HADOKEN_SPINLOCK_HPP_
+#ifndef HADOKEN_SINGLETON_HPP
+#define HADOKEN_SINGLETON_HPP
 
-#include <atomic>
-#include <thread>
 
-namespace hadoken {
-
-namespace thread{
+namespace hadoken{
 
 ///
-/// \brief The spin_lock class
+/// @class singleton
 ///
-/// spinlock implementation
+///  follows the Meyer's singleton pattern
 ///
-/// follow the STL requirement for BasicLockable and
-/// can consequently be used by STL/boost lock_guard and unique_lock
+///  thread-safety: C++11 guarantee atomicity of static initialization
 ///
-class spin_lock{
+template<typename Object>
+class singleton{
 public:
-    spin_lock() : _lock(false) {}
+    singleton(){}
 
-    void lock() noexcept {
-        bool expected = false;
-        while(_lock.compare_exchange_weak(expected, true) == false){
-#if  ((defined _GLIBCXX_THREAD) && !(defined _GLIBCXX_USE_SCHED_YIELD))
+    ~singleton(){}
 
-#else
-            std::this_thread::yield();
-#endif 
-            expected = false;
-        }
+
+    static Object & instance(){
+        static Object obj;
+        return obj;
     }
 
-    void unlock() noexcept{
-        _lock.store(false);
-    }
 
+    static void init(){
+        (void) instance();
+    }
 private:
-    std::atomic<bool> _lock;
+    singleton(const singleton& ) = delete;
+    singleton& operator=(const singleton &) = delete;
+
 };
 
 
-} // thread
 
+}
 
-} //hadoken
-
-#endif // SPINLOCK_HPP
+#endif // SINGLETON_HPP

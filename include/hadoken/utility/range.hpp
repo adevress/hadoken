@@ -51,6 +51,8 @@ template <typename Iterator, typename std::enable_if<std::is_same<
                                                          std::random_access_iterator_tag>::value >::type>
 inline void iterator_check_range(Iterator first_elem, Iterator end_elem){
     assert(first_elem < end_elem || first_elem == end_elem);
+    (void) first_elem;
+    (void) end_elem;
 }
 
 

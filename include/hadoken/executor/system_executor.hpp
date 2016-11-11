@@ -26,52 +26,40 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef _HADOKEN_SPINLOCK_HPP_
-#define _HADOKEN_SPINLOCK_HPP_
+#ifndef HADOKEN_SYSTEM_EXECUTOR_HPP
+#define HADOKEN_SYSTEM_EXECUTOR_HPP
 
-#include <atomic>
-#include <thread>
+#include <hadoken/executor/thread_pool_executor.hpp>
+#include <hadoken/utility/singleton.hpp>
 
-namespace hadoken {
 
-namespace thread{
+namespace hadoken{
+
 
 ///
-/// \brief The spin_lock class
+/// \brief Executor implementation for a simple thread
 ///
-/// spinlock implementation
-///
-/// follow the STL requirement for BasicLockable and
-/// can consequently be used by STL/boost lock_guard and unique_lock
-///
-class spin_lock{
+class system_executor{
 public:
-    spin_lock() : _lock(false) {}
-
-    void lock() noexcept {
-        bool expected = false;
-        while(_lock.compare_exchange_weak(expected, true) == false){
-#if  ((defined _GLIBCXX_THREAD) && !(defined _GLIBCXX_USE_SCHED_YIELD))
-
-#else
-            std::this_thread::yield();
-#endif 
-            expected = false;
-        }
+    system_executor() {
+        singleton<thread_pool_executor>::init();
     }
 
-    void unlock() noexcept{
-        _lock.store(false);
+    ~system_executor(){
+
     }
+
+    void execute(std::function<void (void)> task){
+        singleton<thread_pool_executor>::instance().execute(std::move(task));
+    }
+
 
 private:
-    std::atomic<bool> _lock;
+    singleton<thread_pool_executor> _s;
 };
 
 
-} // thread
+}
 
 
-} //hadoken
-
-#endif // SPINLOCK_HPP
+#endif // SIMPLE_THREAD_EXECUTOR_HPP
