@@ -49,7 +49,9 @@ typedef  system_clock cl;
 
 
 template<typename LockType>
-std::size_t lock_test(std::size_t iter, const std::string & lock_name){
+std::size_t lock_test(std::size_t n_thread, const std::string & lock_name){
+
+	const std::size_t iter = 200000;
 
     tp t1, t2;
 
@@ -57,18 +59,19 @@ std::size_t lock_test(std::size_t iter, const std::string & lock_name){
 
     const std::string msg = "hello world, ";
     std::vector<std::future<void> > res;
-    std::string shared_string;
+    double a = 0.0, inc = 1.0;
     LockType lock;
 
     using namespace hadoken::thread;
 
 
-    for(std::size_t i =0; i < 64; ++i){
+    for(std::size_t i =0; i < n_thread; ++i){
         res.emplace_back(
             std::async(std::launch::async, [&] {
             for(std::size_t j =0; j < iter; ++j){
                 std::lock_guard<LockType> guard(lock);
-                shared_string.append(msg);
+                a += inc;
+				inc += 1.0;
             }
         }));
     }
@@ -81,26 +84,35 @@ std::size_t lock_test(std::size_t iter, const std::string & lock_name){
 
     std::cout << lock_name << ": " << boost::chrono::duration_cast<milliseconds>(t2 -t1) << std::endl;
 
-    return shared_string.size();
+    return std::size_t(a);
 }
 
 
 
 int main(){
 
-    const std::size_t n_exec = 20000;
+	const std::size_t ncore = std::thread::hardware_concurrency();
     std::size_t junk=0;
 
-    hadoken::format::scat(std::cout, "test lock for ", n_exec, " iterations ");
+    hadoken::format::scat(std::cout, "test lock with ", ncore, " cores");
 
-    junk += lock_test<std::mutex>(n_exec, "std::mutex");
+    junk += lock_test<std::mutex>(1, "std::mutex_single");
 
-    junk += lock_test<hadoken::thread::spin_lock>(n_exec, "hadoken::thread::spinlock");
+    junk += lock_test<hadoken::thread::spin_lock>(1, "hadoken::thread::spinlock_single");
 
-    junk += lock_test<std::mutex>(n_exec, "std::mutex_hot");
+    junk += lock_test<std::mutex>(ncore/2, "std::mutex_thread=core/2");
 
-    junk += lock_test<hadoken::thread::spin_lock>(n_exec, "hadoken::thread::spinlock_hot");
+    junk += lock_test<hadoken::thread::spin_lock>(ncore/2, "hadoken::thread::spinlock_thread=core/2");
 
-    std::cout << "end junk " << junk << std::endl;
+
+    junk += lock_test<std::mutex>(ncore, "std::mutex_thread=core");
+
+    junk += lock_test<hadoken::thread::spin_lock>(ncore, "hadoken::thread::spinlock_thread=core");
+
+    junk += lock_test<std::mutex>(2*ncore, "std::mutex_thread=2*core");
+
+    junk += lock_test<hadoken::thread::spin_lock>(2*ncore, "hadoken::thread::spinlock_thread=2*core");
+
+   std::cout << "end junk " << junk << std::endl;
 
 }

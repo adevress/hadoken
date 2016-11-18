@@ -27,8 +27,13 @@ include(DetectCXX11Support)
 find_package(Threads)
 
 if(TEST_WITH_TBB)
-find_package(TBB)
-include_directories(${TBB_INCLUDE_DIR})
+	find_package(TBB)
+	include_directories(${TBB_INCLUDE_DIR})
+endif()
+
+if(BLUEGENE)
+	# scheld_yield is to avoid on BGQ
+	add_definitions(-DHADOKEN_SPIN_NO_YIELD )
 endif()
 
 file(GLOB HADOKEN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*)

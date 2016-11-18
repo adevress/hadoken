@@ -49,15 +49,19 @@ public:
     spin_lock() : _lock(false) {}
 
     void lock() noexcept {
-        bool expected = false;
-        while(_lock.compare_exchange_weak(expected, true) == false){
-#if  ((defined _GLIBCXX_THREAD) && !(defined _GLIBCXX_USE_SCHED_YIELD))
-
-#else
-            std::this_thread::yield();
+			while(1){
+	       		bool expected = false;
+				if(_lock.compare_exchange_strong(expected, true)){
+					return;
+				}
+				
+				while(_lock.load() == true){
+#ifndef HADOKEN_SPIN_NO_YIELD
+					std::this_thread::yield();
 #endif 
-            expected = false;
-        }
+				}
+		     
+	       }
     }
 
     void unlock() noexcept{

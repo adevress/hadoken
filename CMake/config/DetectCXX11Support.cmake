@@ -16,24 +16,7 @@ include(CheckCXXSourceCompiles)
 if(NOT DEFINED CMAKE_CXX_SUPPORT_CXX11)
 
 
-set(_CXX_SUPPORT_TEST_SRC "\
-#include <iostream>\n\
-#include <vector>\n\
-#include <algorithm>\n\
-\
-int main(){\
-    std::vector<int> vec = { 1, 2 };\
-    vec.emplace_back(42);\
-\
-    for(auto & i : vec){\
-        i += 2;\
-    }\
-\
-    std::for_each(vec.begin(), vec.end(), [](int i) {\
-        std::cout << i << std::endl;\
-    });\
-}\
-")
+FILE(READ "${CMAKE_CURRENT_LIST_DIR}/__cpp11_test_prog1.testsrc" _CXX_SUPPORT_TEST_SRC)
 
 set(CMAKE_REQUIRED_FLAGS_OLD ${CMAKE_REQUIRED_FLAGS})
 set(CMAKE_REQUIRED_FLAGS "-std=c++11")
