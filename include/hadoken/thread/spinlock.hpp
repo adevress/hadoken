@@ -46,9 +46,9 @@ namespace thread{
 ///
 class spin_lock{
 public:
-    spin_lock() : _lock(false) {}
+    inline spin_lock() : _lock(false) {}
 
-    void lock() noexcept {
+    inline void lock() noexcept {
 			while(1){
 	       		bool expected = false;
 				if(_lock.compare_exchange_strong(expected, true)){
@@ -64,11 +64,14 @@ public:
 	       }
     }
 
-    void unlock() noexcept{
+    inline void unlock() noexcept{
         _lock.store(false);
     }
 
 private:
+    spin_lock(const spin_lock &) = delete;
+    spin_lock & operator=(const spin_lock&) = delete;
+
     std::atomic<bool> _lock;
 };
 
