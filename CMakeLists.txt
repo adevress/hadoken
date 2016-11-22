@@ -25,6 +25,7 @@ include(DetectCXX11Support)
 
 
 find_package(Threads)
+find_package(OpenMP)
 
 if(TEST_WITH_TBB)
 	find_package(TBB)

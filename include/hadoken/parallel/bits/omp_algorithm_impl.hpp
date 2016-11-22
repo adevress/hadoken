@@ -26,21 +26,19 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef _HADOKEN_CXX11_THREAD_ALGORITHM_BITS_HPP_
-#define _HADOKEN_CXX11_THREAD_ALGORITHM_BITS_HPP_
+#ifndef _HADOKEN_OMP_ALGORITHM_BITS_HPP_
+#define _HADOKEN_OMP_ALGORITHM_BITS_HPP_
 
 #include <type_traits>
-#include <future>
-#include <thread>
 #include <stdexcept>
-#include <atomic>
 
-#include <hadoken/containers/small_vector.hpp>
+#include <omp.h>
+
 #include <hadoken/parallel/algorithm.hpp>
-#include <hadoken/utility/range.hpp>
-#include <hadoken/executor/system_executor.hpp>
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
+
+
 
 namespace hadoken{
 
@@ -58,45 +56,18 @@ namespace detail{
 
 using namespace hadoken::containers;
 
-std::size_t get_parallel_task(){
-    return std::thread::hardware_concurrency();
-}
 
 /// for_each algorithm
 template<typename Iterator, typename Function>
-inline Function _simple_cxx11_parallel(Iterator begin_it, Iterator end_it, Function fun){
-    const std::size_t n_task = get_parallel_task();
+inline Function _tbb_parallel_for_each(Iterator begin_it, Iterator end_it, Function fun){
 
-    std::atomic<std::size_t> completed_task(0);
-
-    range<Iterator> global_range(begin_it, end_it);
-
-    system_executor sexec;
-
-    std::mutex mut;
-    std::condition_variable cond;
-
-    // start task for tasks 1-N on other cores
-    for(std::size_t i = 1; i < n_task; ++i){
-
-         sexec.execute([i, &cond, &completed_task, &mut, &global_range, &n_task, &fun](){
-            auto my_range = hadoken::take_splice(global_range, i, n_task);
-            std::for_each(my_range.begin(), my_range.end(), fun);
-            cond.notify_one();
-            completed_task++;
-        });
+    #pragma omp parallel
+    {
+        #pragma omp for
+        for(Iterator it = begin_it; it != end_it; ++it){
+            fun(*it);
+        }
     }
-
-    // execute the task 0 locally
-    auto my_range = hadoken::take_splice(global_range, 0, n_task);
-    std::for_each(my_range.begin(), my_range.end(), fun);
-
-    // wait for the folks
-    while(completed_task.load() < (n_task -1)){
-        std::unique_lock<std::mutex> _l(mut);
-        cond.wait_for(_l, std::chrono::microseconds(10));
-    }
-
 
     return fun;
 }
@@ -112,7 +83,7 @@ inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_i
     (void) policy;
     if(std::is_same<ExecPolicy, parallel_execution_policy>::value
             || std::is_same<ExecPolicy, parallel_vector_execution_policy>::value ){
-        return detail::_simple_cxx11_parallel(begin_it, end_it, fun);
+        return detail::_tbb_parallel_for_each(begin_it, end_it, fun);
     }
 
    return std::for_each(begin_it, end_it, fun);

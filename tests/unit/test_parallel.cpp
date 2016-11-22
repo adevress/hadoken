@@ -107,5 +107,40 @@ BOOST_AUTO_TEST_CASE( parallel_for_each_simple_test)
  
     for(auto i : values){
          BOOST_CHECK_CLOSE(i, 128*128, 0.01);
-    }}
+    }
 
+}
+
+
+
+
+
+BOOST_AUTO_TEST_CASE( parallel_fill_test)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 5000;
+
+    std::size_t val = 42;
+
+    std::vector<double> values(n), values_seq(n), values_par(n), values_par_n(n);
+
+    std::fill(values.begin(), values.end(), val);
+
+    parallel::fill(parallel::seq, values_seq.begin(), values_seq.end(), val);
+
+    parallel::fill(parallel::parallel_execution_policy(), values_par.begin(), values_par.end(), val);
+
+    parallel::fill_n(parallel::parallel_vector_execution_policy(), values_par_n.begin(), n, val);
+
+
+    for(auto & v : values){
+        BOOST_CHECK_EQUAL(v, val);
+    }
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), values_seq.begin(),values_seq.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), values_par.begin(),values_par.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), values_par_n.begin(),values_par_n.end());
+
+}

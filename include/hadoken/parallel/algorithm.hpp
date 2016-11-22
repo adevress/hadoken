@@ -32,17 +32,6 @@
 #include <algorithm>
 
 
-
-#ifdef HADOKEN_PARALLEL_USE_TBB
-
-#include <hadoken/parallel/bits/tbb_algorithm_impl.hpp>
-
-#else
-
-#include <hadoken/parallel/bits/cxx11_thread_algorithm_impl.hpp>
-
-#endif
-
 namespace hadoken{
 
 
@@ -70,10 +59,26 @@ constexpr parallel_vector_execution_policy par_vec{};
 
 
 
-/// for_each algorithm with execution specifier
+/// parallel for_each algorithm with execution specifier
 template<typename ExecPolicy, typename Iterator, typename Function>
 inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun);
 
+
+/// parallel fill algorithm
+template <typename ExecPolicy, class ForwardIterator, class T>
+void fill(ExecPolicy && policy, ForwardIterator first, ForwardIterator last, const T& val);
+
+/// parallel fill_n algorithm
+template <typename ExecPolicy, class ForwardIterator, class Size, class T>
+void fill_n(ExecPolicy && policy, ForwardIterator first, Size n, const T& val);
+
+/// parallel generate algorithm
+template< class ExecutionPolicy, class ForwardIt, class Generator >
+void generate( ExecutionPolicy&& policy, ForwardIt first, ForwardIt last, Generator g );
+
+/// parallel generate_n algorithm
+template< class ExecutionPolicy, class OutputIt, class Size, class Generator >
+OutputIt generate_n( ExecutionPolicy&& policy, OutputIt first, Size count, Generator g );
 
 } // parallel
 
@@ -81,6 +86,21 @@ inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_i
 
 } // hadoken
 
+
+#ifdef HADOKEN_PARALLEL_USE_TBB
+
+#include <hadoken/parallel/bits/tbb_algorithm_impl.hpp>
+
+#elif (defined HADOKEN_PARALLEL_USE_OMP)
+
+#include <hadoken/parallel/bits/omp_algorithm_impl.hpp>
+
+
+#else
+
+#include <hadoken/parallel/bits/cxx11_thread_algorithm_impl.hpp>
+
+#endif
 
 
 #endif

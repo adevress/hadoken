@@ -51,6 +51,15 @@ typedef  system_clock::time_point tp;
 typedef  system_clock cl;
 
 
+template<typename Value>
+Value dummy_operation(Value & v){
+    Value res = std::pow(v, 99);
+    res = std::sqrt(res);
+    res = std::pow(res, 11);
+    res = std::log(res);
+    return res;
+}
+
 template<typename ForEach>
 std::size_t for_each_vector(std::size_t s_vector, std::size_t n_exec, const std::string & executor_name){
 
@@ -67,11 +76,7 @@ std::size_t for_each_vector(std::size_t s_vector, std::size_t n_exec, const std:
     }
 
     auto fops = [](double & v){
-        double res = std::pow(v, 4);
-        res = std::pow(v, 4);
-        res = std::pow(v, 4);
-        res = std::sqrt(res);
-        v = res;
+        v = dummy_operation<double>(v);
     };
 
     std::size_t cumulated_time =0;
@@ -116,11 +121,8 @@ std::size_t for_each_set(std::size_t s_set, std::size_t n_exec, const std::strin
     }
 
     auto fops = [&res_values](const double v){
-        double res = std::pow(v, 4);
-        res = std::pow(v, 4);
-        res = std::pow(v, 4);
-        res = std::sqrt(res);
-        res_values[v] = res;
+        double v_copy = v;
+        res_values[v] = dummy_operation<double>(v_copy);
     };
 
     std::size_t cumulated_time =0;

@@ -65,6 +65,13 @@ target_link_libraries(parallel_perf_tbb ${CMAKE_THREAD_LIBS_INIT} ${TBB_LIBRARIE
 target_compile_definitions(parallel_perf_tbb PRIVATE "-DHADOKEN_PARALLEL_USE_TBB=1")
 endif()
 
+if(OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    add_executable(parallel_perf_omp ${parallel_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+    target_link_libraries(parallel_perf_omp ${CMAKE_THREAD_LIBS_INIT} ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
+endif()
+
 endif()
 
 

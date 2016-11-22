@@ -38,6 +38,9 @@
 #include <hadoken/containers/small_vector.hpp>
 
 
+#include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
+
+
 
 namespace hadoken{
 
