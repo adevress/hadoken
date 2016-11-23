@@ -191,6 +191,7 @@ int main(){
 
     junk += for_each_vector<hadoken_parallel_for_each>(avg_size_vector*10, n_exec/10, "parallel_for_each");
 
+#ifndef HADOKEN_PARALLEL_USE_OMP
     hadoken::format::scat(std::cout, "\n test algorithms for sets with ", n_exec, " iterations \n");
 
     junk += for_each_set<std_for_each>(small_size_vector, n_exec, "serial_for_each");
@@ -205,6 +206,7 @@ int main(){
 
     junk += for_each_set<hadoken_parallel_for_each>(avg_size_vector*10, n_exec/10, "parallel_for_each");
 
+#endif
 
     std::cout << "end junk " << junk << std::endl;
 

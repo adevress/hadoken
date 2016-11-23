@@ -10,6 +10,7 @@ option(UNIT_TESTS "Enable or disable unit tests execution" TRUE)
 option(PERF_TESTS "Enable or disable performance tests execution" FALSE)
 option(DISABLE_INSTALL "Disable the installation for this component" TRUE)
 option(TEST_WITH_TBB "Use Intel TBB to test parallel algorithms" FALSE)
+option(TEST_WITH_OMP "Use OpneMP to test parallel algorithms" FALSE)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
       ${PROJECT_SOURCE_DIR}/CMake/portability
@@ -25,7 +26,10 @@ include(DetectCXX11Support)
 
 
 find_package(Threads)
+
+if(TEST_WITH_OMP)
 find_package(OpenMP)
+endif()
 
 if(TEST_WITH_TBB)
 	find_package(TBB)

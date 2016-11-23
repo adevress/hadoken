@@ -54,7 +54,6 @@ class parallel_vector_execution_policy;
 
 namespace detail{
 
-using namespace hadoken::containers;
 
 
 /// for_each algorithm
@@ -63,8 +62,8 @@ inline Function _tbb_parallel_for_each(Iterator begin_it, Iterator end_it, Funct
 
     #pragma omp parallel
     {
-        #pragma omp for
-        for(Iterator it = begin_it; it != end_it; ++it){
+        #pragma omp for 
+        for(Iterator it = begin_it; it < end_it; ++it){
             fun(*it);
         }
     }
