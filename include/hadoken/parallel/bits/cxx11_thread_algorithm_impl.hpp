@@ -39,6 +39,8 @@
 #include <hadoken/parallel/algorithm.hpp>
 #include <hadoken/utility/range.hpp>
 #include <hadoken/executor/system_executor.hpp>
+#include <hadoken/thread/latch.hpp>
+
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
 
@@ -67,23 +69,19 @@ template<typename Iterator, typename Function>
 inline Function _simple_cxx11_parallel(Iterator begin_it, Iterator end_it, Function fun){
     const std::size_t n_task = get_parallel_task();
 
-    std::atomic<std::size_t> completed_task(0);
+    hadoken::thread::latch latch_task(n_task);
 
     range<Iterator> global_range(begin_it, end_it);
 
     system_executor sexec;
 
-    std::mutex mut;
-    std::condition_variable cond;
-
-    // start task for tasks 1-N on other cores
+    // start task for tasks 1-N on separated executors
     for(std::size_t i = 1; i < n_task; ++i){
 
-         sexec.execute([i, &cond, &completed_task, &mut, &global_range, &n_task, &fun](){
+         sexec.execute([i, &latch_task, &global_range, &n_task, &fun](){
             auto my_range = hadoken::take_splice(global_range, i, n_task);
             std::for_each(my_range.begin(), my_range.end(), fun);
-            cond.notify_one();
-            completed_task++;
+            latch_task.count_down(1);
         });
     }
 
@@ -92,11 +90,7 @@ inline Function _simple_cxx11_parallel(Iterator begin_it, Iterator end_it, Funct
     std::for_each(my_range.begin(), my_range.end(), fun);
 
     // wait for the folks
-    while(completed_task.load() < (n_task -1)){
-        std::unique_lock<std::mutex> _l(mut);
-        cond.wait_for(_l, std::chrono::microseconds(10));
-    }
-
+    latch_task.count_down_and_wait(1);
 
     return fun;
 }

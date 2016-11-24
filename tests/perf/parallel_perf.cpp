@@ -46,6 +46,7 @@
 
 
 using namespace boost::chrono;
+namespace fmt = hadoken::format;
 
 typedef  system_clock::time_point tp;
 typedef  system_clock cl;
@@ -96,7 +97,7 @@ std::size_t for_each_vector(std::size_t s_vector, std::size_t n_exec, const std:
 
     val += int(std::accumulate(values.begin(), values.end(), 0.0, std::plus<double>()));
 
-    std::cout << "> " << executor_name << " for a vector of " << s_vector << " : " << double(cumulated_time)/n_exec << std::endl;
+    std::cout << "" << executor_name << "; vector;  " << s_vector << "; " << double(cumulated_time)/n_exec << ";" << std::endl;
 
     return val;
 }
@@ -142,7 +143,7 @@ std::size_t for_each_set(std::size_t s_set, std::size_t n_exec, const std::strin
 
     val += int(std::accumulate(values.begin(), values.end(), 0.0, std::plus<double>()));
 
-    std::cout  << "> " << executor_name << " for a set of " << s_set << " : " << double(cumulated_time)/n_exec << std::endl;
+    std::cout << "" << executor_name << "; set;  " << s_set << "; " << double(cumulated_time)/n_exec << ";" << std::endl;
 
     return val;
 }
@@ -173,26 +174,40 @@ struct hadoken_parallel_for_each{
 
 
 int main(){
+    std::string parallel_mode = "";
+#ifdef HADOKEN_PARALLEL_USE_OMP
+    parallel_mode = "openmp";
+#elif (defined HADOKEN_PARALLEL_USE_TBB)
+    parallel_mode = "tbb";
+#else
+     parallel_mode = "pthread";
+#endif
+     const std::size_t ncore = std::thread::hardware_concurrency();
 
-    const std::size_t n_exec = 200, small_size_vector= 255, avg_size_vector=200000;
+
+    const std::size_t n_exec = 200, tiny_size_vector=10, small_size_vector= 255, avg_size_vector=200000;
     std::size_t junk=0;
 
-    hadoken::format::scat(std::cout, "\n test algorithms for vectors with ", n_exec, " iterations \n");
+    hadoken::format::scat(std::cout, "\n# test algorithms for vectors with ", n_exec, " iterations \n");
+    hadoken::format::scat(std::cout, "theading; cores; executor; container; size; time; \n");
 
-    junk += for_each_vector<std_for_each>(small_size_vector, n_exec, "serial_for_each");
 
-    junk += for_each_vector<hadoken_parallel_for_each>(small_size_vector, n_exec, "parallel_for_each");
+    std::size_t local_n_exec = n_exec;
+    for(std::size_t i =1; i < avg_size_vector * 100; i*=10){
+        junk += for_each_vector<std_for_each>(i, local_n_exec, fmt::scat(parallel_mode, "; ",ncore, "; ", "serial_for_each"));
 
-    junk += for_each_vector<std_for_each>(avg_size_vector, n_exec, "serial_for_each");
+        junk += for_each_vector<hadoken_parallel_for_each>(i, local_n_exec, fmt::scat(parallel_mode, "; ",ncore,"; ", "parallel_for_each"));
 
-    junk += for_each_vector<hadoken_parallel_for_each>(avg_size_vector, n_exec, "parallel_for_each");
+        if( i >= avg_size_vector){
+            local_n_exec /= 10;
+        }
+    }
 
-    junk += for_each_vector<std_for_each>(avg_size_vector*10, n_exec/10, "serial_for_each");
 
-    junk += for_each_vector<hadoken_parallel_for_each>(avg_size_vector*10, n_exec/10, "parallel_for_each");
+/*
 
 #ifndef HADOKEN_PARALLEL_USE_OMP
-    hadoken::format::scat(std::cout, "\n test algorithms for sets with ", n_exec, " iterations \n");
+    hadoken::format::scat(std::cout, "\n# test algorithms for sets with ", n_exec, " iterations \n");
 
     junk += for_each_set<std_for_each>(small_size_vector, n_exec, "serial_for_each");
 
@@ -207,7 +222,7 @@ int main(){
     junk += for_each_set<hadoken_parallel_for_each>(avg_size_vector*10, n_exec/10, "parallel_for_each");
 
 #endif
-
-    std::cout << "end junk " << junk << std::endl;
+*/
+    std::cout << "# end junk " << junk << std::endl;
 
 }

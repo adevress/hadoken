@@ -39,6 +39,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <hadoken/thread/spinlock.hpp>
+#include <hadoken/thread/latch.hpp>
 #include <hadoken/executor/simple_thread_executor.hpp>
 #include <hadoken/executor/thread_pool_executor.hpp>
 
@@ -122,5 +123,82 @@ BOOST_AUTO_TEST_CASE( executor_pool_thread_test)
     });
 
     BOOST_CHECK_EQUAL(f.get(), 42);
+
+}
+
+
+BOOST_AUTO_TEST_CASE( latch_test)
+{
+    {
+        hadoken::thread::latch l1(0);
+        BOOST_CHECK_EQUAL(l1.is_ready(), true);
+    }
+
+    {
+        hadoken::thread::latch l2(15);
+        BOOST_CHECK_EQUAL(l2.is_ready(), false);
+        l2.count_down(5);
+        BOOST_CHECK_EQUAL(l2.is_ready(), false);
+        l2.count_down(10);
+        BOOST_CHECK_EQUAL(l2.is_ready(), true);
+    }
+
+    {
+        hadoken::thread::latch l2(8);
+
+        BOOST_CHECK_EQUAL(l2.is_ready(), false);
+
+        std::vector<std::future<void>> res;
+        for(std::size_t i =0; i < 8; ++i){
+            res.emplace_back(std::async(std::launch::async, [&] {
+                l2.count_down();
+            }));
+        }
+
+        l2.wait();
+
+        BOOST_CHECK_EQUAL(l2.is_ready(), true);
+
+    }
+
+    {
+        hadoken::thread::latch l2(16);
+
+        BOOST_CHECK_EQUAL(l2.is_ready(), false);
+
+        std::vector<std::future<void>> res;
+        for(std::size_t i =0; i < 16; ++i){
+            res.emplace_back(std::async(std::launch::async, [&] {
+                BOOST_CHECK_EQUAL(l2.is_ready(), false);
+                l2.count_down_and_wait();
+            }));
+        }
+
+        for(auto & f : res){
+            f.wait();
+        }
+
+        BOOST_CHECK_EQUAL(l2.is_ready(), true);
+
+    }
+
+    {
+        hadoken::thread::latch l2(16);
+
+        BOOST_CHECK_EQUAL(l2.is_ready(), false);
+
+        std::vector<std::future<void>> res;
+        for(std::size_t i =0; i < 15; ++i){
+            res.emplace_back(std::async(std::launch::async, [&] {
+                l2.count_down();
+            }));
+        }
+
+        l2.count_down_and_wait();
+
+        BOOST_CHECK_EQUAL(l2.is_ready(), true);
+
+    }
+
 
 }
