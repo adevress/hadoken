@@ -34,6 +34,7 @@
 #include <assert.h>
 #include <condition_variable>
 
+
 namespace hadoken {
 
 namespace thread{
@@ -103,7 +104,12 @@ public:
                 std::unique_lock<std::mutex> _l(_latch_lock);
                 _cond.wait_for(_l, std::chrono::milliseconds(1));
             }else{
+#ifndef HADOKEN_SPIN_NO_YIELD
                 std::this_thread::yield();
+#else
+                // dummy implementation for platforms without sched_yield() support 
+                usleep(1);
+#endif
             }
         }
     }
