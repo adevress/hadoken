@@ -183,12 +183,12 @@ BOOST_AUTO_TEST_CASE( latch_test)
     }
 
     {
-        hadoken::thread::latch l2(16);
+        hadoken::thread::latch l2(64);
 
         BOOST_CHECK_EQUAL(l2.is_ready(), false);
 
         std::vector<std::future<void>> res;
-        for(std::size_t i =0; i < 15; ++i){
+        for(std::size_t i =0; i < 63; ++i){
             res.emplace_back(std::async(std::launch::async, [&] {
                 l2.count_down();
             }));

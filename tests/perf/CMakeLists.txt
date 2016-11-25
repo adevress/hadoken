@@ -57,7 +57,7 @@ target_link_libraries(executor_perf ${CMAKE_THREAD_LIBS_INIT}  ${Boost_CHRONO_LI
 LIST(APPEND parallel_perf_src "parallel_perf.cpp")
 
 add_executable(parallel_perf ${parallel_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
-target_link_libraries(parallel_perf ${CMAKE_THREAD_LIBS_INIT}  ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
+target_link_libraries(parallel_perf ${CMAKE_THREAD_LIBS_INIT}  ${Boost_CHRONO_LIBRARIES}  ${Boost_SYSTEM_LIBRARIES})
 
 if(TBB_FOUND)
 add_executable(parallel_perf_tbb ${parallel_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
