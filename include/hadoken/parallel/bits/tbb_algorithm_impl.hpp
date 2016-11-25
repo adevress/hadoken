@@ -33,6 +33,7 @@
 #include <stdexcept>
 
 #include <tbb/parallel_for_each.h>
+#include <tbb/task_scheduler_init.h>
 
 #include <hadoken/parallel/algorithm.hpp>
 #include <hadoken/containers/small_vector.hpp>
