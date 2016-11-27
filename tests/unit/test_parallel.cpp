@@ -34,6 +34,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <future>
+#include <algorithm>
 
 #include <chrono>
 
@@ -44,11 +45,13 @@
 #include <parallel/algorithm>
 
 
+using namespace hadoken;
+using cl = std::chrono::system_clock;
+
 BOOST_AUTO_TEST_CASE( parallel_for_each_simple_test)
 {
 
-    using namespace hadoken;
-    using cl = std::chrono::system_clock;
+
 
     std::vector<double> values;
     parallel::for_each(parallel::seq, values.begin(), values.end(), [](double & v){ v += 42; });
@@ -144,3 +147,128 @@ BOOST_AUTO_TEST_CASE( parallel_fill_test)
     BOOST_CHECK_EQUAL_COLLECTIONS(values.begin(), values.end(), values_par_n.begin(),values_par_n.end());
 
 }
+
+
+
+BOOST_AUTO_TEST_CASE( parallel_count_test)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 5000000;
+
+    std::size_t num_4, num_2, p_num_4, p_num_2;
+
+    std::vector<std::size_t> values(n, 0);
+
+    std::size_t counter = 0;
+    for(auto & v : values){
+        v = (counter++) % 5;
+    }
+
+    {
+        auto t1 = cl::now();
+
+        num_4 =  std::count(values.begin(), values.end(), 4);
+        num_2 = std::count_if(values.begin(), values.end(), [&](const std::size_t & v){
+            return v == 1;
+        });
+
+        auto t2 = cl::now();
+        std::cout << " std::count " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+
+    {
+        auto t1 = cl::now();
+
+        p_num_4 =  parallel::count(parallel::par, values.begin(), values.end(), 4);
+        p_num_2 = parallel::count_if(parallel::par, values.begin(), values.end(), [&](const std::size_t & v){
+            return v == 1;
+        });
+
+        auto t2 = cl::now();
+        std::cout << " parallel::count " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+    std::size_t s_num_4 =  parallel::count(parallel::seq, values.begin(), values.end(), 4);
+    std::size_t s_num_2 = parallel::count_if(parallel::seq, values.begin(), values.end(), [&](const std::size_t & v){
+        return v == 1;
+    });
+
+
+    BOOST_CHECK_EQUAL(num_4, p_num_4);
+    BOOST_CHECK_EQUAL(num_4, s_num_4);
+
+    BOOST_CHECK_EQUAL(num_2, p_num_2);
+    BOOST_CHECK_EQUAL(num_2, s_num_2);
+
+    std::cout << " n " << s_num_4 << std::endl;
+}
+
+
+BOOST_AUTO_TEST_CASE( parallel_transform_test)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 800000;
+
+    auto dummy_ops = [](std::size_t i , std::size_t j){
+        return (i * 100  + j ) / 7;
+    };
+
+    std::vector<std::size_t> v1(n), v2(n), res(n), res2(n), res3(n), res4(n);
+
+    std::size_t counter = 0;
+    for(std::size_t i=0; i < n; ++i){
+        v1[i] = counter++;
+        v2[i] = counter++;
+    }
+
+
+
+
+    {
+        auto t1 = cl::now();
+
+        hadoken::parallel::transform(hadoken::parallel::par, v1.begin(), v1.end(),
+                                     v2.begin(), res.begin(), dummy_ops);
+
+        auto t2 = cl::now();
+
+        std::cout << " transform parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+
+
+        hadoken::parallel::transform(hadoken::parallel::seq, v1.begin(), v1.end(),
+                                     res2.begin(), [](const std::size_t & v){
+            return v + 100;
+        });
+
+    }
+
+    {
+        auto t1 = cl::now();
+
+        std::transform(v1.begin(), v1.end(),
+                        v2.begin(), res3.begin(), dummy_ops);
+
+        auto t2 = cl::now();
+
+        std::cout << " transform sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+
+
+        std::transform(v1.begin(), v1.end(),
+                        res4.begin(), [](const std::size_t & v){
+            return v + 100;
+        });
+    }
+
+
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(res.begin(), res.end(), res3.begin(), res3.end());
+
+    BOOST_CHECK_EQUAL_COLLECTIONS(res2.begin(), res2.end(), res4.begin(), res4.end());
+
+}
+

@@ -89,7 +89,6 @@ add_test(NAME test_thread_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CM
 
 LIST(APPEND test_parallel_src "test_parallel.cpp")
 
-
 add_executable(test_parallel_base ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
 target_link_libraries(test_parallel_base ${CMAKE_THREAD_LIBS_INIT}  ${CMAKE_parallel_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 

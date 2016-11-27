@@ -32,6 +32,10 @@
 #include <algorithm>
 #include <hadoken/parallel/algorithm.hpp>
 
+
+#include "parallel_generic_utils.hpp"
+
+
 namespace hadoken{
 
 
@@ -40,20 +44,50 @@ namespace parallel{
 
 namespace detail{
 
-template<typename Iterator, typename Size>
-inline Iterator get_end_iterator(Iterator first, Size n){
-    std::advance(first, n);
-    return first;
+// count_internal
+template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
+typename std::iterator_traits<InputIterator>::difference_type
+ _internal_count_if( ExecutionPolicy&& policy, InputIterator first, InputIterator last,
+                      UnaryPredicate p ){
+    using result_type = typename std::iterator_traits<InputIterator>::difference_type;
+
+    if(is_parallel_policy(policy)){
+        std::atomic<result_type> res(0);
+
+        ::hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last, [&res, &p](InputIterator local_first,
+                                       InputIterator local_end){
+            result_type local_res = std::count_if(local_first, local_end, p);
+            res += local_res;
+        });
+        return res;
+    }else {
+        return std::count_if(first, last, p);
+    }
 }
 
+} // detail
+
+
+/// for_each algorithm
+template<typename ExecPolicy, typename Iterator, typename Function>
+inline void for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun){
+    if(detail::is_parallel_policy(policy)){
+        for_range(std::forward<ExecPolicy>(policy), begin_it, end_it, [&fun](Iterator sub_begin, Iterator sub_end){
+            std::for_each(sub_begin, sub_end, fun);
+        });
+        return;
+    }
+
+   std::for_each(begin_it, end_it, fun);
 }
+
 
 // reimplement fill using for_each
 template <typename ExecutionPolicy, class ForwardIterator, class T>
 void fill(ExecutionPolicy && policy, ForwardIterator first, ForwardIterator last, const T& val){
     using value_type = typename std::iterator_traits<ForwardIterator>::value_type;
 
-    hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&val](value_type& elem){
+    ::hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&val](value_type& elem){
         elem = val;
     });
 }
@@ -62,7 +96,8 @@ void fill(ExecutionPolicy && policy, ForwardIterator first, ForwardIterator last
 //  reimplement fill_n using fill
 template <typename ExecutionPolicy, class ForwardIterator, class Size, class T>
 void fill_n(ExecutionPolicy && policy, ForwardIterator first, Size n, const T& val){
-    hadoken::parallel::fill(std::forward<ExecutionPolicy>(policy), first, detail::get_end_iterator(first, n), val);
+    ::hadoken::parallel::fill(std::forward<ExecutionPolicy>(policy), first,
+                              ::hadoken::parallel::detail::get_end_iterator(first, n), val);
 }
 
 
@@ -71,7 +106,7 @@ template< class ExecutionPolicy, class ForwardIterator, class Generator >
 void generate( ExecutionPolicy&& policy, ForwardIterator first, ForwardIterator last, Generator g ){
     using value_type = typename std::iterator_traits<ForwardIterator>::value_type;
 
-    hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&g](value_type& elem){
+    ::hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&g](value_type& elem){
         elem = g();
     });
 }
@@ -79,8 +114,38 @@ void generate( ExecutionPolicy&& policy, ForwardIterator first, ForwardIterator 
 // parallel generate_n algorithm
 template< class ExecutionPolicy, class OutputIt, class Size, class Generator >
 OutputIt generate_n( ExecutionPolicy&& policy, OutputIt first, Size count, Generator g ){
-    hadoken::parallel::generate(std::forward<ExecutionPolicy>(policy), first, detail::get_end_iterator(first, count), std::forward<Generator>(g));
+    ::hadoken::parallel::generate(std::forward<ExecutionPolicy>(policy), first,
+                                  ::hadoken::parallel::detail::get_end_iterator(first, count), std::forward<Generator>(g));
 }
+
+
+// parallel count_if algorithm
+template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
+typename std::iterator_traits<InputIterator>::difference_type
+    count_if( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p ){
+
+    return detail::_internal_count_if<ExecutionPolicy,
+            InputIterator,
+            UnaryPredicate>(std::move(policy),
+                                first, last,
+                                p);
+}
+
+// parallel count algorithm
+template< class ExecutionPolicy, class InputIterator, class T >
+typename std::iterator_traits<InputIterator>::difference_type
+    count( ExecutionPolicy&& policy, InputIterator first, InputIterator last, const T &value ){
+    using value_type = typename std::iterator_traits<InputIterator>::value_type;
+
+    return detail::_internal_count_if<ExecutionPolicy,
+            InputIterator>(std::move(policy),
+                                first, last,
+                            [&](const value_type & v){
+        return (v == static_cast<value_type>(value));
+    });
+
+}
+
 
 } //parallel
 

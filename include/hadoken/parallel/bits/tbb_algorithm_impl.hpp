@@ -39,6 +39,7 @@
 
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
+#include <hadoken/parallel/bits/parallel_transform_generic.hpp>
 
 
 
@@ -61,10 +62,18 @@ using namespace hadoken::containers;
 
 /// for_each algorithm
 template<typename Iterator, typename Function>
-inline Function _tbb_parallel_for_each(Iterator begin_it, Iterator end_it, Function fun){
+inline void _tbb_parallel_for_range(Iterator begin_it, Iterator end_it, Function fun){
     using namespace tbb;
-    parallel_for_each(begin_it, end_it, fun);
-    return fun;
+    const std::size_t n_elem = std::distance(begin_it, end_it);
+
+    tbb::parallel_for(tbb::blocked_range<std::size_t>(0, n_elem), [&](tbb::blocked_range<std::size_t> & my_range){
+        Iterator local_begin_it = begin_it;
+        std::advance(local_begin_it, my_range.begin());
+        Iterator local_end_it = local_begin_it;
+        std::advance(local_end_it, my_range.size());
+
+        fun(local_begin_it, local_end_it);
+    });
 }
 
 
@@ -73,15 +82,14 @@ inline Function _tbb_parallel_for_each(Iterator begin_it, Iterator end_it, Funct
 
 
 /// for_each algorithm
-template<typename ExecPolicy, typename Iterator, typename Function>
-inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun){
+template<typename ExecPolicy, typename Iterator, typename RangeFunction>
+inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, RangeFunction fun){
     (void) policy;
-    if(std::is_same<ExecPolicy, parallel_execution_policy>::value
-            || std::is_same<ExecPolicy, parallel_vector_execution_policy>::value ){
-        return detail::_tbb_parallel_for_each(begin_it, end_it, fun);
+    if( detail::is_parallel_policy(policy)){
+        detail::_tbb_parallel_for_range(begin_it, end_it, fun);
+        return;
     }
-
-   return std::for_each(begin_it, end_it, fun);
+   fun(begin_it, end_it);
 }
 
 

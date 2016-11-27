@@ -43,6 +43,7 @@
 
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
+#include <hadoken/parallel/bits/parallel_transform_generic.hpp>
 
 namespace hadoken{
 
@@ -58,18 +59,18 @@ class parallel_vector_execution_policy;
 
 namespace detail{
 
-using namespace hadoken::containers;
 
 std::size_t get_parallel_task(){
     return std::thread::hardware_concurrency();
 }
 
-/// for_each algorithm
-template<typename Iterator, typename Function>
-inline Function _simple_cxx11_parallel(Iterator begin_it, Iterator end_it, Function fun){
+
+/// for_range algorithm
+template<typename Iterator, typename RangeFunction>
+inline void _simple_cxx11_for_range(Iterator begin_it, Iterator end_it, RangeFunction fun){
     const std::size_t n_task = get_parallel_task();
 
-    hadoken::thread::latch latch_task(n_task);
+    thread::latch latch_task(n_task);
 
     range<Iterator> global_range(begin_it, end_it);
 
@@ -79,38 +80,37 @@ inline Function _simple_cxx11_parallel(Iterator begin_it, Iterator end_it, Funct
     for(std::size_t i = 1; i < n_task; ++i){
 
          sexec.execute([i, &latch_task, &global_range, &n_task, &fun](){
-            auto my_range = hadoken::take_splice(global_range, i, n_task);
-            std::for_each(my_range.begin(), my_range.end(), fun);
+            auto my_range = take_splice(global_range, i, n_task);
+            fun(my_range.begin(), my_range.end());
             latch_task.count_down(1);
         });
     }
 
     // execute the task 0 locally
-    auto my_range = hadoken::take_splice(global_range, 0, n_task);
-    std::for_each(my_range.begin(), my_range.end(), fun);
+    auto my_range = take_splice(global_range, 0, n_task);
+    fun(my_range.begin(), my_range.end());
 
     // wait for the folks
     latch_task.count_down_and_wait(1);
-
-    return fun;
 }
-
 
 
 } // detail
 
-
-/// for_each algorithm
-template<typename ExecPolicy, typename Iterator, typename Function>
-inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun){
-    (void) policy;
-    if(std::is_same<ExecPolicy, parallel_execution_policy>::value
-            || std::is_same<ExecPolicy, parallel_vector_execution_policy>::value ){
-        return detail::_simple_cxx11_parallel(begin_it, end_it, fun);
+/// for_range_ algorithm
+/// for_range is an extension to for_each where the function
+/// execute on a subrange, instead of a single element
+template<typename ExecPolicy, typename Iterator, typename RangeFunction>
+inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, RangeFunction fun){
+    if(detail::is_parallel_policy(policy)){
+        detail::_simple_cxx11_for_range(begin_it, end_it, fun);
+        return;
     }
 
-   return std::for_each(begin_it, end_it, fun);
+   fun(begin_it, end_it);
 }
+
+
 
 
 } // concurrent

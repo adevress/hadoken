@@ -61,8 +61,7 @@ constexpr parallel_vector_execution_policy par_vec{};
 
 /// parallel for_each algorithm with execution specifier
 template<typename ExecPolicy, typename Iterator, typename Function>
-inline Function for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun);
-
+inline void for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun);
 
 /// parallel fill algorithm
 template <typename ExecPolicy, class ForwardIterator, class T>
@@ -79,6 +78,15 @@ void generate( ExecutionPolicy&& policy, ForwardIt first, ForwardIt last, Genera
 /// parallel generate_n algorithm
 template< class ExecutionPolicy, class OutputIt, class Size, class Generator >
 OutputIt generate_n( ExecutionPolicy&& policy, OutputIt first, Size count, Generator g );
+
+
+
+/// Extension: for_range_ algorithm
+///
+/// for_range is an extension to for_each where the function
+/// execute on a subrange, instead of a single element
+template<typename ExecPolicy, typename Iterator, typename RangeFunction>
+inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, RangeFunction fun);
 
 } // parallel
 
