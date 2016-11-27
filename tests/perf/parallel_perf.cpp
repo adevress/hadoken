@@ -54,10 +54,13 @@ typedef  system_clock cl;
 
 template<typename Value>
 Value dummy_operation(Value & v){
-    Value res = std::pow(v, 99);
-    res = std::sqrt(res);
-    res = std::pow(res, 11);
-    res = std::log(res);
+    Value res = v;
+	for(std::size_t n = 0; n < 10; ++n){
+			res = std::pow(res, 99);
+			res = std::sqrt(res);
+			res = std::pow(res, 11);
+			res = std::log(res);
+	}
     return res;
 }
 
@@ -180,12 +183,12 @@ int main(){
 #elif (defined HADOKEN_PARALLEL_USE_TBB)
     parallel_mode = "tbb";
 #else
-     parallel_mode = "pthread";
+    parallel_mode = "pthread";
 #endif
      const std::size_t ncore = std::thread::hardware_concurrency();
 
 
-    const std::size_t n_exec = 200, tiny_size_vector=10, small_size_vector= 255, avg_size_vector=200000;
+    const std::size_t n_exec = 100, max_size_vector=200000000, limit_size_iter = 20000;
     std::size_t junk=0;
 
     hadoken::format::scat(std::cout, "\n# test algorithms for vectors with ", n_exec, " iterations \n");
@@ -193,13 +196,14 @@ int main(){
 
 
     std::size_t local_n_exec = n_exec;
-    for(std::size_t i =1; i < avg_size_vector * 100; i*=10){
+    for(std::size_t i =1; i < max_size_vector; i*=10){
         junk += for_each_vector<std_for_each>(i, local_n_exec, fmt::scat(parallel_mode, "; ",ncore, "; ", "serial_for_each"));
 
         junk += for_each_vector<hadoken_parallel_for_each>(i, local_n_exec, fmt::scat(parallel_mode, "; ",ncore,"; ", "parallel_for_each"));
 
-        if( i >= avg_size_vector){
+        if( i >= limit_size_iter){
             local_n_exec /= 10;
+            local_n_exec = std::max<decltype(local_n_exec)>(local_n_exec, 1);
         }
     }
 
