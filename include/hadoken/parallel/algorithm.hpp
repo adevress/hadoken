@@ -81,6 +81,32 @@ OutputIt generate_n( ExecutionPolicy&& policy, OutputIt first, Size count, Gener
 
 
 
+/// parallel transform algorithm binary
+template< class ExecutionPolicy, class InputIterator1, class InputIterator2, class OutputIterator, class BinaryOperation >
+OutputIterator transform( ExecutionPolicy&& policy, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
+                    OutputIterator d_first, BinaryOperation binary_op );
+
+/// parallel transform algorithm unary
+template< class ExecutionPolicy, class InputIt, class OutputIt, class UnaryOperation >
+OutputIt transform( ExecutionPolicy&& policy, InputIt first1, InputIt last1, OutputIt d_first,
+                    UnaryOperation unary_op );
+
+
+
+/// parallel all_of algorithm
+template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
+inline bool all_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p );
+
+/// parallel any_of algorithm
+template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
+inline bool any_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p );
+
+/// parallel none_of algorithm
+template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
+inline bool none_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p );
+
+
+
 /// Extension: for_range_ algorithm
 ///
 /// for_range is an extension to for_each where the function

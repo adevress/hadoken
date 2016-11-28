@@ -35,8 +35,10 @@
 #include <omp.h>
 
 #include <hadoken/parallel/algorithm.hpp>
+#include <hadoken/utility/range.hpp>
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
+#include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>
 #include <hadoken/parallel/bits/parallel_transform_generic.hpp>
 
 
@@ -60,18 +62,14 @@ namespace detail{
 /// for_each algorithm
 template<typename Iterator, typename Function>
 inline void _omp_parallel_for_range(Iterator begin_it, Iterator end_it, Function fun){
-    const std::size_t n_elem = std::distance(begin_it, end_it);
+    range<Iterator> global_range(begin_it, end_it);
 
     #pragma omp parallel
     {
-        #pragma omp for 
-        for(std::size_t i=0; i < n_elem; ++i){
-            Iterator local_begin = begin_it;
-            std::advance(local_begin, i);
-            Iterator local_end = local_begin;
-            std::advance(local_end, 1);
-            fun(local_begin, local_end);
-        }
+       int id = omp_get_thread_num();
+       int num_thread = omp_get_num_threads();
+       range<Iterator> my_range = take_splice(global_range, id, num_thread);
+       fun(my_range.begin(), my_range.end());
     }
 }
 

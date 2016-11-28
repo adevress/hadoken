@@ -272,3 +272,232 @@ BOOST_AUTO_TEST_CASE( parallel_transform_test)
 
 }
 
+
+
+
+BOOST_AUTO_TEST_CASE( parallel_all_of_test)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 500000;
+
+    auto is_positive = [](int v){
+            return (v >=0);
+    };
+
+
+    std::vector<int> values;
+
+    bool res_seq = parallel::all_of(parallel::seq, values.begin(), values.end(), is_positive);
+
+    bool res_par = parallel::all_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_positive);
+
+    bool res_std = std::all_of(values.begin(), values.end(), is_positive);
+
+    BOOST_CHECK_EQUAL(res_seq, true);
+    BOOST_CHECK_EQUAL(res_par, true);
+    BOOST_CHECK_EQUAL(res_std, true);
+
+
+    // fullfil vector with positive values excepted one
+    for(std::size_t i= 0; i < n; ++i){
+        values.push_back(i);
+    }
+
+    values.push_back(-1);
+
+    res_seq = parallel::all_of(parallel::seq, values.begin(), values.end(), is_positive);
+
+    {
+        auto t1 = cl::now();
+        res_par = parallel::all_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_positive);
+        auto t2 = cl::now();
+
+        std::cout << " all_of parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+
+    {
+        auto t1 = cl::now();
+        res_std = std::all_of(values.begin(), values.end(), is_positive);
+        auto t2 = cl::now();
+
+        std::cout << " all_of sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+
+
+    BOOST_CHECK_EQUAL(res_seq, false);
+    BOOST_CHECK_EQUAL(res_par, false);
+    BOOST_CHECK_EQUAL(res_std, false);
+
+    // remove the positive values
+    values.pop_back();
+
+
+    res_seq = parallel::all_of(parallel::seq, values.begin(), values.end(), is_positive);
+
+    res_par = parallel::all_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_positive);
+
+    res_std = std::all_of(values.begin(), values.end(), is_positive);
+
+
+    BOOST_CHECK_EQUAL(res_seq, true);
+    BOOST_CHECK_EQUAL(res_par, true);
+    BOOST_CHECK_EQUAL(res_std, true);
+
+
+}
+
+
+BOOST_AUTO_TEST_CASE( parallel_none_of_test)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 500000;
+
+    auto is_negative = [](int v){
+            return (v <0);
+    };
+
+    std::vector<int> values;
+
+    bool res_seq = parallel::none_of(parallel::seq, values.begin(), values.end(), is_negative);
+
+    bool res_par = parallel::none_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_negative);
+
+    bool res_std = std::none_of(values.begin(), values.end(), is_negative);
+
+    BOOST_CHECK_EQUAL(res_seq, true);
+    BOOST_CHECK_EQUAL(res_par, true);
+    BOOST_CHECK_EQUAL(res_std, true);
+
+
+    // fullfil vector with positive values excepted one
+    for(std::size_t i= 0; i < n; ++i){
+        values.push_back(i);
+    }
+
+    values.push_back(-1);
+
+    res_seq = parallel::none_of(parallel::seq, values.begin(), values.end(), is_negative);
+
+    {
+        auto t1 = cl::now();
+        res_par = parallel::none_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_negative);
+        auto t2 = cl::now();
+
+        std::cout << " none_of parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+
+    {
+        auto t1 = cl::now();
+        res_std = std::none_of(values.begin(), values.end(), is_negative);
+        auto t2 = cl::now();
+
+        std::cout << " none_of sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+
+
+    BOOST_CHECK_EQUAL(res_seq, false);
+    BOOST_CHECK_EQUAL(res_par, false);
+    BOOST_CHECK_EQUAL(res_std, false);
+
+    // remove the positive values
+    values.pop_back();
+
+
+    res_seq = parallel::none_of(parallel::seq, values.begin(), values.end(), is_negative);
+
+    res_par = parallel::none_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_negative);
+
+    res_std = std::none_of(values.begin(), values.end(), is_negative);
+
+
+    BOOST_CHECK_EQUAL(res_seq, true);
+    BOOST_CHECK_EQUAL(res_par, true);
+    BOOST_CHECK_EQUAL(res_std, true);
+}
+
+
+
+
+BOOST_AUTO_TEST_CASE( parallel_any_of_test)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 500000;
+
+    auto is_negative = [](int v){
+            return (v <0);
+    };
+
+
+    std::vector<int> values;
+
+    bool res_seq = parallel::any_of(parallel::seq, values.begin(), values.end(), is_negative);
+
+    bool res_par = parallel::any_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_negative);
+
+    bool res_std = std::any_of(values.begin(), values.end(), is_negative);
+
+    BOOST_CHECK_EQUAL(res_seq, false);
+    BOOST_CHECK_EQUAL(res_par, false);
+    BOOST_CHECK_EQUAL(res_std, false);
+
+
+    // fullfil vector with positive values excepted one
+    for(std::size_t i= 0; i < n; ++i){
+        values.push_back(i);
+    }
+
+    values.push_back(-1);
+
+    res_seq = parallel::any_of(parallel::seq, values.begin(), values.end(), is_negative);
+
+    {
+        auto t1 = cl::now();
+        res_par = parallel::any_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_negative);
+        auto t2 = cl::now();
+
+        std::cout << " any_of parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+
+    {
+        auto t1 = cl::now();
+        res_std = std::any_of(values.begin(), values.end(), is_negative);
+        auto t2 = cl::now();
+
+        std::cout << " any_of sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+    }
+
+
+
+    BOOST_CHECK_EQUAL(res_seq, true);
+    BOOST_CHECK_EQUAL(res_par, true);
+    BOOST_CHECK_EQUAL(res_std, true);
+
+    // remove the positive values
+    values.pop_back();
+
+
+    res_seq = parallel::any_of(parallel::seq, values.begin(), values.end(), is_negative);
+
+    res_par = parallel::any_of(parallel::parallel_execution_policy(), values.begin(), values.end(), is_negative);
+
+    res_std = std::any_of(values.begin(), values.end(), is_negative);
+
+
+    BOOST_CHECK_EQUAL(res_seq, false);
+    BOOST_CHECK_EQUAL(res_par, false);
+    BOOST_CHECK_EQUAL(res_std, false);
+
+
+}
+

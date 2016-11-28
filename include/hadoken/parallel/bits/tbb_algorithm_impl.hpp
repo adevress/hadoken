@@ -40,6 +40,7 @@
 
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
+#include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>
 #include <hadoken/parallel/bits/parallel_transform_generic.hpp>
 
 
