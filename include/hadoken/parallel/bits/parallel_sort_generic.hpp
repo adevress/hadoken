@@ -26,22 +26,15 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef _HADOKEN_OMP_ALGORITHM_BITS_HPP_
-#define _HADOKEN_OMP_ALGORITHM_BITS_HPP_
+#ifndef PARALLEL_SORT_GENERIC_HPP
+#define PARALLEL_SORT_GENERIC_HPP
 
-#include <type_traits>
-#include <stdexcept>
-
-#include <omp.h>
-
+#include <atomic>
+#include <algorithm>
 #include <hadoken/parallel/algorithm.hpp>
-#include <hadoken/utility/range.hpp>
 
-#include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
-#include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>
-#include <hadoken/parallel/bits/parallel_transform_generic.hpp>
-#include <hadoken/parallel/bits/parallel_sort_generic.hpp>
 
+#include "parallel_generic_utils.hpp"
 
 
 namespace hadoken{
@@ -50,53 +43,31 @@ namespace hadoken{
 namespace parallel{
 
 
-class sequential_execution_policy;
-class parallel_execution_policy;
-class parallel_vector_execution_policy;
-
-
-
 namespace detail{
-
-
-
-/// for_each algorithm
-template<typename Iterator, typename Function>
-inline void _omp_parallel_for_range(Iterator begin_it, Iterator end_it, Function fun){
-    range<Iterator> global_range(begin_it, end_it);
-
-    #pragma omp parallel
-    {
-       int id = omp_get_thread_num();
-       int num_thread = omp_get_num_threads();
-       range<Iterator> my_range = take_splice(global_range, id, num_thread);
-       fun(my_range.begin(), my_range.end());
-    }
-}
 
 
 
 } // detail
 
+// sort algorithm
+template< class ExecutionPolicy, class RandomIt >
+void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last ){
+    // temporary dummy implementation
+    (void) policy;
+    std::sort(first, last);
+}
 
-
-/// for_each algorithm
-template<typename ExecPolicy, typename Iterator, typename RangeFunction>
-inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, RangeFunction fun){
-    if( detail::is_parallel_policy(policy) ){
-        detail::_omp_parallel_for_range(begin_it, end_it, fun);
-        return;
-    }
-
-   fun(begin_it, end_it);
+// sort algorithm with comparator
+template< class ExecutionPolicy, class RandomIt, class Compare >
+void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp ){
+    // temporary dummy implementation
+    (void) policy;
+    std::sort(first, last, comp);
 }
 
 
-} // concurrent
-
-
+} //parallel
 
 } // hadoken
 
-
-#endif
+#endif // PARALLEL_ALGORITHM_GENERICS_HPP

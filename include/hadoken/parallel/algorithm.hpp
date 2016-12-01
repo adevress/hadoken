@@ -107,6 +107,19 @@ inline bool none_of( ExecutionPolicy&& policy, InputIterator first, InputIterato
 
 
 
+
+/// sort algorithm
+template< class ExecutionPolicy, class RandomIt >
+void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last );
+
+/// sort algorithmwith comparator
+template< class ExecutionPolicy, class RandomIt, class Compare >
+void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp );
+
+
+
+
+
 /// Extension: for_range_ algorithm
 ///
 /// for_range is an extension to for_each where the function
@@ -129,6 +142,9 @@ inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, 
 
 #include <hadoken/parallel/bits/omp_algorithm_impl.hpp>
 
+#elif (defined HADOKEN_PARALLEL_USE_GNU_PSTL)
+
+#include <hadoken/parallel/bits/gnu_pstl_algorithm_impl.hpp>
 
 #else
 

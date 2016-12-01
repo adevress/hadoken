@@ -33,6 +33,7 @@
 #include <stdexcept>
 
 #include <tbb/parallel_for_each.h>
+#include <tbb/parallel_sort.h>
 #include <tbb/task_scheduler_init.h>
 
 #include <hadoken/parallel/algorithm.hpp>
@@ -79,14 +80,38 @@ inline void _tbb_parallel_for_range(Iterator begin_it, Iterator end_it, Function
 }
 
 
+template<typename Iterator, typename Comp>
+inline void _tbb_sort(Iterator begin_it, Iterator end_it, Comp comp){
+    tbb::parallel_sort(begin_it, end_it, comp);
+}
+
 
 } // detail
 
 
-/// for_each algorithm
+// sort algorithm
+template< class ExecutionPolicy, class RandomIt >
+void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last ){
+    using value_type = typename std::iterator_traits<RandomIt>::value_type;
+    std::less<value_type> comparator;
+    
+    sort(policy, first, last, comparator);
+}
+
+// sort algorithm with comparator
+template< class ExecutionPolicy, class RandomIt, class Compare >
+void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp ){
+    if( detail::is_parallel_policy(policy)){
+        detail::_tbb_sort(first, last, comp);
+        return;
+    }
+    std::sort(first, last, comp);
+}
+
+
+// for_range algorithm
 template<typename ExecPolicy, typename Iterator, typename RangeFunction>
 inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, RangeFunction fun){
-    (void) policy;
     if( detail::is_parallel_policy(policy)){
         detail::_tbb_parallel_for_range(begin_it, end_it, fun);
         return;

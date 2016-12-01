@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <future>
 #include <algorithm>
+#include <random>
 
 #include <chrono>
 
@@ -498,6 +499,76 @@ BOOST_AUTO_TEST_CASE( parallel_any_of_test)
     BOOST_CHECK_EQUAL(res_par, false);
     BOOST_CHECK_EQUAL(res_std, false);
 
+
+}
+
+
+template<typename Container>
+bool is_ordered(Container & c){
+    for(std::size_t i =0; i < c.size()-1; ++i){
+        if(c[i] > c[i+1]){
+            return false;
+        }
+    
+    }
+    return true;
+}
+
+
+BOOST_AUTO_TEST_CASE( parallel_sort)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 500000;
+
+    std::vector<int> values(n);
+    
+    std::mt19937_64 mt;
+    std::uniform_int_distribution<int> dist;
+    
+    std::generate(values.begin(), values.end(), [&](){
+       return dist(mt); 
+    });
+
+    BOOST_CHECK( is_ordered(values) == false);
+
+    {
+        auto v1 = values;
+        parallel::sort(parallel::seq, v1.begin(), v1.end());
+        BOOST_CHECK( is_ordered(v1) == true);
+        
+    }
+
+    {
+        auto v2 = values;
+        
+        auto t1 = cl::now();        
+        parallel::sort(parallel::parallel_execution_policy(), v2.begin(), v2.end());
+        
+        auto t2 = cl::now();
+
+        std::cout << " sort parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+        
+        BOOST_CHECK( is_ordered(v2) == true);
+    }
+
+    {
+
+        auto v3 = values;
+        
+        auto t1 = cl::now();       
+              
+        std::sort(v3.begin(), v3.end());
+        
+        auto t2 = cl::now();
+
+        std::cout << " sort sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;        
+        
+        BOOST_CHECK( is_ordered(v3) == true);
+    }
+
+  
 
 }
 
