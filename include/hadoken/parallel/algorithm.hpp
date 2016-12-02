@@ -118,7 +118,21 @@ void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp
 
 
 
-
+///
+/// numerics
+/// inclusive scan algorithm
+template< class ExecutionPolicy, class InputIt, class OutputIt >
+OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first,
+                         InputIt last, OutputIt d_first );
+                         
+/// inclusive scan algorithm binary op
+template< class ExecutionPolicy, class InputIt, class OutputIt,
+class BinaryOperation>
+OutputIt inclusive_scan( ExecutionPolicy&& policy,
+                         InputIt first, InputIt last, OutputIt d_first,
+                         BinaryOperation binary_op);
+                         
+                         
 
 /// Extension: for_range_ algorithm
 ///

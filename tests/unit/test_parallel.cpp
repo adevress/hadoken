@@ -36,6 +36,7 @@
 #include <future>
 #include <algorithm>
 #include <random>
+#include <numeric>
 
 #include <chrono>
 
@@ -572,3 +573,69 @@ BOOST_AUTO_TEST_CASE( parallel_sort)
 
 }
 
+
+
+
+
+
+BOOST_AUTO_TEST_CASE( parallel_inclusive_scan)
+{
+
+    using namespace hadoken;
+
+    std::size_t n = 5000000;
+
+    std::vector<std::uint64_t> values(n);
+    
+    decltype(values) v1(n), v2(n), v3(n);    
+    
+    std::iota(values.begin(), values.end(), 1);
+
+
+    {
+
+        parallel::inclusive_scan(parallel::seq, values.begin(), values.end(), v1.begin());
+        
+    }
+
+    {
+        
+        auto t1 = cl::now();        
+
+        parallel::inclusive_scan(parallel::par, values.begin(), values.end(), v2.begin());
+        
+        auto t2 = cl::now();
+
+        std::cout << " inclusive scan parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
+        
+    }
+
+    {
+        
+        auto t1 = cl::now();       
+              
+        std::partial_sum(values.begin(), values.end(), v3.begin());
+        
+        auto t2 = cl::now();
+
+        std::cout << " inclusive scan sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;        
+        
+    }
+
+     BOOST_CHECK_EQUAL(v1.size(), n);
+     BOOST_CHECK_EQUAL(v2.size(), n);
+     BOOST_CHECK_EQUAL(v3.size(), n);
+     
+     
+     decltype(values)::value_type res = 0;
+     for(std::size_t i =0; i < n; ++i){
+         BOOST_CHECK_EQUAL(v1[i], v2[i]);
+         BOOST_CHECK_EQUAL(v2[i], v3[i]);
+         
+         BOOST_CHECK_LE(res, v1[i]);
+         res = v1[i];
+         
+     }
+  
+
+}

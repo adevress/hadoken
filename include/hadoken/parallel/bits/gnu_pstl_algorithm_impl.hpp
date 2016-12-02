@@ -34,11 +34,11 @@
 
 
 #include <parallel/algorithm>
-#include <parallel/for_each.h>
+#include <parallel/numeric>
+
 
 #include <hadoken/parallel/algorithm.hpp>
 #include <hadoken/parallel/bits/parallel_generic_utils.hpp>
-
 #include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>
 
 
@@ -181,6 +181,31 @@ void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last, Comp compara
     }else {
         std::sort(first, last, comparator);
     }
+}
+
+
+
+///
+/// numerics
+/// inclusive scan algorithm
+template< class ExecutionPolicy, class InputIt, class OutputIt >
+OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first,
+                         InputIt last, OutputIt d_first ){
+    using value_type = typename std::iterator_traits<InputIt>::value_type;
+    
+    return inclusive_scan(std::forward<ExecutionPolicy>(policy), first, last, d_first, std::plus<value_type>());
+}
+
+/// inclusive scan algorithm binary op
+template< class ExecutionPolicy, class InputIt, class OutputIt,
+class BinaryOperation>
+OutputIt inclusive_scan( ExecutionPolicy&& policy,
+                         InputIt first, InputIt last, OutputIt d_first,
+                         BinaryOperation binary_op){
+    if(detail::is_parallel_policy(policy)){
+        return detail::pstd::partial_sum(first, last, d_first, binary_op);
+    }
+    return std::partial_sum(first, last, d_first, binary_op);
 }
 
 

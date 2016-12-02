@@ -41,7 +41,7 @@
 #include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>
 #include <hadoken/parallel/bits/parallel_transform_generic.hpp>
 #include <hadoken/parallel/bits/parallel_sort_generic.hpp>
-
+#include <hadoken/parallel/bits/parallel_numeric_generic.hpp>
 
 
 namespace hadoken{
