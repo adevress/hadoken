@@ -3,6 +3,10 @@
 
 #include <boost/geometry/geometry.hpp>
 
+#include <boost/geometry/geometries/linestring.hpp>
+#include <boost/geometry/multi/geometries/multi_point.hpp> // Boost 1.54
+//#include <boost/geometry/geometries/multi_point.hpp> // Boost 1.62
+
 #include <hadoken/geometry/objects/sphere.hpp>
 #include <hadoken/geometry/objects/point_base.hpp>
 
