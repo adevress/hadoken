@@ -126,7 +126,7 @@ inline std::vector<Range> split_range(const Range & range, std::size_t number_pa
 
 template<typename Range>
 inline Range take_splice(const Range & range, std::size_t slice_id, std::size_t total_slices){
-    assert(my_splice <= total_slices);
+    assert(slice_id <= total_slices);
     const std::size_t n_elem = range.size();
     const std::size_t elem_per_slice_base = n_elem / total_slices;
     const std::size_t elem_per_slice_modulo = n_elem % total_slices;
