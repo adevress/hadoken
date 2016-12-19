@@ -3,8 +3,8 @@ cmake_minimum_required(VERSION 2.8)
 
 enable_testing()
 
-set(VERSION_MAJOR "1")
-set(VERSION_MINOR "0")
+set(HADOKEN_VERSION_MAJOR "1")
+set(HADOKEN_VERSION_MINOR "0")
 
 option(UNIT_TESTS "Enable or disable unit tests execution" TRUE)
 option(PERF_TESTS "Enable or disable performance tests execution" FALSE)
@@ -28,6 +28,8 @@ include(DetectCXX11Support)
 
 find_package(Threads)
 
+add_definitions( -DHADOKEN_VERSION_MAJOR=\"${HADOKEN_VERSION_MAJOR}\" -DHADOKEN_VERSION_MINOR=\"${HADOKEN_VERSION_MINOR}\")
+
 if(TEST_WITH_OMP)
 find_package(OpenMP)
 endif()
@@ -46,11 +48,16 @@ file(GLOB HADOKEN_HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*)
 file(GLOB HADOKEN_HEADERS_1 ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*/*)
 
 
+set(hadoken_version_src "${CMAKE_CURRENT_SOURCE_DIR}/src/hadoken_version.cpp")
+add_executable(hadoken_version ${hadoken_version_src})
+
+
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include/  )
 include_directories(SYSTEM ${BOOST_INCLUDE_DIR} )
 
 if(NOT DISABLE_INSTALL)
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/hadoken DESTINATION ${INCLUDE_INSTALL_DIR}/)
+install(TARGETS hadoken_version DESTINATION ${BIN_INSTALL_DIR}/)
 endif()
 
 add_subdirectory(tests/perf)
