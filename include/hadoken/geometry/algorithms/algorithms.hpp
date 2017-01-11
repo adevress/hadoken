@@ -114,6 +114,32 @@ Vector normalize(const Vector & v1){
 }
 
 
+///
+/// Merge two bounding box to one being the union of the two
+///
+template<typename Box>
+Box merge_box(const Box & box1, const Box & box2){
+    const auto b1_min = box1.min_corner();
+    const auto b2_min = box2.min_corner();
+    const auto b1_max = box1.max_corner();
+    const auto b2_max = box2.max_corner();
+
+    typedef decltype(b1_min) box_point_type;
+
+    box_point_type p_min(std::min(get_x(b1_min), get_x(b2_min)),
+                         std::min(get_y(b1_min), get_y(b2_min)),
+                         std::min(get_z(b1_min), get_z(b2_min))
+                         );
+
+    box_point_type p_max(std::max(get_x(b1_max), get_x(b2_max)),
+                         std::max(get_y(b1_max), get_y(b2_max)),
+                         std::max(get_z(b1_max), get_z(b2_max))
+                         );
+
+    return Box(p_min, p_max);
+}
+
+
 } // cartesian
 
 
