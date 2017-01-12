@@ -10,6 +10,7 @@
 //#include <boost/geometry/geometries/multi_point.hpp> // Boost 1.62
 
 #include <hadoken/geometry/objects/sphere.hpp>
+#include <hadoken/geometry/objects/cone.hpp>
 #include <hadoken/geometry/objects/point_base.hpp>
 
 
@@ -79,6 +80,16 @@ namespace cartesian {
     using sphere3d = sphere<double>;
 
     using sphere3f = sphere<float>;
+
+
+    /// default cone/truncated cone object
+    template<typename CoordType>
+    using cone = cone_base<point3<CoordType>, CoordType>;
+
+    using cone3d = cone<double>;
+
+    using cone3f = cone<float>;
+
 
     /// default circle object
     template<typename CoordType>

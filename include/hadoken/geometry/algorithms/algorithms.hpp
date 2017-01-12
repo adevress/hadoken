@@ -139,6 +139,17 @@ Box merge_box(const Box & box1, const Box & box2){
     return Box(p_min, p_max);
 }
 
+template<typename Box, typename Sphere>
+inline Box envelope_sphere_return(const Sphere & sphere){
+    auto radius = sphere.get_radius();
+    auto center = sphere.get_center();
+
+    typedef decltype(center) point_type;
+
+    return Box( center - point_type(radius, radius, radius),
+                center + point_type(radius, radius, radius));
+}
+
 
 } // cartesian
 
