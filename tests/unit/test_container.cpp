@@ -40,6 +40,9 @@
 
 #include <hadoken/containers/small_vector.hpp>
 
+#include <hadoken/utility/range.hpp>
+
+
 #include "test_helpers.hpp"
 
 typedef boost::mpl::list<
@@ -144,4 +147,56 @@ BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
         BOOST_CHECK_EQUAL(*values[i], *gen(i));
         BOOST_CHECK_EQUAL(*values.at(i), *gen(i));
     }
+}
+
+
+
+template<typename T, typename Mod, typename Check>
+void  test_check_range(T vec, size_t partition, const Mod & modifier, const Check & checker){
+    using namespace hadoken;
+
+    typedef range<typename T::iterator> range_vec;
+
+    range_vec my_range(vec.begin(), vec.end());
+
+
+    BOOST_CHECK_EQUAL(vec.size(), my_range.size());
+
+    std::vector< range_vec> ranges = split_range(my_range, partition);
+    BOOST_CHECK_EQUAL(ranges.size(), partition);
+    BOOST_CHECK(ranges[0].begin() == vec.begin());
+    BOOST_CHECK(ranges[partition-1].end() == vec.end());
+
+
+    // test validity of all iterators
+    for(typename std::vector<range_vec>::iterator it = ranges.begin(); it != ranges.end(); ++it){
+        std::for_each(it->begin(), it->end(), modifier);
+    }
+
+    std::for_each(vec.begin(), vec.end(), checker);
+
+    // test sequence
+    // no range should have a difference of more than 1 elem
+    std::size_t min_elem = std::numeric_limits<std::size_t>::max(), max_elem = std::numeric_limits<std::size_t>::min();
+    for(typename std::vector<range_vec>::iterator it = ranges.begin(); it < ranges.end(); ++it){
+        const std::size_t diff = std::distance(it->begin(), it->end());
+        min_elem = std::min(min_elem, diff);
+        max_elem = std::min(max_elem, diff);
+    }
+
+    BOOST_CHECK_GE(min_elem+1,max_elem);
+
+    // create on purpose over range
+    const std::size_t over_range = my_range.size() + 100;
+
+    BOOST_CHECK_EQUAL(take_splice(my_range, over_range, over_range*2).size(), 0);
+
+
+    // check matching between split and take_splice
+    std::vector< range_vec> other_ranges = split_range(my_range, 200);
+    for(std::size_t i = 0; i < 200; ++i){
+        range<typename T::iterator> my_slice = take_splice(my_range, i, 200);
+        BOOST_CHECK(my_slice == other_ranges[i]);
+    }
+
 }

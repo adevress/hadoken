@@ -31,13 +31,15 @@
 #define BOOST_TEST_MAIN
 
 #include <iostream>
+#include <string>
 
+
+#include <boost/array.hpp>
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-#include <string>
-#include <boost/array.hpp>
 #include <hadoken/crypto/crypto.hpp>
+
 
 
 BOOST_AUTO_TEST_CASE( sha1_basic_tests )

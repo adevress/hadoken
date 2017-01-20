@@ -4,7 +4,7 @@
 #include <sys/param.h>
 #include <netinet/in.h>
 
-#include <boost/integer.hpp>
+//#include <boost/integer.hpp>
 
 
 namespace hadoken{
