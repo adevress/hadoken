@@ -5,9 +5,12 @@
 
 #include <boost/geometry/geometries/linestring.hpp>
 #include <boost/geometry/multi/geometries/multi_point.hpp> // Boost 1.54
+#include <boost/geometry/geometries/box.hpp>
+
 //#include <boost/geometry/geometries/multi_point.hpp> // Boost 1.62
 
 #include <hadoken/geometry/objects/sphere.hpp>
+#include <hadoken/geometry/objects/cone.hpp>
 #include <hadoken/geometry/objects/point_base.hpp>
 
 
@@ -52,7 +55,7 @@ namespace cartesian {
 
     /// default multi_point model with type specification
     template<typename CoordType>
-    using multi_point3 = model::multi_point<point3<CoordType>>;
+    using multi_point3 = bg::model::multi_point<point3<CoordType>>;
 
     /// default point in double precision
     using multi_point3d = multi_point3<double>;
@@ -62,7 +65,7 @@ namespace cartesian {
 
     /// default linestring
     template<typename CoordType>
-    using linestring3 = model::linestring<point3<CoordType>>;
+    using linestring3 = bg::model::linestring<point3<CoordType>>;
 
     /// default point in double precision
     using linestring3d = linestring3<double>;
@@ -78,14 +81,31 @@ namespace cartesian {
 
     using sphere3f = sphere<float>;
 
+
+    /// default cone/truncated cone object
+    template<typename CoordType>
+    using cone = cone_base<point3<CoordType>, CoordType>;
+
+    using cone3d = cone<double>;
+
+    using cone3f = cone<float>;
+
+
     /// default circle object
     template<typename CoordType>
     using circle = circle_base<point3<CoordType>, vector3<CoordType>, CoordType>;
 
     using circle3d = circle<double>;
 
-    using circle3f = circle<float>;///
+    using circle3f = circle<float>;
 
+    /// default bounding box object
+    template<typename CoordType>
+    using box = bg::model::box<point3<CoordType>>;
+
+    using box3d = box<double>;
+
+    using box3f = box<float>;
 
 } // cartesian
 

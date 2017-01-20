@@ -44,7 +44,7 @@
 
 #include <hadoken/parallel/algorithm.hpp>
 
-#include <parallel/algorithm>
+//#include <parallel/algorithm>
 
 
 using namespace hadoken;
