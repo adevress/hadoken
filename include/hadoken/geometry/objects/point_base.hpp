@@ -160,6 +160,10 @@ public:
         return *this;
     }
 
+    const value_type* data() const {
+        return _point.data();
+    }
+
 
 protected:
         std::array<CoordType, N> _point;
