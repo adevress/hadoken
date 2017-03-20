@@ -30,14 +30,13 @@ find_package(Threads)
 
 add_definitions( -DHADOKEN_VERSION_MAJOR=\"${HADOKEN_VERSION_MAJOR}\" -DHADOKEN_VERSION_MINOR=\"${HADOKEN_VERSION_MINOR}\")
 
-if(TEST_WITH_OMP)
 find_package(OpenMP)
+if(OpenMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
 
-if(TEST_WITH_TBB)
-	find_package(TBB)
-	include_directories(${TBB_INCLUDE_DIR})
-endif()
+
 
 if(BLUEGENE)
 	# scheld_yield is to avoid on BGQ

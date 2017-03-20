@@ -30,7 +30,10 @@
 #define _HADOKEN_OMP_ALGORITHM_BITS_HPP_
 
 #include <type_traits>
+#include <iterator>
 #include <stdexcept>
+#include <cstdint>
+
 
 #include <omp.h>
 
@@ -91,8 +94,59 @@ inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, 
    fun(begin_it, end_it);
 }
 
+/// parallel count_if algorithm
+template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
+typename std::iterator_traits<InputIterator>::difference_type
+    count_if( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p ){
 
-} // concurrent
+    typedef typename std::iterator_traits<InputIterator>::difference_type counter_type;
+
+    static_assert(std::is_same< typename std::iterator_traits<InputIterator>::iterator_category, std::random_access_iterator_tag>::value , "parallel::count requires random_access_iterator");
+
+    if( detail::is_parallel_policy(policy) ){
+
+        const std::size_t nelems = std::distance(first, last);
+        std::uint64_t counter = 0;
+
+        #pragma omp parallel reduction(+:counter)
+        {
+           int id = omp_get_thread_num();
+           int num_thread = omp_get_num_threads();
+
+           std::size_t nelem_per_slice = nelems / num_thread;
+
+           InputIterator my_begin = first + (id * nelem_per_slice);
+           InputIterator my_end = ( ((id +1) == num_thread) ? (last): (my_begin + nelem_per_slice));
+
+           counter += std::count_if(my_begin, my_end, p);
+        }
+
+        return counter_type(counter);
+    }else{
+        return std::count_if(first, last, p);
+    }
+}
+
+/// parallel count algorithm
+template< class ExecutionPolicy, class InputIterator, class T >
+typename std::iterator_traits<InputIterator>::difference_type
+    count( ExecutionPolicy&& policy, InputIterator first, InputIterator last, const T &value ){
+    using value_type = typename std::iterator_traits<InputIterator>::value_type;
+
+    return count_if(std::move(policy),
+                    first, last,
+                    [&value](const value_type & v){
+                        return (v == static_cast<value_type>(value));
+                    }
+    );
+
+}
+
+
+
+
+
+} // parallel
 
 
 

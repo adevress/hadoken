@@ -85,7 +85,7 @@ target_link_libraries(test_thread ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FR
 add_test(NAME test_thread_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_thread)
 
 
-
+if(OPENMP_FOUND)
 
 LIST(APPEND test_parallel_src "test_parallel.cpp")
 
@@ -94,45 +94,10 @@ target_link_libraries(test_parallel_base ${CMAKE_THREAD_LIBS_INIT}  ${CMAKE_para
 
 add_test(NAME test_parallel_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_base)
 
-if(TBB_FOUND)
-
-add_executable(test_parallel_tbb ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
-target_link_libraries(test_parallel_tbb  ${CMAKE_THREAD_LIBS_INIT} ${TBB_LIBRARIES} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
-target_compile_definitions(test_parallel_tbb PRIVATE "-DHADOKEN_PARALLEL_USE_TBB=1")
-
-add_test(NAME test_parallel_unit_tbb COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_tbb)
-
 
 endif()
 
-if(OPENMP_FOUND)
-
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-add_executable(test_parallel_omp ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
-target_link_libraries(test_parallel_omp  ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
-target_compile_definitions(test_parallel_omp PRIVATE "-DHADOKEN_PARALLEL_USE_OMP=1")
-add_test(NAME test_parallel_unit_omp COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_omp)
-
-
 endif()
-
-
-if(TEST_WITH_GNU_PSTL AND OPENMP_FOUND)
-
-set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-add_executable(test_parallel_gnu_pstl ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
-target_link_libraries(test_parallel_gnu_pstl  ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
-target_compile_definitions(test_parallel_gnu_pstl PRIVATE "-DHADOKEN_PARALLEL_USE_GNU_PSTL=1")
-add_test(NAME test_parallel_unit_gnu_pstl COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_gnu_pstl)
-
-
-endif()
-
-
-endif()
-
 
 
 endif()

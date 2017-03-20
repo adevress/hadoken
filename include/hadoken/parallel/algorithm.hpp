@@ -148,23 +148,8 @@ inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, 
 } // hadoken
 
 
-#ifdef HADOKEN_PARALLEL_USE_TBB
-
-#include <hadoken/parallel/bits/tbb_algorithm_impl.hpp>
-
-#elif (defined HADOKEN_PARALLEL_USE_OMP)
-
 #include <hadoken/parallel/bits/omp_algorithm_impl.hpp>
 
-#elif (defined HADOKEN_PARALLEL_USE_GNU_PSTL)
-
-#include <hadoken/parallel/bits/gnu_pstl_algorithm_impl.hpp>
-
-#else
-
-#include <hadoken/parallel/bits/cxx11_thread_algorithm_impl.hpp>
-
-#endif
 
 
 #endif
