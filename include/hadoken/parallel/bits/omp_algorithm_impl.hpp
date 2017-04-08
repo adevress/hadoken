@@ -34,8 +34,14 @@
 #include <stdexcept>
 #include <cstdint>
 
+#if !(defined _OPENMP) || (defined CPP17_ALGORITHM_FORCE_SEQ)
+#warning "No OpenMP support available: parallel algorithm execution disabled"
+#define __ALGORITHM_NO_OPENMP
+#endif
 
+#ifndef __ALGORITHM_NO_OPENMP
 #include <omp.h>
+#endif
 
 #include <hadoken/parallel/algorithm.hpp>
 #include <hadoken/utility/range.hpp>
@@ -61,23 +67,55 @@ class parallel_vector_execution_policy;
 
 namespace detail{
 
+inline int __get_number_executor(){
+#ifndef __ALGORITHM_NO_OPENMP
+    // TODO : should be configurable parameter, extracted from execution_policy
+    return std::thread::hardware_concurrency();
+#else
+    return 1;
+#endif
+}
 
+template<typename Function>
+inline void __execute_grid(int num_executor, Function fun){
+#ifndef __ALGORITHM_NO_OPENMP
+    //std::cout << "val " << num_executor << std::endl;
+    #pragma omp parallel
+    {
+
+       #pragma omp single
+       {
+
+           for(int id = 0; id < num_executor; ++id){
+
+               #pragma omp task firstprivate(id)
+               {
+                fun(id, num_executor);
+               }
+            }
+
+        }
+
+    }
+#else
+    for(int id =0 ; id < num_executor; ++id){
+        fun(id, num_executor);
+    }
+#endif
+}
 
 /// for_each algorithm
 template<typename Iterator, typename Function>
 inline void _omp_parallel_for_range(Iterator begin_it, Iterator end_it, Function fun){
     range<Iterator> global_range(begin_it, end_it);
 
-    #pragma omp parallel
-    {
-       int id = omp_get_thread_num();
-       int num_thread = omp_get_num_threads();
-       range<Iterator> my_range = take_splice(global_range, id, num_thread);
-       fun(my_range.begin(), my_range.end());
-    }
+    const int num_exec = __get_number_executor();
+
+    __execute_grid(num_exec, [&](int id, int num_executor){
+                range<Iterator> my_range = take_splice(global_range, id, num_executor);
+                fun(my_range.begin(), my_range.end());
+    });
 }
-
-
 
 } // detail
 
@@ -106,22 +144,20 @@ typename std::iterator_traits<InputIterator>::difference_type
     if( detail::is_parallel_policy(policy) ){
 
         const std::size_t nelems = std::distance(first, last);
-        std::uint64_t counter = 0;
+        std::atomic<uint64_t> counter(0);
 
-        #pragma omp parallel reduction(+:counter)
-        {
-           int id = omp_get_thread_num();
-           int num_thread = omp_get_num_threads();
+        const int number_executor = detail::__get_number_executor();
 
-           std::size_t nelem_per_slice = nelems / num_thread;
+        detail::__execute_grid(number_executor, [&](int id, int number_executor){
+           std::size_t nelem_per_slice = nelems / number_executor;
 
            InputIterator my_begin = first + (id * nelem_per_slice);
-           InputIterator my_end = ( ((id +1) == num_thread) ? (last): (my_begin + nelem_per_slice));
+           InputIterator my_end = ( ((id +1) == number_executor) ? (last): (my_begin + nelem_per_slice));
 
            counter += std::count_if(my_begin, my_end, p);
-        }
+        });
 
-        return counter_type(counter);
+        return counter_type(counter.load());
     }else{
         return std::count_if(first, last, p);
     }

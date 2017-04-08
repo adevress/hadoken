@@ -117,6 +117,38 @@ BOOST_AUTO_TEST_CASE( parallel_for_each_simple_test)
 }
 
 
+BOOST_AUTO_TEST_CASE( parallel_for_each_nested)
+{
+
+    std::vector<std::vector<double> > vec_vec_values(1024);
+
+    std::size_t index = 0;
+    for(auto & vec_values : vec_vec_values){
+        vec_values.resize(2048);
+        std::fill(vec_values.begin(), vec_values.end(), index);
+        index ++;
+    }
+
+    parallel::for_each(parallel::parallel_execution_policy(), vec_vec_values.begin(), vec_vec_values.end(), [](std::vector<double> & vec_values){
+
+        parallel::for_each(parallel::parallel_execution_policy(), vec_values.begin(), vec_values.end(), []( double & v){
+           v += 42;
+        });
+
+    });
+
+
+    index = 0;
+    for(auto & vec_values : vec_vec_values){
+        for(auto i : vec_values){
+             BOOST_CHECK_CLOSE(index + 42, i, 0.001);
+        }
+        index ++;
+    }
+
+
+
+}
 
 
 

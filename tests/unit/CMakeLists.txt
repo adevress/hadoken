@@ -85,7 +85,6 @@ target_link_libraries(test_thread ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FR
 add_test(NAME test_thread_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_thread)
 
 
-if(OPENMP_FOUND)
 
 LIST(APPEND test_parallel_src "test_parallel.cpp")
 
@@ -95,7 +94,6 @@ target_link_libraries(test_parallel_base ${CMAKE_THREAD_LIBS_INIT}  ${CMAKE_para
 add_test(NAME test_parallel_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_base)
 
 
-endif()
 
 endif()
 
