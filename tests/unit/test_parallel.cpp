@@ -615,7 +615,7 @@ BOOST_AUTO_TEST_CASE( parallel_inclusive_scan)
 
     using namespace hadoken;
 
-    std::size_t n = 50000000;
+    std::size_t n = 500000;
 
     std::vector<std::uint64_t> values(n);
     
