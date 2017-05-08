@@ -6,7 +6,7 @@ enable_testing()
 set(HADOKEN_VERSION_MAJOR "1")
 set(HADOKEN_VERSION_MINOR "0")
 
-option(UNIT_TESTS "Enable or disable unit tests execution" TRUE)
+option(HADOKEN_UNIT_TESTS "Enable or disable unit tests execution" TRUE)
 option(PERF_TESTS "Enable or disable performance tests execution" FALSE)
 option(DISABLE_INSTALL "Disable the installation for this component" TRUE)
 option(TEST_WITH_TBB "Use Intel TBB to test parallel algorithms" FALSE)
