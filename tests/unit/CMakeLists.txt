@@ -1,5 +1,5 @@
 
-if(UNIT_TESTS)
+if(HADOKEN_UNIT_TESTS)
 
 find_package(Boost 1.41.0 REQUIRED system unit_test_framework)
 
