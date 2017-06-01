@@ -1,5 +1,5 @@
 
-if(PERF_TESTS)
+if(HADOKEN_PERF_TESTS)
 
 find_package(Boost 1.41.0 REQUIRED system chrono)
 
