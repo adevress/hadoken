@@ -37,9 +37,9 @@
 std::string hadoken_help();
 
 int main(){
-	std::cout << "\n\t\t"<< "Hadoken: C++ Utility library, modular, header-only, in the STL style " 
+    std::cout << "\n\t\t"<< "Hadoken: C++ STL-style header-only and modular utility library  "
 	<< "\n\n" << "hadoken_version: " << HADOKEN_VERSION_MAJOR << "." << HADOKEN_VERSION_MINOR
-	<< "\n" << "hadoken_features: " << "range spinlock geometry parallelism threefry abstract_random string_utils ublas format small_vector"
+    << "\n" << "hadoken_features: " << "range spinlock geometry parallelism threefry abstract_random string_utils ublas format small_vector spmd"
 	<< "\n\n\n\n"
 	<< hadoken_help() << "\n";
 	return 0;

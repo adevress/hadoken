@@ -58,6 +58,18 @@ add_test(NAME test_format_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CM
 
 
 
+
+## spmd related tests
+LIST(APPEND test_spmd_src "test_spmd.cpp")
+
+add_executable(test_spmd ${test_spmd_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_spmd ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+target_compile_options(test_spmd PRIVATE ${CMAKE_CXX_VECTORIZE} )
+
+add_test(NAME test_spmd_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_spmd)
+
+
+
 ## geometry related tests
 LIST(APPEND test_geometry_src "test_geometry.cpp")
 
