@@ -46,23 +46,25 @@ using namespace hadoken;
 
 
 typedef boost::mpl::list<char, unsigned char, short, unsigned short, int, unsigned int, float, double, long double> numerical_types;
-
+//typedef boost::mpl::list<float> numerical_types;
 
 
 
 
 // dummy generator of numerical value
+template<typename T>
 class generator{
 public:
 
-    template<typename T>
     T rand(){
         return T(_dist(_generator))/ T(100);
     }
 
 private:
     std::mt19937_64 _generator;
-    std::uniform_int_distribution<std::uint64_t> _dist;
+    typename std::conditional<std::is_integral<T>::value,
+            std::uniform_int_distribution<T>,
+            std::uniform_real_distribution<T>>::type _dist;
 };
 
 
@@ -72,7 +74,7 @@ std::array<T, 10> get_base_array(){
     std::random_device rd;
     std::mt19937_64 g(rd());
 
-    std::iota(base_numbers.begin(), base_numbers.end(), 0);
+    std::iota(base_numbers.begin(), base_numbers.end(), 1);
     std::shuffle(base_numbers.begin(), base_numbers.end(), g);
 
     return base_numbers;
@@ -86,15 +88,15 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( base_add_spmd_operations, T, numerical_types )
 {
     namespace spmd = hadoken::spmd;
 
-    generator gen;
+    generator<T> gen;
 
 
 
 
     // simple add vec
     {
-        T val_inputs1[] = { gen.rand<T>(), gen.rand<T>(), gen.rand<T>(), gen.rand<T>() };
-        T val_inputs2[] = { gen.rand<T>(), gen.rand<T>(), gen.rand<T>(), gen.rand<T>() };
+        T val_inputs1[] = { gen.rand(), gen.rand(), gen.rand(), gen.rand() };
+        T val_inputs2[] = { gen.rand(), gen.rand(), gen.rand(), gen.rand() };
 
         spmd::spmd_array<T,4> my_array_res1, my_array_res2;
 
@@ -102,12 +104,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( base_add_spmd_operations, T, numerical_types )
 
         spmd::spmd_array<T,4> my_array_src2({ val_inputs2[0], val_inputs2[1], val_inputs2[2], val_inputs2[3]});
 
+        // asm mark plus
 
-        my_array_res1 = my_array_src1 + my_array_src2;
+        my_array_res1 = spmd::plus(my_array_src1, my_array_src2);
 
         BOOST_CHECK_EQUAL(my_array_res1[1], (val_inputs1[1] + val_inputs2[1]));
 
-        my_array_res2 = my_array_src2 + my_array_src1;
+        my_array_res2 = spmd::plus(my_array_src2, my_array_src1);
 
 
         BOOST_CHECK(my_array_res1 == my_array_res2);
@@ -141,7 +144,9 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( base_sub_spmd_operations, T, numerical_types )
 
 
 
-    generator gen;
+    generator<T> gen;
+
+
     std::array<T, 10> base_array = get_base_array<T>();
 
     {
@@ -185,7 +190,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( base_mul_spmd_operations, T, numerical_types )
 {
     namespace spmd = hadoken::spmd;
 
-    generator gen;
+    generator<T> gen;
     std::array<T, 10> base_array = get_base_array<T>();
 
     // mul simple
@@ -229,13 +234,13 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( base_div_spmd_operations, T, numerical_types )
 {
     namespace spmd = hadoken::spmd;
 
-    generator gen;
+    generator<T> gen;
     std::array<T, 10> base_array = get_base_array<T>();
 
     // mul simple
     {
 
-        spmd::spmd_array<T,4> my_array_res1, my_array_res2;
+        spmd::spmd_array<T,4> my_array_res1;
 
         spmd::spmd_array<T,4> my_array_src1({ base_array[0], base_array[1], base_array[2], base_array[3]});
 
@@ -245,17 +250,17 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( base_div_spmd_operations, T, numerical_types )
 
         my_array_res1 = my_array_src1 / my_array_src2;
 
-        BOOST_CHECK_EQUAL(my_array_res1[1], (base_array[1] / base_array[5]));
+        for(std::size_t i =0; i < 4; ++i ){
+            BOOST_CHECK_EQUAL( my_array_res1[i], (base_array[i] / base_array[i+4]));
+        }
 
-        my_array_res2 = my_array_src2 / my_array_src1;
 
+        const T scalar_div = base_array[6];
 
-        BOOST_CHECK(my_array_res1 == my_array_res2);
-
-        my_array_res1 = my_array_res2 / T(10);
+        my_array_res1 = my_array_src2 / scalar_div;
 
         for(std::size_t i =0; i < my_array_res1.size(); ++i){
-            BOOST_CHECK_EQUAL(my_array_res1[i], T(my_array_res2[i] / T(10)));
+            BOOST_CHECK_EQUAL(my_array_res1[i], T(my_array_src2[i] / scalar_div));
         }
 
         std::cout << "test_spmd_div " << my_array_res1 << std::endl;
