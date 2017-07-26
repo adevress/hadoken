@@ -42,6 +42,10 @@
 #endif
 
 
+#ifndef HADOKEN_FORCE_VECTORIZE
+#define HADOKEN_FORCE_VECTORIZE
+#endif 
+
 namespace hadoken {
 
 namespace spmd {
@@ -67,6 +71,28 @@ template<typename Array, typename Scalar>
 using ArrayOfScalar = typename std::enable_if<std::is_same<typename Array::value_type, Scalar>::value, Array>::type;
 
 
+
+//
+// neg
+//
+
+// neg
+template<typename Array>
+HADOKEN_FORCE_INLINE Array neg(const Array & a){
+    Array res;
+    constexpr std::size_t N = a.size();
+
+    HADOKEN_FORCE_VECTORIZE
+    for(std::size_t i = 0; i < N; i++){
+        res[i] = -a[i];
+    }
+
+    return res;
+}
+
+
+
+
 //
 // plus
 //
@@ -78,7 +104,7 @@ HADOKEN_FORCE_INLINE Array plus(const Array & a, const Array & b){
     Array res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = a[i] + b[i];
     }
@@ -94,7 +120,7 @@ plus(const Array & a, const Scalar & s){
     Array res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = a[i] + s;
     }
@@ -123,7 +149,7 @@ HADOKEN_FORCE_INLINE Array minus(const Array & array1, const Array & array2){
     Array res;
     constexpr std::size_t N = array1.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = array1[i] - array2[i];
     }
@@ -139,7 +165,7 @@ minus(const Array & array, const Scalar & scalar){
     Array res;
     constexpr std::size_t N = array.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = array[i] - scalar;
     }
@@ -155,7 +181,7 @@ minus(const Scalar & scalar, const Array & array){
     Array res;
     constexpr std::size_t N = array.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = scalar - array[i];
     }
@@ -175,7 +201,7 @@ HADOKEN_FORCE_INLINE Array mul(const Array & a, const Array & b){
     Array res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = a[i] * b[i];
     }
@@ -191,7 +217,7 @@ mul(const Array & a, const Scalar & s){
     Array res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = a[i] * s;
     }
@@ -220,7 +246,7 @@ HADOKEN_FORCE_INLINE Array div(const Array & array1, const Array & array2){
     Array res;
     constexpr std::size_t N = array1.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = array1[i] / array2[i];
     }
@@ -236,7 +262,7 @@ div(const Array & array, const Scalar & scalar){
     Array res;
     constexpr std::size_t N = array.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = array[i] / scalar;
     }
@@ -252,12 +278,54 @@ div(const Scalar & scalar, const Array & array){
     Array res;
     constexpr std::size_t N = array.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = scalar / array[i];
     }
 
     return res;
+}
+
+
+//
+// fma
+//
+
+// fma
+template<typename Array>
+HADOKEN_FORCE_INLINE Array fma(const Array & add1, const Array & mul1, const Array & mul2){
+    assert(mul1.size() == add1.size() && mul1.size() == mul2.size());
+    Array res;
+    constexpr std::size_t N = add1.size();
+
+    HADOKEN_FORCE_VECTORIZE
+    for(std::size_t i = 0; i < N; i++){
+        res[i] = add1[i] + mul1[i] * mul2[i];
+    }
+
+    return res;
+}
+
+// fma mul scalar
+template<typename Array>
+HADOKEN_FORCE_INLINE Array fma(const Array & add1, const Array & mul1, typename Array::value_type mul_scalar){
+    assert(mul1.size() == add1.size());
+    Array res;
+    constexpr std::size_t N = add1.size();
+
+    HADOKEN_FORCE_VECTORIZE
+    for(std::size_t i = 0; i < N; i++){
+        res[i] = add1[i] + mul1[i] * mul_scalar;
+    }
+
+    return res;
+}
+
+// fma mul scalar
+template<typename Array>
+HADOKEN_FORCE_INLINE Array fma(const Array & add1, typename Array::value_type  mul_scalar, 
+const Array & mul1){
+	return fma(add1, mul1, mul_scalar);
 }
 
 
@@ -275,7 +343,7 @@ HADOKEN_FORCE_INLINE Array min(const Array & a, const Array & b){
 
     typedef typename Array::value_type NumType;
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = std::min<NumType>(a[i], b[i]);
     }
@@ -292,7 +360,7 @@ HADOKEN_FORCE_INLINE Array max(const Array & a, const Array & b){
 
     typedef typename Array::value_type NumType;
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = std::max<NumType>(a[i], b[i]);
     }
@@ -311,7 +379,7 @@ HADOKEN_FORCE_INLINE Array sqrt(const Array & a){
     Array res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = std::sqrt(a[i]);
     }
@@ -331,7 +399,7 @@ HADOKEN_FORCE_INLINE Array exp(const Array & a){
     Array res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = std::exp(a[i]);
     }
@@ -352,7 +420,7 @@ HADOKEN_FORCE_INLINE Array1 pow(const Array1 & a, const Array2 & b){
     Array1 res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = std::pow(a[i], b[i]);
     }
@@ -368,7 +436,7 @@ pow(const Array & a, const Scalar & scalar){
     Array res;
     constexpr std::size_t N = a.size();
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res[i] = std::pow(a[i], scalar);
     }
@@ -397,12 +465,12 @@ close_to_abs(const Array & arr1, const Array & arr2, typename Array::value_type 
 
     int res = 0;
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         const NumType biggest = std::max<NumType>(arr1[i], arr2[i]);
         const NumType smallest = std::min<NumType>(arr1[i], arr2[i]);
 
-        res += (std::abs<NumType>(biggest - smallest) <= max_delta);
+        res += ((biggest - smallest) <= max_delta);
     }
 
     return  (res == N);
@@ -419,7 +487,7 @@ close_to_abs(const Array & arr1, const Array & arr2, typename Array::value_type 
 
     int res = 0;
 
-    #pragma omp simd
+    HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
         res += (std::fabs<NumType>(arr1[i] - arr2[i]) <= max_delta);
     }

@@ -45,7 +45,7 @@
 using namespace hadoken;
 
 
-typedef boost::mpl::list<char, unsigned char, short, unsigned short, int, unsigned int, float, double, long double> numerical_types;
+typedef boost::mpl::list<char, unsigned char, short, unsigned short, int, unsigned int, float, double> numerical_types;
 //typedef boost::mpl::list<float> numerical_types;
 
 
