@@ -32,6 +32,7 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 #include <array>
 #include <cassert>
 #include <type_traits>
@@ -44,6 +45,10 @@
 
 #ifndef HADOKEN_FORCE_VECTORIZE
 #define HADOKEN_FORCE_VECTORIZE
+#endif 
+
+#ifndef HADOKEN_SPMD_CONSTEXPR
+#define HADOKEN_SPMD_CONSTEXPR constexpr
 #endif 
 
 namespace hadoken {
@@ -70,7 +75,25 @@ class spmd_array;
 template<typename Array, typename Scalar>
 using ArrayOfScalar = typename std::enable_if<std::is_same<typename Array::value_type, Scalar>::value, Array>::type;
 
+namespace {
 
+
+    /*template<typename NonStaticArray>
+    inline std::size_t spmd_get_size(const NonStaticArray &){
+        static_assert(false, "Error ! not defined as static sized array");
+        return 0;
+    }*/
+
+
+    template<typename StaticArray>
+    constexpr
+    std::size_t
+//    typename std::enable_if<std::is_same<decltype(StaticArray::static_size), std::size_t>::value, std::size_t>::type
+    spmd_get_size(const StaticArray &){
+        return StaticArray::static_size; 
+    }
+
+}
 
 //
 // neg
@@ -80,7 +103,7 @@ using ArrayOfScalar = typename std::enable_if<std::is_same<typename Array::value
 template<typename Array>
 HADOKEN_FORCE_INLINE Array neg(const Array & a){
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -100,9 +123,9 @@ HADOKEN_FORCE_INLINE Array neg(const Array & a){
 // plus
 template<typename Array>
 HADOKEN_FORCE_INLINE Array plus(const Array & a, const Array & b){
-    assert(a.size() == b.size());
+    assert(spmd_get_size(a) == spmd_get_size(b));
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -118,7 +141,7 @@ HADOKEN_FORCE_INLINE
 ArrayOfScalar<Array,Scalar>
 plus(const Array & a, const Scalar & s){
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -145,9 +168,9 @@ plus(const Scalar & scalar, const Array & array){
 // minus
 template<typename Array>
 HADOKEN_FORCE_INLINE Array minus(const Array & array1, const Array & array2){
-    assert(array1.size() == array2.size());
+    assert(spmd_get_size(array1) == spmd_get_size(array2));
     Array res;
-    constexpr std::size_t N = array1.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(array1);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -163,7 +186,7 @@ HADOKEN_FORCE_INLINE
 ArrayOfScalar<Array,Scalar>
 minus(const Array & array, const Scalar & scalar){
     Array res;
-    constexpr std::size_t N = array.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(array);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -179,7 +202,7 @@ HADOKEN_FORCE_INLINE
 ArrayOfScalar<Array,Scalar>
 minus(const Scalar & scalar, const Array & array){
     Array res;
-    constexpr std::size_t N = array.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(array);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -197,9 +220,9 @@ minus(const Scalar & scalar, const Array & array){
 // mul
 template<typename Array>
 HADOKEN_FORCE_INLINE Array mul(const Array & a, const Array & b){
-    assert(a.size() == b.size());
+    assert(spmd_get_size(a) == spmd_get_size(b));
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -215,7 +238,7 @@ HADOKEN_FORCE_INLINE
 ArrayOfScalar<Array,Scalar>
 mul(const Array & a, const Scalar & s){
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -242,9 +265,9 @@ mul(const Scalar & scalar, const Array & array){
 // div
 template<typename Array>
 HADOKEN_FORCE_INLINE Array div(const Array & array1, const Array & array2){
-    assert(array1.size() == array2.size());
+    assert(spmd_get_size(array1) == spmd_get_size(array2));
     Array res;
-    constexpr std::size_t N = array1.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(array1);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -260,7 +283,7 @@ HADOKEN_FORCE_INLINE
 ArrayOfScalar<Array,Scalar>
 div(const Array & array, const Scalar & scalar){
     Array res;
-    constexpr std::size_t N = array.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(array);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -276,7 +299,7 @@ HADOKEN_FORCE_INLINE
 ArrayOfScalar<Array,Scalar>
 div(const Scalar & scalar, const Array & array){
     Array res;
-    constexpr std::size_t N = array.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(array);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -294,9 +317,9 @@ div(const Scalar & scalar, const Array & array){
 // fma
 template<typename Array>
 HADOKEN_FORCE_INLINE Array fma(const Array & add1, const Array & mul1, const Array & mul2){
-    assert(mul1.size() == add1.size() && mul1.size() == mul2.size());
+    assert(spmd_get_size(mul1) == spmd_get_size(add1) && spmd_get_size(mul1) == spmd_get_size(mul1));
     Array res;
-    constexpr std::size_t N = add1.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(add1);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -309,9 +332,9 @@ HADOKEN_FORCE_INLINE Array fma(const Array & add1, const Array & mul1, const Arr
 // fma mul scalar
 template<typename Array>
 HADOKEN_FORCE_INLINE Array fma(const Array & add1, const Array & mul1, typename Array::value_type mul_scalar){
-    assert(mul1.size() == add1.size());
+    assert(spmd_get_size(mul1) == spmd_get_size(add1));
     Array res;
-    constexpr std::size_t N = add1.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(add1);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -337,9 +360,9 @@ const Array & mul1){
 // min
 template<typename Array>
 HADOKEN_FORCE_INLINE Array min(const Array & a, const Array & b){
-    assert(a.size() == b.size());
+    assert(spmd_get_size(a) == spmd_get_size(b));
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     typedef typename Array::value_type NumType;
 
@@ -354,9 +377,9 @@ HADOKEN_FORCE_INLINE Array min(const Array & a, const Array & b){
 // max
 template<typename Array>
 HADOKEN_FORCE_INLINE Array max(const Array & a, const Array & b){
-    assert(a.size() == b.size());
+    assert(spmd_get_size(a) == spmd_get_size(b));
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     typedef typename Array::value_type NumType;
 
@@ -377,7 +400,7 @@ HADOKEN_FORCE_INLINE Array max(const Array & a, const Array & b){
 template<typename Array>
 HADOKEN_FORCE_INLINE Array sqrt(const Array & a){
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -395,9 +418,9 @@ HADOKEN_FORCE_INLINE Array sqrt(const Array & a){
 // exp
 template<typename Array>
 HADOKEN_FORCE_INLINE Array exp(const Array & a){
-    assert(a.size() == b.size());
+    assert(spmd_get_size(a));
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -416,9 +439,9 @@ HADOKEN_FORCE_INLINE Array exp(const Array & a){
 // pow
 template<typename Array1, typename Array2>
 HADOKEN_FORCE_INLINE Array1 pow(const Array1 & a, const Array2 & b){
-    assert(a.size() == b.size());
+    assert(spmd_get_size(a) == spmd_get_size(b));
     Array1 res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -434,7 +457,7 @@ HADOKEN_FORCE_INLINE
 typename std::enable_if<std::is_arithmetic<Scalar>::value, Array>::type
 pow(const Array & a, const Scalar & scalar){
     Array res;
-    constexpr std::size_t N = a.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(a);
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
@@ -457,9 +480,9 @@ pow(const Array & a, const Scalar & scalar){
 template<typename Array>
 typename std::enable_if<std::is_integral<typename Array::value_type>::value, bool>::type
 close_to_abs(const Array & arr1, const Array & arr2, typename Array::value_type max_delta){
-    assert(arr1.size() == arr2.size());
+    assert(spmd_get_size(arr1) == spmd_get_size(arr2));
 
-    constexpr std::size_t N = arr1.size();
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(arr1);
 
     typedef typename Array::value_type NumType;
 
@@ -480,16 +503,14 @@ close_to_abs(const Array & arr1, const Array & arr2, typename Array::value_type 
 template<typename Array>
 typename std::enable_if<std::is_floating_point<typename Array::value_type>::value, bool>::type
 close_to_abs(const Array & arr1, const Array & arr2, typename Array::value_type max_delta){
-    assert(arr1.size() == arr2.size());
-    constexpr std::size_t N = arr1.size();
-
-    typedef typename Array::value_type NumType;
+    assert(spmd_get_size(arr1) == spmd_get_size(arr2));
+    HADOKEN_SPMD_CONSTEXPR std::size_t N = spmd_get_size(arr1);
 
     int res = 0;
 
     HADOKEN_FORCE_VECTORIZE
     for(std::size_t i = 0; i < N; i++){
-        res += (std::fabs<NumType>(arr1[i] - arr2[i]) <= max_delta);
+        res += (std::fabs(arr1[i] - arr2[i]) <= max_delta);
     }
 
     return  (res == N);

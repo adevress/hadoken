@@ -106,6 +106,7 @@ public:
     typedef NumType* iterator;
     typedef const NumType* const_iterator;
 
+    constexpr static std::size_t static_size = N;
 
     spmd_array() = default;
     spmd_array(const spmd_array_t & ) = default;
@@ -224,7 +225,6 @@ public:
     ///
     ///
     HADOKEN_FORCE_INLINE NumType* data(){
-        assert( pos < N );
         return &(_d[0]);
     }
 
@@ -252,7 +252,7 @@ public:
     ///
     /// get size
     ///
-    HADOKEN_FORCE_INLINE constexpr std::size_t size(){
+    HADOKEN_FORCE_INLINE constexpr std::size_t size() const{
         return N;
     }
 
