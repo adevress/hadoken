@@ -124,8 +124,8 @@ public:
     const static result_type _min = 0;
     const static result_type _max = ~((result_type)0);
 
-    static result_type min () { return _min; }
-    static result_type max () { return _max; }
+    static constexpr result_type min () { return _min; }
+    static constexpr result_type max () { return _max; }
 
     result_type operator()(){
         if( elem == 0 ){
