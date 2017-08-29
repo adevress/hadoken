@@ -5,6 +5,7 @@ enable_testing()
 
 set(HADOKEN_VERSION_MAJOR "1")
 set(HADOKEN_VERSION_MINOR "0")
+add_definitions( -DHADOKEN_VERSION_MAJOR=\"${HADOKEN_VERSION_MAJOR}\" -DHADOKEN_VERSION_MINOR=\"${HADOKEN_VERSION_MINOR}\")
 
 
 option(HADOKEN_DISABLE_INSTALL "Disable the installation for this component" TRUE)
@@ -27,16 +28,13 @@ include(ReleaseDebugAutoFlags)
 include(DetectCXX11Support)
 
 
-find_package(Threads)
-
-add_definitions( -DHADOKEN_VERSION_MAJOR=\"${HADOKEN_VERSION_MAJOR}\" -DHADOKEN_VERSION_MINOR=\"${HADOKEN_VERSION_MINOR}\")
-
-find_package(OpenMP)
+## Dependencies
+find_package(Threads QUIET)
+find_package(OpenMP QUIET)
 if(OpenMP_FOUND)
     set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
 endif()
-
 
 
 if(BLUEGENE)
@@ -50,6 +48,7 @@ file(GLOB HADOKEN_HEADERS_1 ${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*/*)
 
 set(hadoken_version_src "${CMAKE_CURRENT_SOURCE_DIR}/src/hadoken_version.cpp")
 add_executable(hadoken_version ${hadoken_version_src})
+
 
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include/  )
