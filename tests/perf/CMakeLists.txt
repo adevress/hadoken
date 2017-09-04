@@ -1,7 +1,7 @@
 
 if(HADOKEN_PERF_TESTS)
 
-find_package(Boost 1.41.0 REQUIRED system chrono)
+  find_package(Boost 1.41.0 QUIET REQUIRED system chrono)
 
 include_directories(${CMAKE_SOURCE_DIR})
 include_directories(${Boost_INCLUDE_DIRS} )
