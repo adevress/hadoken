@@ -290,7 +290,8 @@ public:
         return k != rhs.k;
     }
 
-    range_type operator()(const domain_type & counter){
+
+    __attribute__((always_inline)) inline range_type operator()(const domain_type & counter){
         boost::array<uint_type, N+1>  ks;
         domain_type c(counter);
 
