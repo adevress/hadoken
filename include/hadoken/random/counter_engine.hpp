@@ -150,6 +150,19 @@ public:
         return v[--elem];
     }
 
+
+    result_type generate(){
+        return (*this)();
+    }
+
+
+    ctr_type generate_block(){
+        elem = 0;
+        incr_array(c.begin(), c.end());
+        return b(c);
+    }
+
+
     void discard(boost::uintmax_t skip){
         // any buffered turn need to be dropped
         while(elem != 0 && skip > 0){

@@ -260,6 +260,35 @@ std::size_t test_random_threefry(std::size_t iter){
 
 }
 
+std::size_t test_random_threefry_block_fake(std::size_t iter){
+
+    std::size_t res =0;
+
+    tp t1, t2;
+
+    boost::random::uniform_int_distribution<std::size_t> dist;
+
+    hadoken::counter_engine<hadoken::threefry4x64> threefry_engine;
+
+    t1 = cl::now();
+
+    const std::size_t size_block = sizeof(typename hadoken::counter_engine<hadoken::threefry4x64>::ctr_type) / sizeof(std::size_t);
+
+    for(std::size_t i =0; i < (iter/size_block); ++i){
+        auto block = threefry_engine.generate_block();
+        for(std::size_t i = 0; i < size_block; ++i){
+            res += block[i];
+        }
+    }
+
+
+    t2 = cl::now();
+
+    std::cout << "threefry block gen: " << boost::chrono::duration_cast<milliseconds>(t2 -t1) << std::endl;
+    return res;
+
+}
+
 
 int main(){
 
@@ -287,6 +316,9 @@ int main(){
 
 
     junk += test_random_threefry(n_exec);
+
+
+    junk += test_random_threefry_block_fake(n_exec);
 
 
     junk += test_random_abstract_threefry(n_exec);
