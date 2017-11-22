@@ -1,9 +1,11 @@
 
+[![Build Status](https://travis-ci.org/adevress/hadoken.svg?branch=master)](https://travis-ci.org/adevress/hadoken)
+
 Hadoken
 
 # Summmary
 
- Hadoken is a general purpose C++ Utility library. Hadoken is designed to complement and enhanced missing feature inside the STL and Boost.
+ Hadoken is Minimalist, Simple, Stupid, C++ Utility Library. Hadoken is designed to complement and enhanced missing feature inside the STL and Boost.
 
 - Hadoken does not have any other mandatory dependency than STL and Boost 
 - Hadoken is header-only and designed to be embedded
@@ -14,7 +16,7 @@ Hadoken
 
 ## Random
 
- - Random123 implementation with counter based random generator, high quality, crush resistant, faster than mersenne twister
+ - [Random123](https://www.deshawresearch.com/resources_random123.html) implementation of counter based random generator, high quality, crush resistant and faster than mersenne twister
  - Abstract interface to allow runtime random generator selection, fully compatible with C++11 and Boost random distribution
 
 ## Format
@@ -25,7 +27,16 @@ Hadoken
 
 ## Network
  - Uri library
- 
+
+## Containers
+ - small_vector: Vector with small size optimization. In the spirit of [LLVM small vector](http://llvm.org/doxygen/classllvm_1_1SmallVector.html)
+
+## Parallel
+ - Partial C++17 Parallel STL implementation compatible with C++11
+
+## Thread
+ - spinlock: simple implementation
+ - latch: barrier with counter implementation
 
 
 # How to use
@@ -42,7 +53,7 @@ make install
 
 
 # LICENSE
-hadoken is free of charge and distributed under the Boost Software License 1.0 ( https://opensource.org/licenses/BSL-1.0 )
+Hadoken is free of charge and distributed under the [Boost Software License 1.0](https://opensource.org/licenses/BSL-1.0)
 
 
 
