@@ -60,7 +60,7 @@ add_test(NAME test_format_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CM
 
 
 ## spmd related tests
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     LIST(APPEND test_spmd_src "test_spmd.cpp")
 
     add_executable(test_spmd ${test_spmd_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
@@ -70,7 +70,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 
     add_test(NAME test_spmd_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_spmd)
-
+endif()
 
 
 ## geometry related tests
