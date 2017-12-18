@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE( parallel_for_each_simple_test)
     parallel::for_each(parallel::parallel_vector_execution_policy(), values.begin(), values.end(), [](double & v){ v += 4222; });
 
 
-    values = std::vector<double>(128000, 128);
+    values = std::vector<double>(12800, 128);
 
     auto t1 = cl::now();
 
@@ -87,7 +87,7 @@ BOOST_AUTO_TEST_CASE( parallel_for_each_simple_test)
 
     std::cout << "sequential " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
 
-    values = std::vector<double>(128000, 128);
+    values = std::vector<double>(12800, 128);
 
     t1 = cl::now();
 
@@ -104,7 +104,7 @@ BOOST_AUTO_TEST_CASE( parallel_for_each_simple_test)
     std::cout << "parallel " << std::chrono::duration_cast<std::chrono::microseconds>(t2 -t1).count() << std::endl;
 
 
-    values = std::vector<double>(128000, 128);
+    values = std::vector<double>(12800, 128);
 
     parallel::for_each(parallel::parallel_vector_execution_policy(), values.begin(), values.end(), fops);
 
@@ -189,7 +189,7 @@ BOOST_AUTO_TEST_CASE( parallel_count_test)
 
     using namespace hadoken;
 
-    std::size_t n = 5000000;
+    std::size_t n = 50000;
 
     std::size_t num_4, num_2, p_num_4, p_num_2;
 
@@ -246,7 +246,7 @@ BOOST_AUTO_TEST_CASE( parallel_transform_test)
 
     using namespace hadoken;
 
-    std::size_t n = 800000;
+    std::size_t n = 80000;
 
     auto dummy_ops = [](std::size_t i , std::size_t j){
         return (i * 100  + j ) / 7;
@@ -314,7 +314,7 @@ BOOST_AUTO_TEST_CASE( parallel_all_of_test)
 
     using namespace hadoken;
 
-    std::size_t n = 500000;
+    std::size_t n = 50000;
 
     auto is_positive = [](int v){
             return (v >=0);
@@ -390,7 +390,7 @@ BOOST_AUTO_TEST_CASE( parallel_none_of_test)
 
     using namespace hadoken;
 
-    std::size_t n = 500000;
+    std::size_t n = 50000;
 
     auto is_negative = [](int v){
             return (v <0);
@@ -465,7 +465,7 @@ BOOST_AUTO_TEST_CASE( parallel_any_of_test)
 
     using namespace hadoken;
 
-    std::size_t n = 500000;
+    std::size_t n = 50000;
 
     auto is_negative = [](int v){
             return (v <0);
@@ -553,7 +553,7 @@ BOOST_AUTO_TEST_CASE( parallel_sort)
 
     using namespace hadoken;
 
-    std::size_t n = 500000;
+    std::size_t n = 50000;
 
     std::vector<int> values(n);
     
@@ -615,7 +615,7 @@ BOOST_AUTO_TEST_CASE( parallel_inclusive_scan)
 
     using namespace hadoken;
 
-    std::size_t n = 500000;
+    std::size_t n = 50000;
 
     std::vector<std::uint64_t> values(n);
     

@@ -65,9 +65,11 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
     add_executable(test_spmd ${test_spmd_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
     target_link_libraries(test_spmd ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
-    target_compile_options(test_spmd PRIVATE ${CMAKE_CXX_VECTORIZE} -fopt-info-vec ${CMAKE_CXX_GEN_NATIVE} )
+    target_compile_options(test_spmd PRIVATE ${CMAKE_CXX_VECTORIZE} ${CMAKE_CXX_GEN_NATIVE} )
+    #target_compile_options(test_spmd PRIVATE ${CMAKE_CXX_VECTORIZE} -fopt-info-vec ${CMAKE_CXX_GEN_NATIVE} )
+
+
     add_test(NAME test_spmd_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_spmd)
-endif()
 
 
 
@@ -99,13 +101,23 @@ add_test(NAME test_thread_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CM
 
 
 
+## Parallel Test
 LIST(APPEND test_parallel_src "test_parallel.cpp")
 
 add_executable(test_parallel_base ${test_parallel_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
-target_link_libraries(test_parallel_base ${CMAKE_THREAD_LIBS_INIT}  ${CMAKE_parallel_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+target_link_libraries(test_parallel_base ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 
 add_test(NAME test_parallel_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_parallel_base)
 
+
+
+# Network Test
+LIST(APPEND test_network_src "test_network.cpp")
+
+add_executable(test_network_base ${test_network_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_network_base ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_network_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_network_base)
 
 
 endif()

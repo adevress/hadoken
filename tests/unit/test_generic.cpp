@@ -38,8 +38,30 @@
 #include <boost/array.hpp>
 #include <boost/math/constants/constants.hpp>
 
+#include <hadoken/string/wildcard.hpp>
 #include <hadoken/geometry/geometry_legacy.hpp>
 #include <hadoken/math/math_floating_point.hpp>
+
+
+
+BOOST_AUTO_TEST_CASE(wildcard_simple)
+{
+
+    BOOST_CHECK(hadoken::match_wildcard("hello*ld", "hello world"));
+
+    BOOST_CHECK(hadoken::match_wildcard("dude", "hello world") == false);
+
+    BOOST_CHECK(hadoken::match_wildcard("h*", "hello world"));
+
+    BOOST_CHECK(hadoken::match_wildcard("hello world", "hello*") == false);
+
+    BOOST_CHECK(hadoken::match_wildcard("h**", "hello world"));
+    BOOST_CHECK(hadoken::match_wildcard("*hello*", "hello world"));
+
+    BOOST_CHECK(hadoken::match_wildcard("world*", "hello world") == false);
+    BOOST_CHECK(hadoken::match_wildcard("*", "hello world"));
+}
+
 
 BOOST_AUTO_TEST_CASE( simple_rotation_tests )
 {

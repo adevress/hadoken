@@ -57,6 +57,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ///  available cbrng backend  are : threefy
 ///
 ///
+///
+///
+
+
+#include <random>
 
 namespace hadoken{
 
@@ -75,9 +80,18 @@ public:
     explicit counter_engine() : b(), c(), elem() {
 
     }
+
     explicit counter_engine(result_type r) : b(), c(), elem() {
         key_type key;
         std::fill(key.begin(), key.end(), typename key_type::value_type(r));
+        b.set_key(key);
+    }
+
+
+    explicit counter_engine(std::seed_seq & seq) : b(), c(), elem() {
+        key_type key;
+
+        seq.generate(key.begin(), key.end());
         b.set_key(key);
     }
 
@@ -135,6 +149,19 @@ public:
         }
         return v[--elem];
     }
+
+
+    result_type generate(){
+        return (*this)();
+    }
+
+
+    ctr_type generate_block(){
+        elem = 0;
+        incr_array(c.begin(), c.end());
+        return b(c);
+    }
+
 
     void discard(boost::uintmax_t skip){
         // any buffered turn need to be dropped
