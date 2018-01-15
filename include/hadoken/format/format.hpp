@@ -8,13 +8,9 @@
 
 namespace hadoken {
 
-namespace format{
-
 inline void scat(std::ostream & ostream){
     (void) ostream;
 }
-
-
 
 ///
 /// @brief scat
@@ -34,10 +30,7 @@ inline void scat(std::ostream & ostream, const T & arg1, const Args&...  args){
     scat(ostream, args...);
 }
 
-
-
 // enable only for 1st argument != ostream
-
 ///
 /// @brief scat
 ///
@@ -61,7 +54,12 @@ scat(const T & arg1, const Args&...  args){
 
 
 
-} //format
+
+// for compatibility purpose with the deprecated
+// hadoken::format namespace
+namespace format{
+    using namespace hadoken;
+}
 
 
 } //hadoken

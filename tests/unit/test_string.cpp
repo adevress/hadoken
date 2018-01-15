@@ -26,64 +26,44 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef TEST_HELPERS_HPP
-#define TEST_HELPERS_HPP
 
-#include <algorithm>
-#include <type_traits>
-#include <string>
-#include <memory>
-#include <cmath>
+#define BOOST_TEST_MODULE stringTests
+#define BOOST_TEST_MAIN
 
+#include <iostream>
+#include <map>
+#include <stdexcept>
 
-template<typename T, typename Extra = void>
-struct content_generator{
-
-    static_assert(sizeof(T) != -1, "Need to be specialized");
-
-};
-
-template<>
-struct content_generator<std::string, void>{
-
-    std::string operator()(std::size_t n){
-        const std::size_t s = std::max<std::size_t>(std::log(n+1), 1) ;
-
-        std::ostringstream ss;
-        for(std::size_t i =0; i < s; ++i){
-            ss << "hello world ";
-        }
-        return ss.str();
-    }
-
-};
+#include <boost/test/unit_test.hpp>
+#include <boost/mpl/list.hpp>
 
 
-template<>
-struct content_generator<std::unique_ptr<std::string> >{
+#include <hadoken/string/string_view.hpp>
 
-    std::unique_ptr<std::string> operator()(std::size_t n){
-        content_generator<std::string, void> gen;
+#include <hadoken/utility/range.hpp>
 
-        return std::unique_ptr<std::string>(new std::string(gen(n)));
-    }
 
-};
+#include "test_helpers.hpp"
 
 
 
+BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
+{
+    using namespace hadoken;
 
-template<typename T>
-struct content_generator<T, typename std::enable_if<std::is_arithmetic<T>::value >::type >{
+    const char* msg = "hello bob #42~€é";
 
-    T operator()(std::size_t n){
-        return T(n) + T(n * 0.1);
-    }
+    string_view empty, truncated(msg, 5), full(msg);
 
-};
-
+    BOOST_CHECK_EQUAL(empty.empty(), true);
+    BOOST_CHECK_EQUAL(truncated.empty(), false);
+    BOOST_CHECK_EQUAL(full.empty(), false);
 
 
+    BOOST_CHECK_EQUAL(empty.size(), 0);
+    BOOST_CHECK_EQUAL(empty.size(), empty.length());
+    BOOST_CHECK_EQUAL(truncated.size(), 5);
+    BOOST_CHECK_EQUAL(truncated.size(), truncated.length());
+    BOOST_CHECK_EQUAL(full.size(), strlen(msg));
+}
 
-
-#endif // TEST_HELPERS_HPP

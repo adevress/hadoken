@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, Adrien Devresse <adrien.devresse@epfl.ch>
+ * Copyright (c) 2018, Adrien Devresse <adrien.devresse@epfl.ch>
  *
  * Boost Software License - Version 1.0
  *
@@ -26,64 +26,58 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef TEST_HELPERS_HPP
-#define TEST_HELPERS_HPP
+#ifndef HADOKEN_STRING_VIEW_IMPL_HPP
+#define HADOKEN_STRING_VIEW_IMPL_HPP
 
-#include <algorithm>
-#include <type_traits>
-#include <string>
-#include <memory>
-#include <cmath>
+#include "../string_view.hpp"
 
+#include <cstring>
+#include <limits>
 
-template<typename T, typename Extra = void>
-struct content_generator{
+namespace hadoken {
 
-    static_assert(sizeof(T) != -1, "Need to be specialized");
+inline string_view::string_view() noexcept :
+    _pstr(nullptr),
+    _len(0){
 
-};
+}
 
-template<>
-struct content_generator<std::string, void>{
+inline string_view::string_view(const char *c_str, std::size_t length) :
+    _pstr(c_str),
+    _len(length){
 
-    std::string operator()(std::size_t n){
-        const std::size_t s = std::max<std::size_t>(std::log(n+1), 1) ;
+}
 
-        std::ostringstream ss;
-        for(std::size_t i =0; i < s; ++i){
-            ss << "hello world ";
-        }
-        return ss.str();
-    }
+inline string_view::string_view(const char *c_str) :
+    _pstr(c_str),
+    _len(strlen(c_str)){
 
-};
+}
 
 
-template<>
-struct content_generator<std::unique_ptr<std::string> >{
+inline string_view::size_type string_view::size() const noexcept{
+    return _len;
+}
 
-    std::unique_ptr<std::string> operator()(std::size_t n){
-        content_generator<std::string, void> gen;
+inline string_view::size_type string_view::length() const noexcept{
+    return size();
+}
 
-        return std::unique_ptr<std::string>(new std::string(gen(n)));
-    }
+inline bool string_view::empty() const noexcept{
+    return (_len == 0);
+}
 
-};
-
-
-
-
-template<typename T>
-struct content_generator<T, typename std::enable_if<std::is_arithmetic<T>::value >::type >{
-
-    T operator()(std::size_t n){
-        return T(n) + T(n * 0.1);
-    }
-
-};
+inline string_view::size_type string_view::max_size() const noexcept{
+    return std::numeric_limits<decltype(_len)>::max();
+}
 
 
+inline void string_view::swap(string_view &other) noexcept{
+    using std::swap;
+    swap(_pstr, other._pstr);
+    swap(_len, other._len);
+}
 
+} // hadoken
 
-
-#endif // TEST_HELPERS_HPP
+#endif // STRING_VIEW_IMPL_HPP
