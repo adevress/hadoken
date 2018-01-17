@@ -65,5 +65,17 @@ BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
     BOOST_CHECK_EQUAL(truncated.size(), 5);
     BOOST_CHECK_EQUAL(truncated.size(), truncated.length());
     BOOST_CHECK_EQUAL(full.size(), strlen(msg));
+
+    string_view new_view_copied = full;
+    string_view truncated_copy = truncated;
+    string_view new_view_moved = std::move(truncated_copy);
+
+    BOOST_CHECK_EQUAL(full, new_view_copied);
+    BOOST_CHECK_EQUAL(new_view_moved, truncated);
+
+    std::ostringstream ss;
+    ss << truncated;
+    BOOST_CHECK_EQUAL(ss.str(), to_string(truncated));
+
 }
 

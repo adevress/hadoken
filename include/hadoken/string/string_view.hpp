@@ -67,6 +67,7 @@ public:
 
     /// default copy constructor
     string_view(const string_view& other) noexcept = default;
+    string_view(string_view&& other) noexcept = default;
 
     /// construct from char with known length
     string_view(const char* c_str, std::size_t length);
@@ -85,14 +86,32 @@ public:
 
     size_type max_size() const noexcept;
 
+    // operations
+    int compare(const string_view & other) const noexcept;
 
     // utility
     void swap(string_view & other) noexcept;
 
+    const_pointer data() const noexcept;
+
+    // operators
+    string_view & operator =(const string_view & other) noexcept = default;
+
 private:
     char const* _pstr;
     size_type _len;
+
+    friend std::ostream & operator <<(std::ostream & o, const string_view & sv);
 };
+
+
+bool operator==(const string_view & first, const string_view & second);
+
+
+std::ostream & operator <<(std::ostream & o, const string_view & sv);
+
+
+std::string to_string(const string_view & sv);
 
 } // namespace hadoken
 
