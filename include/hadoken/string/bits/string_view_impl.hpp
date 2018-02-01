@@ -42,6 +42,12 @@ inline string_view::string_view() noexcept :
 
 }
 
+inline string_view::string_view(const std::string &str) noexcept :
+    _pstr(str.c_str()),
+    _len(str.size()){
+
+}
+
 inline string_view::string_view(const char *c_str, std::size_t length) :
     _pstr(c_str),
     _len(length){

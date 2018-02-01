@@ -31,6 +31,7 @@
 
 #include <string>
 #include <cstdint>
+#include <ostream>
 #include <utility>
 
 namespace hadoken {
@@ -64,6 +65,9 @@ public:
 
     /// default constructor
     string_view() noexcept;
+
+    /// constructor from std::string
+    string_view(const std::string & str) noexcept;
 
     /// default copy constructor
     string_view(const string_view& other) noexcept = default;
