@@ -101,6 +101,8 @@ public:
     // operators
     string_view & operator =(const string_view & other) noexcept = default;
 
+    char operator [](std::size_t pos) const;
+
 private:
     char const* _pstr;
     size_type _len;

@@ -32,6 +32,7 @@
 #include "../string_view.hpp"
 
 #include <cstring>
+#include <cassert>
 #include <limits>
 
 namespace hadoken {
@@ -94,6 +95,11 @@ inline int string_view::compare(const string_view &other) const noexcept{
 
 inline string_view::const_pointer string_view::data() const noexcept{
     return _pstr;
+}
+
+inline char string_view::operator [](std::size_t pos) const{
+    assert(pos < _len);
+    return _pstr[pos];
 }
 
 
