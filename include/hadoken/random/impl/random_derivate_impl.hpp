@@ -41,7 +41,7 @@
 
 namespace hadoken {
 
-namespace {
+namespace impl {
 
 template<typename Uint>
 inline hadoken::sha1::digest32_t generate_deterministic_seed_160(Uint origin_seed, Uint key){
@@ -64,7 +64,7 @@ inline hadoken::sha1::digest32_t generate_deterministic_seed_160(Uint origin_see
 
 
 
-} // end anonymou
+} // end imple
 
 
 
@@ -75,7 +75,7 @@ inline Engine random_engine_derivate(const Engine & engine, const typename Engin
     typename Engine::result_type old_val = res();
 
     // compute a new  seed determinitically
-    hadoken::sha1::digest32_t digest = generate_deterministic_seed_160<typename Engine::result_type> (old_val, key);
+    hadoken::sha1::digest32_t digest = impl::generate_deterministic_seed_160<typename Engine::result_type> (old_val, key);
     typename Engine::result_type new_seed;
     std::memcpy(&new_seed, &(digest[0]), sizeof(typename Engine::result_type));
 

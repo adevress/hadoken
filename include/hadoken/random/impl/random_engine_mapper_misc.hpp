@@ -72,7 +72,7 @@ private:
 };
 
 
-}
+} // impl
 
 template< typename Uint >
 template< typename Engine >
