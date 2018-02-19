@@ -64,7 +64,7 @@
 
 namespace hadoken{
 
-namespace impl {
+namespace {
 
 // threefry_constants is an abstract template that will be
 // specialized with the KS_PARITY and Rotation constants
@@ -85,53 +85,35 @@ struct threefry_constants{
 // 2x32 constants
 template <>
 struct threefry_constants<2, uint32_t>{
-    static const uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
-    static const unsigned rotations[8];
+    static constexpr uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
+    static constexpr unsigned rotations[8] = {13, 15, 26, 6, 17, 29, 16, 24};
 };
-const unsigned
-threefry_constants<2, uint32_t>::rotations[]  =
-    {13, 15, 26, 6, 17, 29, 16, 24};
+
+
 
 // 4x32 contants
 template <>
 struct threefry_constants<4, uint32_t>{
-    static const uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
-    static const unsigned rotations0[8];
-    static const unsigned rotations1[8];
+    static constexpr uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
+    static constexpr unsigned rotations0[8] = {10, 11, 13, 23, 6, 17, 25, 18};
+    static constexpr unsigned rotations1[8] = {26, 21, 27, 5, 20, 11, 10, 20};
 };
-
-const unsigned threefry_constants<4, uint32_t>::rotations0[]  =
-    {10, 11, 13, 23, 6, 17, 25, 18};
-
-const unsigned
-threefry_constants<4, uint32_t>::rotations1[]  =
-    {26, 21, 27, 5, 20, 11, 10, 20};
 
 // 2x64 constants
 template <>
 struct threefry_constants<2, uint64_t>{
-    static const uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
-    static const unsigned rotations[8];
+    static constexpr uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
+    static constexpr unsigned rotations[8] = {16, 42, 12, 31, 16, 32, 24, 21};
 };
-const unsigned
-threefry_constants<2, uint64_t>::rotations[]  =
-    {16, 42, 12, 31, 16, 32, 24, 21};
+
 
 // 4x64 constants
 template <>
 struct threefry_constants<4, uint64_t>{
-    static const uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
-    static const unsigned rotations0[8];
-    static const unsigned rotations1[8];
+    static constexpr uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
+    static constexpr unsigned rotations0[8] = {14, 52, 23, 5, 25, 46, 58, 32};
+    static constexpr unsigned rotations1[8] = {16, 57, 40, 37, 33, 12, 22, 32};
 };
-
-const unsigned
-threefry_constants<4, uint64_t>::rotations0[]  =
-    {14, 52, 23, 5, 25, 46, 58, 32};
-
-const unsigned
-threefry_constants<4, uint64_t>::rotations1[]  = {
-    16, 57, 40, 37, 33, 12, 22, 32};
 
 
 template <typename Uint>
@@ -165,7 +147,7 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 4>{
 
     inline void operator() (const boost::array<uint_type, 5> & ks,
                         domain_type & c){
-        const std::size_t r = r_max - r_remain;
+        constexpr std::size_t r = r_max - r_remain;
 
         if( ( r & 0x01)  ){
             c[0] += c[3];
@@ -221,16 +203,16 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 2>{
 
     inline void operator() (const boost::array<uint_type, 3> & ks,
                         domain_type & c){
-        const std::size_t r = r_max - r_remain;
+        constexpr std::size_t r = r_max - r_remain;
 
         c[0] += c[1];
         c[1] = threefry_rotl(c[1], Constants::rotations[r%8]);
         c[1] ^= c[0];
 
 
-        const std::size_t r_next = r+1;
-        const std::size_t r4 = r_next>>2;
-        const std::size_t r_next_mod_4 = r_next%4;
+        constexpr std::size_t r_next = r+1;
+        constexpr std::size_t r4 = r_next>>2;
+        constexpr std::size_t r_next_mod_4 = r_next%4;
 
         if(r_next_mod_4  == 0){
             c[0] += ks[r4%3];
@@ -259,9 +241,9 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 2>{
 
 };
 
-} // details namespace
+} // anonymous namespace
 
-template <unsigned N, typename Uint, unsigned R=20, typename Constants=impl::threefry_constants<N, Uint> >
+template <unsigned N, typename Uint, unsigned R=20, typename Constants=threefry_constants<N, Uint> >
 class threefry{
     BOOST_STATIC_ASSERT( N==2 || N==4 );
 public:
@@ -292,8 +274,6 @@ public:
 
 
     __attribute__((always_inline)) inline range_type operator()(const domain_type & counter){
-        using namespace impl;
-
         boost::array<uint_type, N+1>  ks;
         domain_type c(counter);
 

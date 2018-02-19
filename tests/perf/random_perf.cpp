@@ -277,7 +277,7 @@ std::size_t test_random_threefry_block_fake(std::size_t iter){
     for(std::size_t i =0; i < (iter/size_block); ++i){
         auto block = threefry_engine.generate_block();
         for(std::size_t i = 0; i < size_block; ++i){
-            res += block[i];
+            res += block[0];
         }
     }
 
