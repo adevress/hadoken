@@ -64,7 +64,7 @@
 
 namespace hadoken{
 
-namespace {
+namespace impl {
 
 // threefry_constants is an abstract template that will be
 // specialized with the KS_PARITY and Rotation constants
@@ -243,7 +243,7 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 2>{
 
 } // anonymous namespace
 
-template <unsigned N, typename Uint, unsigned R=20, typename Constants=threefry_constants<N, Uint> >
+template <unsigned N, typename Uint, unsigned R=20, typename Constants=impl::threefry_constants<N, Uint> >
 class threefry{
     BOOST_STATIC_ASSERT( N==2 || N==4 );
 public:
@@ -274,6 +274,7 @@ public:
 
 
     __attribute__((always_inline)) inline range_type operator()(const domain_type & counter){
+        using namespace impl;
         boost::array<uint_type, N+1>  ks;
         domain_type c(counter);
 
