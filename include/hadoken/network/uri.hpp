@@ -57,7 +57,7 @@ public:
 
     typedef std::tuple<std::string, std::string> query_pair;
 
-    inline explicit uri(const std::string & uri_string);
+    inline explicit uri(std::string uri_string);
     inline explicit uri(const uri &) = default;
     inline explicit uri(uri &&) = default;
     inline ~uri();

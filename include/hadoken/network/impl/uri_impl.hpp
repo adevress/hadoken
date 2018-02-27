@@ -72,8 +72,8 @@ namespace {
 
 }
 
-uri::uri(const std::string & uri_string) :
-    _str_uri(uri_string),
+uri::uri(std::string uri_string) :
+    _str_uri(std::move(uri_string)),
     _state(state::invalid),
     _scheme(make_empty_view(_str_uri)),
     _userinfo(make_empty_view(_str_uri)),
