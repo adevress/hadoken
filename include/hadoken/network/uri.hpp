@@ -91,6 +91,11 @@ private:
 };
 
 
+std::string percent_encode(std::string decoded_origin);
+
+
+std::string percent_decode(std::string encoded_string);
+
 } //hadoken
 
 

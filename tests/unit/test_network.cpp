@@ -145,5 +145,34 @@ BOOST_AUTO_TEST_CASE( uri_parsing)
     uri broken_scheme(broken_scheme_str);
     BOOST_CHECK(broken_scheme.is_valid() == false);
 
+}
 
+
+
+BOOST_AUTO_TEST_CASE( test_encode)
+{
+    std::string res;
+
+    res = percent_encode("hello_world");
+
+    BOOST_CHECK_EQUAL(res, "hello_world");
+
+    res = percent_decode(res);
+
+    BOOST_CHECK_EQUAL(res, "hello_world");
+
+
+    res= percent_encode("il pleut, il pleut bergère, rentre_t€s bläncs mOutön$");
+
+    BOOST_CHECK_EQUAL(res, "il%20pleut%2C%20il%20pleut%20berg%C3%A8re%2C%20rentre_t%E2%82%ACs%20bl%C3%A4ncs%20mOut%C3%B6n%24");
+
+    res = percent_decode(res);
+
+
+  //  BOOST_CHECK_EQUAL(res, "il pleut, il pleut bergère, rentre_t€s bläncs mOutön$");
+
+
+    res = percent_encode("私はガラスを食べられます。それは私を傷つけません");
+
+   BOOST_CHECK_EQUAL(res, "%E7%A7%81%E3%81%AF%E3%82%AC%E3%83%A9%E3%82%B9%E3%82%92%E9%A3%9F%E3%81%B9%E3%82%89%E3%82%8C%E3%81%BE%E3%81%99%E3%80%82%E3%81%9D%E3%82%8C%E3%81%AF%E7%A7%81%E3%82%92%E5%82%B7%E3%81%A4%E3%81%91%E3%81%BE%E3%81%9B%E3%82%93");
 }

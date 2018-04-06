@@ -39,6 +39,7 @@
 
 
 #include <hadoken/containers/small_vector.hpp>
+#include <hadoken/containers/concurrent_queue.hpp>
 
 #include <hadoken/utility/range.hpp>
 

@@ -15,7 +15,11 @@
 
 namespace hadoken {
 
-namespace {
+namespace details{
+
+    constexpr char hexmap_uppercase[] = {'0', '1', '2', '3', '4', '5', '6', '7',
+                           '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
+
 
     inline const char* rfc3986_gen_delims_chars(){
         return (":" "/"  "?"  "#"  "["  "]"  "@") ;
@@ -70,18 +74,26 @@ namespace {
          return std::make_tuple<uri::iterator_type, uri::iterator_type>(str.end(), str.end());
     }
 
+    inline bool is_percent_unreserved(char c){
+        return     (c >= 'a' && c <= 'z')
+                || (c >= 'A' && c <= 'z')
+                || (c >= '0' && c <= '9')
+                || (c == '-' || c == '_')
+                || (c == '?' || c == '~');
+    }
+
 }
 
 uri::uri(std::string uri_string) :
     _str_uri(std::move(uri_string)),
     _state(state::invalid),
-    _scheme(make_empty_view(_str_uri)),
-    _userinfo(make_empty_view(_str_uri)),
-    _host(make_empty_view(_str_uri)),
-    _port(make_empty_view(_str_uri)),
-    _path(make_empty_view(_str_uri)),
-    _query(make_empty_view(_str_uri)),
-    _fragment(make_empty_view(_str_uri))
+    _scheme(details::make_empty_view(_str_uri)),
+    _userinfo(details::make_empty_view(_str_uri)),
+    _host(details::make_empty_view(_str_uri)),
+    _port(details::make_empty_view(_str_uri)),
+    _path(details::make_empty_view(_str_uri)),
+    _query(details::make_empty_view(_str_uri)),
+    _fragment(details::make_empty_view(_str_uri))
 {
     parse_uri(_str_uri.begin(), _str_uri.begin(), _str_uri.end(), state::scheme);
 }
@@ -96,11 +108,13 @@ bool uri::is_valid() const{
 }
 
 std::string uri::get_uri() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     return _str_uri;
 }
 
 std::string uri::get_scheme() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     return string_from_view(_scheme);
 }
@@ -108,6 +122,7 @@ std::string uri::get_scheme() const{
 
 
 std::string uri::get_userinfo() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     return string_from_view(_userinfo);
 }
@@ -115,11 +130,13 @@ std::string uri::get_userinfo() const{
 
 
 std::string uri::get_host() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     return string_from_view(_host);
 }
 
 int uri::get_port() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     if(std::get<0>(_port) == std::get<1>(_port)){
         return 0;
@@ -128,22 +145,26 @@ int uri::get_port() const{
 }
 
 std::string uri::get_path() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     return string_from_view(_path);
 }
 
 std::string uri::get_query() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     return string_from_view(_query);
 }
 
 std::string uri::get_fragment() const{
+    using namespace details;
     check_validity(_str_uri, _state);
     return string_from_view(_fragment);
 }
 
 
 int uri::parse_uri(iterator_type begin, iterator_type last, iterator_type end, state pstate){
+    using namespace details;
     const char delim_query = '?';
     const char delim_fragment = '#';
     const char userinfo_delim = '@';
@@ -261,6 +282,47 @@ int uri::parse_uri(iterator_type begin, iterator_type last, iterator_type end, s
 
 
 
+inline std::string percent_encode(std::string decoded_origin){
+    if( std::all_of(decoded_origin.begin(), decoded_origin.end(), details::is_percent_unreserved)){
+        return std::move(decoded_origin);
+    }
+    std::string encoded;
+    for(char c : decoded_origin){
+        if(details::is_percent_unreserved(c)){
+            encoded.push_back(c);
+        }else{
+            encoded.append({ '%', details::hexmap_uppercase[ ((c >> 4) & 0x0f)], details::hexmap_uppercase[c & 0x0f] });
+        }
+    }
+    return encoded;
+}
+
+
+inline std::string percent_decode(std::string encoded_origin){
+    (void) encoded_origin;
+    throw std::invalid_argument("not implemented yet");
+
+    /*   if( std::all_of(encoded_origin.begin(), encoded_origin.end(), [](char c){ return c != '%'; })){
+        return std::move(encoded_origin);
+    }
+
+    std::string decoded;
+    int encounter_percent = 0;
+    char buff;
+    for(char c : encoded_origin){
+        if(details::is_percent_unreserved(c)){
+            decoded.push_back(c);
+        }else if (c == '%' && encounter_percent == 0){
+            encounter_percent = 2;
+        }else if ( encounter_percent == 2){
+            decoded.push_back( (c <);
+            encoded.append({ '%', details::hexmap_uppercase[ ((c >> 4) & 0x0f)], details::hexmap_uppercase[c & 0x0f] });){
+
+        }
+
+    }
+    return decoded;*/
+}
 
 
 
