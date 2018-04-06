@@ -55,10 +55,9 @@ public:
     typedef value_type& reference;
     typedef const value_type& const_reference;
 
-    //const_iterator 	implementation-defined constant RandomAccessIterator and ContiguousIterator whose value_type is CharT
-    //iterator 	const_iterator
-    //reverse_iterator 	const_reverse_iterator
-    //const_reverse_iterator 	std::reverse_iterator<const_iterator>
+
+    typedef  char* iterator;
+    typedef char const* const_iterator;
 
     typedef std::size_t size_type;
     typedef std::ptrdiff_t difference_type;
@@ -81,6 +80,10 @@ public:
 
     /// default destructor
     ~string_view() = default;
+
+    // iterator
+    const_iterator begin() const;
+    const_iterator end() const;
 
     // capacity
     size_type size() const noexcept;

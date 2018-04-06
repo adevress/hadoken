@@ -47,7 +47,7 @@ file(GLOB HADOKEN_HEADERS_2 "${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*/*.hpp
 
 
 set(hadoken_version_src "${CMAKE_CURRENT_SOURCE_DIR}/src/hadoken_version.cpp")
-add_executable(hadoken_version ${hadoken_version_src} ${HADOKEN_HEADERS_1} ${HADOKEN_HEADERS_2})
+add_executable(hadoken_version ${hadoken_version_src} )
 
 
 

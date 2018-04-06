@@ -62,6 +62,16 @@ inline string_view::string_view(const char *c_str) :
 }
 
 
+
+string_view::const_iterator string_view::begin() const{
+    return _pstr;
+}
+
+string_view::const_iterator string_view::end() const{
+    return _pstr + _len;
+}
+
+
 inline string_view::size_type string_view::size() const noexcept{
     return _len;
 }

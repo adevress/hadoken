@@ -8,6 +8,7 @@
 #include <cstring>
 
 #include <hadoken/format/format.hpp>
+#include <hadoken/string/string_view.hpp>
 
 #ifndef HADOKEN_URI_HPP
 #include "../uri.hpp"
@@ -80,6 +81,42 @@ namespace details{
                 || (c >= '0' && c <= '9')
                 || (c == '-' || c == '_')
                 || (c == '?' || c == '~');
+    }
+
+    inline unsigned char decode_half_hex(unsigned char in){
+        if(in >= '0' && in <= '9')
+            return in - '0';
+        if(in >= 'a' && in <= 'f')
+            return in - 'a' +10;
+        if(in >= 'A' && in <= 'F')
+            return in - 'A' +10;
+        // invalid
+        return 0xff;
+    }
+
+    inline void decode_percent_rec(string_view sview, std::string & res, unsigned char c = 0x00, int pos = 0){
+        if(sview.empty()){
+            return;
+        }
+
+        unsigned char tmp;
+        if(pos == 1 && (tmp = decode_half_hex(sview[0])) != 0xff){
+            pos = 2;
+            c = tmp << 4;
+        }else if(pos == 2 && (tmp = decode_half_hex(sview[0])) != 0xff){
+            c |= tmp;
+            res.push_back(c);
+            pos = 0;
+            c = 0;
+        }else if( sview[0] == '%'){
+            pos = 1;
+            c = 0;
+        } else {
+            res.push_back(sview[0]);
+            pos = 0;
+            c = 0;
+        }
+       decode_percent_rec(string_view(sview.data() +1, sview.size()-1), res, c, pos);
     }
 
 }
@@ -281,7 +318,6 @@ int uri::parse_uri(iterator_type begin, iterator_type last, iterator_type end, s
 }
 
 
-
 inline std::string percent_encode(std::string decoded_origin){
     if( std::all_of(decoded_origin.begin(), decoded_origin.end(), details::is_percent_unreserved)){
         return std::move(decoded_origin);
@@ -298,30 +334,18 @@ inline std::string percent_encode(std::string decoded_origin){
 }
 
 
-inline std::string percent_decode(std::string encoded_origin){
-    (void) encoded_origin;
-    throw std::invalid_argument("not implemented yet");
 
-    /*   if( std::all_of(encoded_origin.begin(), encoded_origin.end(), [](char c){ return c != '%'; })){
+
+inline std::string percent_decode(std::string encoded_origin){
+
+
+    if( std::all_of(encoded_origin.begin(), encoded_origin.end(), [](char c){ return c != '%'; })){
         return std::move(encoded_origin);
     }
 
     std::string decoded;
-    int encounter_percent = 0;
-    char buff;
-    for(char c : encoded_origin){
-        if(details::is_percent_unreserved(c)){
-            decoded.push_back(c);
-        }else if (c == '%' && encounter_percent == 0){
-            encounter_percent = 2;
-        }else if ( encounter_percent == 2){
-            decoded.push_back( (c <);
-            encoded.append({ '%', details::hexmap_uppercase[ ((c >> 4) & 0x0f)], details::hexmap_uppercase[c & 0x0f] });){
-
-        }
-
-    }
-    return decoded;*/
+    details::decode_percent_rec(encoded_origin, decoded);
+    return decoded;
 }
 
 
