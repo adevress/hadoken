@@ -24,7 +24,6 @@ add_test(NAME test_generic_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${C
 
 
 ## random generator related tests
-
 LIST(APPEND test_random_src "test_random.cpp")
 
 add_executable(test_random ${test_random_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
@@ -34,7 +33,6 @@ add_test(NAME test_random_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CM
 
 
 ## crypto generator related tests
-
 LIST(APPEND test_crypto_src "test_crypto.cpp")
 
 add_executable(test_crypto ${test_crypto_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
@@ -72,7 +70,7 @@ add_test(NAME test_geometry_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${
 LIST(APPEND test_container_src "test_container.cpp")
 
 add_executable(test_container ${test_container_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
-target_link_libraries(test_container ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+target_link_libraries(test_container ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES} ${CMAKE_THREAD_LIBS_INIT})
 
 add_test(NAME test_container_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_container)
 

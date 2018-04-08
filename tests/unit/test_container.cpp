@@ -201,3 +201,78 @@ void  test_check_range(T vec, size_t partition, const Mod & modifier, const Chec
     }
 
 }
+
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( concurrent_queue_test_pthread, T, small_vector_types )
+{
+
+    using namespace hadoken;
+
+    constexpr std::size_t nb_input_items = 128;
+
+    constexpr std::size_t consummer_thread = 8;
+
+    content_generator<T> gen;
+
+    concurrent_queue<T> queue;
+
+
+
+    BOOST_CHECK_EQUAL(queue.size(), 0);
+    BOOST_CHECK_EQUAL(queue.empty(), true);
+
+    auto object = queue.try_pop();
+
+    BOOST_CHECK(! object);
+    BOOST_CHECK_EQUAL(queue.empty(), true);
+
+    std::vector<T> items, result_items;
+
+    for(std::size_t i =0; i < nb_input_items; ++i){
+        items.emplace_back(gen(i));
+    }
+
+    std::vector<std::thread> threads_pool_push, thread_pool_pull;
+
+    for(std::size_t i = 0; i < nb_input_items; ++i){
+        threads_pool_push.emplace_back(std::thread( [&items, &queue, i](){
+            queue.push(items[i]);
+        }));
+    }
+
+
+
+
+    result_items.resize(nb_input_items);
+    std::atomic<std::size_t> counter(0);
+
+    for(std::size_t i = 0; i < consummer_thread; ++i){
+        thread_pool_pull.emplace_back(std::thread([&](){
+
+            while(counter.load() < nb_input_items){
+                auto item = queue.try_pop();
+                if(item){
+                    auto pos = counter ++;
+                    std::cout << pos << std::endl;
+                    result_items[pos] = item.get();
+                }
+            }
+        }));
+    }
+
+
+    for(auto & t : thread_pool_pull){
+        t.join();
+    }
+
+
+    for(auto & t : threads_pool_push){
+        t.join();
+    }
+
+    BOOST_CHECK_EQUAL(counter.load(), nb_input_items);
+    BOOST_CHECK_EQUAL(result_items.size(), nb_input_items);
+    BOOST_CHECK_EQUAL(queue.size(), 0);
+
+}

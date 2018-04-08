@@ -34,30 +34,35 @@
 namespace hadoken {
 
 
-template<typename T>
-inline concurrent_queue_stl_mut<T>::concurrent_queue_stl_mut(){
+template<typename T, typename ThreadModel, typename Allocator>
+inline concurrent_queue_stl_mut<T, ThreadModel, Allocator>::concurrent_queue_stl_mut(const Allocator & allocator) :
+    _qmut(),
+    _qcond(),
+    _dek(allocator)
+{
 
 }
 
-template<typename T>
-inline void concurrent_queue_stl_mut<T>::push(T && element){
+template<typename T, typename ThreadModel, typename Allocator>
+inline void concurrent_queue_stl_mut<T, ThreadModel, Allocator>::push(T element){
     {
         std::lock_guard<std::mutex> l(_qmut);
 
         _dek.push_back(std::move(element));
+        _qcond.notify_one();
     }
-    _qcond.notify_one();
+
 }
 
 
-template<typename T>
+template<typename T, typename ThreadModel, typename Allocator>
 template<typename Duration>
-inline optional<T> concurrent_queue_stl_mut<T>::try_pop(const Duration & d){
+inline optional<T> concurrent_queue_stl_mut<T, ThreadModel, Allocator>::try_pop(const Duration & d){
     optional<T> res;
     bool timeout = false;
 
     {
-        std::lock_guard<std::mutex> l(_qmut);
+        std::unique_lock<decltype(_qmut)> l(_qmut);
 
         while(!timeout){
             if( ! _dek.empty()){
@@ -76,10 +81,22 @@ inline optional<T> concurrent_queue_stl_mut<T>::try_pop(const Duration & d){
 
 }
 
-template<typename T>
-bool concurrent_queue_stl_mut<T>::empty() const{
-    std::lock_guard<std::mutex> l(_qmut);
+template<typename T, typename ThreadModel, typename Allocator>
+inline optional<T> concurrent_queue_stl_mut<T, ThreadModel, Allocator>::try_pop(){
+    return try_pop(std::chrono::milliseconds(0));
+}
+
+
+template<typename T, typename ThreadModel, typename Allocator>
+bool concurrent_queue_stl_mut<T, ThreadModel, Allocator>::empty() const{
+    std::lock_guard<decltype(_qmut)> l(_qmut);
     return _dek.empty();
+}
+
+template<typename T, typename ThreadModel, typename Allocator>
+std::size_t concurrent_queue_stl_mut<T, ThreadModel, Allocator>::size() const{
+    std::lock_guard<decltype(_qmut)> l(_qmut);
+    return _dek.size();
 }
 
 

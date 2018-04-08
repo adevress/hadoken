@@ -26,57 +26,28 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef CONCURRENT_QUEUE_HPP
-#define CONCURRENT_QUEUE_HPP
+#ifndef HADOKEN_STD_THREAD_MODEL_HPP
+#define HADOKEN_STD_THREAD_MODEL_HPP
 
-#include <chrono>
+#include <mutex>
 #include <condition_variable>
-#include <deque>
-#include <memory>
-
-
-#include <hadoken/utility/optional.hpp>
-#include <hadoken/threading/std_thread_model.hpp>
+#include <future>
 
 namespace hadoken {
 
-///
-/// simple thread-safe queue around STL container
-///
-template<typename T, typename ThreadModel = std_thread_model, typename Allocator = std::allocator<T>>
-class concurrent_queue_stl_mut
-{
+
+class std_thread_model{
 public:
-    concurrent_queue_stl_mut(const Allocator & allocator = Allocator());
+    using mutex = std::mutex;
+    using condition_variable = std::condition_variable;
 
-    void push(T element);
+    template<typename T>
+    using future = std::future<T>;
 
-
-    template<typename Duration >
-    optional<T> try_pop(const Duration & d);
-
-    optional<T> try_pop();
-
-
-    bool empty() const;
-
-    std::size_t size() const;
-
-private:
-    mutable typename ThreadModel::mutex _qmut;
-    typename ThreadModel::condition_variable _qcond;
-    std::deque<T, Allocator> _dek;
 
 };
 
 
+} //hadoken
 
-template<typename T>
-using concurrent_queue = concurrent_queue_stl_mut<T>;
-
-} // namespace hadoken
-
-
-#include "bits/concurrent_queue_bits.hpp"
-
-#endif // CONCURRENT_QUEUE_HPP
+#endif // STD_THREAD_MODEL_HPP
