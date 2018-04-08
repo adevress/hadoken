@@ -32,12 +32,11 @@
 #include <atomic>
 #include <thread>
 #include <chrono>
-#include <vector>
-#include <condition_variable>
-#include <mutex>
-#include <future>
 #include <functional>
+#include <vector>
 
+
+#include <hadoken/containers/concurrent_queue.hpp>
 
 namespace hadoken{
 
@@ -46,13 +45,10 @@ namespace details{
 
 class worker_thread{
 public:
-    inline worker_thread() :
+    inline worker_thread(concurrent_queue<std::function<void ()>> & queue) :
+                    _queue_ref(queue),
                     exec(),
-                    event_cond(),
-                    mut(),
-                    queue(),
                     finished(false) {
-        queue.reserve(16);
         std::thread runner([this]() { run();});
 
         exec.swap(runner);
@@ -69,52 +65,22 @@ public:
 
     inline void run(){
         while(!finished){
-            std::function<void (void)> task;
+            auto work_item = _queue_ref.try_pop(std::chrono::milliseconds(10));
 
-            task = pop();
-
-            if(task){
-                task();
+            if(work_item){
+                work_item.get()();
             }
 
         }
 
-    }
-
-    inline std::function<void (void)> pop(){
-        std::function<void (void)> ret;
-        std::unique_lock<std::mutex> l(mut);
-
-        if(queue.size() > 0){
-            ret = std::move(queue.back());
-            queue.pop_back();
-        }else{
-            event_cond.wait_for(l, std::chrono::microseconds(10));
-            if(queue.size() > 0){
-                ret = std::move(queue.back());
-                queue.pop_back();
-            }
-        }
-        return ret;
-
-    }
-
-    inline void push(std::function<void (void)> && task){
-        {
-            std::unique_lock<std::mutex> l(mut);
-            queue.emplace_back(std::move(task));
-        }
-        event_cond.notify_one();
     }
 
 private:
     worker_thread(const worker_thread &) = delete;
 
-    std::thread exec;
-    std::condition_variable event_cond;
-    std::mutex mut;
+    concurrent_queue<std::function<void ()>> & _queue_ref;
 
-    std::vector<std::function<void (void)> > queue;
+    std::thread exec;
 
     std::atomic<bool> finished;
 };
@@ -127,28 +93,52 @@ private:
 ///
 class thread_pool_executor{
 public:
-    thread_pool_executor(std::size_t n_thread =0) :
-        _counter(0),
+
+    template<typename T>
+    using future = std::future<T>;
+
+    template<typename T>
+    using promise = std::promise<T>;
+
+    inline thread_pool_executor(std::size_t n_thread =0) :
+        _work_queue(),
         _executors(){
         const std::size_t n_workers = (n_thread > 0) ? n_thread : (std::thread::hardware_concurrency());
         for(std::size_t i =0; i < n_workers; ++i){
-            _executors.emplace_back( new details::worker_thread());
+            _executors.emplace_back( new details::worker_thread(_work_queue));
         }
     }
 
-    ~thread_pool_executor(){
+    inline ~thread_pool_executor(){
 
     }
 
-    void execute(std::function<void (void)> task){
-        std::size_t pos = _counter.fetch_add(1);
-        pos = pos % _executors.size();
-        _executors[pos]->push(std::move(task));
+    inline void execute(std::function<void (void)> task){
+        _work_queue.push(std::move(task));
     }
 
+    template<typename Function>
+    inline future<typename Function::result_type> twoway_execute(Function func){
+        auto prom = std::make_shared<promise<typename Function::result_type> >();
+        auto future_result = prom->get_future();
+
+        _work_queue.push([prom, func]() mutable -> void{
+
+            try{
+                prom->set_value(func());
+            } catch(...) {
+                try {
+                    prom->set_exception(std::current_exception());
+                } catch(...) {
+                    std::cerr << "error during set_exception in executor" << std::endl;
+                }
+            }
+        });
+        return future_result;
+    }
 
 private:
-    std::atomic<std::size_t> _counter;
+    concurrent_queue<std::function<void ()>> _work_queue;
     std::vector<std::unique_ptr<details::worker_thread> > _executors;
 };
 

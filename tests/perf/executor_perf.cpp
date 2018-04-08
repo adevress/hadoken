@@ -86,6 +86,38 @@ std::size_t executor_test(std::size_t n_exec, const std::string & executor_name)
 }
 
 
+template<typename Executor>
+std::size_t executor_test_twoway(std::size_t n_exec, const std::string & executor_name){
+
+    tp t1, t2;
+
+    int val=0;
+
+    std::plus<int> add;
+
+
+
+    Executor executor;
+
+    t1 = cl::now();
+
+    for(std::size_t i= 0; i < n_exec; ++i){
+
+        auto f = executor.twoway_execute(std::function<int ()>([&add, i](){
+            return add(i, i);
+        }));
+
+        val += f.get();
+    }
+
+    t2 = cl::now();
+
+    std::cout << executor_name << ": " << double(boost::chrono::duration_cast<microseconds>(t2 -t1).count())/n_exec << std::endl;
+
+    return val;
+}
+
+
 
 int main(){
 
@@ -100,6 +132,7 @@ int main(){
 
     junk += executor_test<hadoken::system_executor>(n_exec, "system_executor");
 
+    junk += executor_test_twoway<hadoken::thread_pool_executor>(n_exec, "pool_executor_twoway");
 
     std::cout << "end junk " << junk << std::endl;
 

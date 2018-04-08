@@ -41,7 +41,6 @@ target_link_libraries(small_vector_perf ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM
 ## lock / spinlock perf test
 LIST(APPEND lock_perf_src "lock_perf.cpp")
 
-add_definitions( -std=c++11 )
 
 add_executable(lock_perf ${lock_perf_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
 target_link_libraries(lock_perf ${CMAKE_THREAD_LIBS_INIT}  ${Boost_CHRONO_LIBRARIES} ${Boost_SYSTEM_LIBRARIES})
