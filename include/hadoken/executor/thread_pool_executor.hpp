@@ -37,7 +37,9 @@
 #include <type_traits>
 
 
+#include <hadoken/thread/future_helpers.hpp>
 #include <hadoken/containers/concurrent_queue.hpp>
+
 
 namespace hadoken{
 
@@ -126,7 +128,7 @@ public:
         _work_queue.push([prom, func]() mutable -> void{
 
             try{
-                prom->set_value(func());
+                set_promise_from_result(*prom, func);
             } catch(...) {
                 try {
                     prom->set_exception(std::current_exception());
