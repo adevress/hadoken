@@ -37,14 +37,26 @@
 #ifndef _HADOKEN_RANDOM_THREEFRY_
 #define _HADOKEN_RANDOM_THREEFRY_
 
-#include <numeric>
 #include <algorithm>
+#include <numeric>
+#include <cstdint>
+#include <random>
 
-#include <boost/array.hpp>
-#include <boost/integer.hpp>
-#include <boost/static_assert.hpp>
-#include <boost/random/seed_seq.hpp>
-#include <boost/limits.hpp>
+
+#include <hadoken/config/platform_config.hpp>
+
+#ifdef HADOKEN_COMPILER_IS_NVCC
+#   include <hadoken/gpu/array.hpp>
+
+    template<typename T, std::size_t N>
+    using threefry_array = hadoken::array<T,N>;
+#else
+#   include <array>
+
+template<typename T, std::size_t N>
+using threefry_array = std::array<T,N>;
+#endif
+
 
 
 ///
@@ -85,38 +97,87 @@ struct threefry_constants{
 // 2x32 constants
 template <>
 struct threefry_constants<2, uint32_t>{
-    static constexpr uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
-    static constexpr unsigned rotations[8] = {13, 15, 26, 6, 17, 29, 16, 24};
-};
 
+    HADOKEN_DECORATE_HOST_DEVICE
+    static constexpr int32_t ks_parity(){
+        return UINT32_C(0x1BD11BDA);
+    }
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static inline unsigned rotations(int pos){
+        constexpr unsigned rotations[8] = {13, 15, 26, 6, 17, 29, 16, 24};
+        return rotations[pos];
+    }
+};
 
 
 // 4x32 contants
 template <>
 struct threefry_constants<4, uint32_t>{
-    static constexpr uint32_t KS_PARITY = UINT32_C(0x1BD11BDA);
-    static constexpr unsigned rotations0[8] = {10, 11, 13, 23, 6, 17, 25, 18};
-    static constexpr unsigned rotations1[8] = {26, 21, 27, 5, 20, 11, 10, 20};
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static constexpr int32_t ks_parity(){
+        return UINT32_C(0x1BD11BDA);
+    }
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static inline unsigned rotations0(int pos){
+        constexpr unsigned rotations[8] = {10, 11, 13, 23, 6, 17, 25, 18};
+        return rotations[pos];
+    }
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static inline unsigned rotations1(int pos){
+        constexpr unsigned rotations[8] = {26, 21, 27, 5, 20, 11, 10, 20};
+        return rotations[pos];
+    }
 };
+
+
+
 
 // 2x64 constants
 template <>
 struct threefry_constants<2, uint64_t>{
-    static constexpr uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
-    static constexpr unsigned rotations[8] = {16, 42, 12, 31, 16, 32, 24, 21};
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static constexpr uint64_t ks_parity(){
+        return UINT64_C(0x1BD11BDAA9FC1A22);
+    }
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static inline unsigned rotations(int pos){
+        constexpr unsigned rotations[8] = {16, 42, 12, 31, 16, 32, 24, 21};
+        return rotations[pos];
+    }
 };
+
 
 
 // 4x64 constants
 template <>
 struct threefry_constants<4, uint64_t>{
-    static constexpr uint64_t KS_PARITY = UINT64_C(0x1BD11BDAA9FC1A22);
-    static constexpr unsigned rotations0[8] = {14, 52, 23, 5, 25, 46, 58, 32};
-    static constexpr unsigned rotations1[8] = {16, 57, 40, 37, 33, 12, 22, 32};
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static constexpr uint64_t ks_parity(){
+        return UINT64_C(0x1BD11BDAA9FC1A22);
+    }
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static inline unsigned rotations0(int pos){
+        constexpr unsigned rotations[8] = {14, 52, 23, 5, 25, 46, 58, 32};
+        return rotations[pos];
+    }
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    static inline unsigned rotations1(int pos){
+        constexpr unsigned rotations[8] = {16, 57, 40, 37, 33, 12, 22, 32};
+        return rotations[pos];
+    }
 };
 
-
 template <typename Uint>
+HADOKEN_DECORATE_HOST_DEVICE
 inline Uint threefry_rotl(Uint x, unsigned s){
     return (x<<s) | (x>>(std::numeric_limits<Uint>::digits-s));
 }
@@ -136,7 +197,7 @@ inline Uint threefry_rotl(Uint x, unsigned s){
 template <std::size_t r_remain, std::size_t r_max,
           typename Uint, typename Domain, typename Constants, std::size_t N>
 struct rounds_functor{
-    BOOST_STATIC_ASSERT( N==2 || N==4 );
+    static_assert( N==2 || N==4, "number of rounds should be 2 or 4");
 };
 
 template <std::size_t r_remain, std::size_t r_max,
@@ -145,15 +206,16 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 4>{
     typedef Uint uint_type;
     typedef Domain domain_type;
 
-    inline void operator() (const boost::array<uint_type, 5> & ks,
+    HADOKEN_DECORATE_HOST_DEVICE
+    inline void operator() (const std::array<uint_type, 5> & ks,
                         domain_type & c){
         constexpr std::size_t r = r_max - r_remain;
 
         if( ( r & 0x01)  ){
             c[0] += c[3];
             c[2] += c[1];
-            c[3] = threefry_rotl(c[3],Constants::rotations0[r%8]) ^ c[0];
-            c[1] = threefry_rotl(c[1],Constants::rotations1[r%8]) ^ c[2];
+            c[3] = threefry_rotl(c[3],Constants::rotations0(r%8)) ^ c[0];
+            c[1] = threefry_rotl(c[1],Constants::rotations1(r%8)) ^ c[2];
 
             const std::size_t r_next = r+1;
             const std::size_t r4 = r_next>>2;
@@ -169,8 +231,8 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 4>{
         }else{
             c[0] += c[1];
             c[2] += c[3];
-            c[1] = threefry_rotl(c[1], Constants::rotations0[r%8]) ^ c[0];
-            c[3] = threefry_rotl(c[3], Constants::rotations1[r%8]) ^ c[2];
+            c[1] = threefry_rotl(c[1], Constants::rotations0(r%8)) ^ c[0];
+            c[3] = threefry_rotl(c[3], Constants::rotations1(r%8)) ^ c[2];
 
         }
         rounds_functor<r_remain-1, r_max, uint_type, domain_type, Constants, 4> func;
@@ -186,7 +248,8 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 4>{
     typedef Uint uint_type;
     typedef Domain domain_type;
 
-    inline void operator() (const boost::array<uint_type, 5> & ks,
+    HADOKEN_DECORATE_HOST_DEVICE
+    inline void operator() (const std::array<uint_type, 5> & ks,
                         domain_type & c){
         (void) ks;
         (void) c;
@@ -201,12 +264,13 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 2>{
     typedef Uint uint_type;
     typedef Domain domain_type;
 
-    inline void operator() (const boost::array<uint_type, 3> & ks,
+    HADOKEN_DECORATE_HOST_DEVICE
+    inline void operator() (const std::array<uint_type, 3> & ks,
                         domain_type & c){
         constexpr std::size_t r = r_max - r_remain;
 
         c[0] += c[1];
-        c[1] = threefry_rotl(c[1], Constants::rotations[r%8]);
+        c[1] = threefry_rotl(c[1], Constants::rotations(r%8));
         c[1] ^= c[0];
 
 
@@ -233,7 +297,8 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 2>{
     typedef Uint uint_type;
     typedef Domain domain_type;
 
-    inline void operator() (const boost::array<uint_type, 3> & ks,
+    HADOKEN_DECORATE_HOST_DEVICE
+    inline void operator() (const std::array<uint_type, 3> & ks,
                         domain_type & c){
         (void) ks;
         (void) c;
@@ -241,45 +306,53 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 2>{
 
 };
 
-} // anonymous namespace
+} // impl
 
 template <unsigned N, typename Uint, unsigned R=20, typename Constants=impl::threefry_constants<N, Uint> >
 class threefry{
-    BOOST_STATIC_ASSERT( N==2 || N==4 );
+    static_assert( N==2 || N==4, "number of rounds should be 2 or 4");
 public:
-    typedef boost::array<Uint, N> domain_type;
-    typedef boost::array<Uint, N> range_type;
-    typedef boost::array<Uint, N> key_type;
+    typedef threefry_array<Uint, N> domain_type;
+    typedef threefry_array<Uint, N> range_type;
+    typedef threefry_array<Uint, N> key_type;
     typedef Uint                  uint_type;
 
+    HADOKEN_DECORATE_HOST_DEVICE
     threefry() : k(){}
+    HADOKEN_DECORATE_HOST_DEVICE
     threefry(key_type _k) : k(_k) {}
+    HADOKEN_DECORATE_HOST_DEVICE
     threefry(const threefry& v) : k(v.k){}
 
+    HADOKEN_DECORATE_HOST_DEVICE
     void set_key(key_type _k){
         k = _k;
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     key_type get_key() const{
         return k;
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     bool operator==(const threefry& rhs) const{
         return k == rhs.k;
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     bool operator!=(const threefry& rhs) const{
         return k != rhs.k;
     }
 
 
-    __attribute__((always_inline)) inline range_type operator()(const domain_type & counter){
+    HADOKEN_DECORATE_HOST_DEVICE
+    inline range_type operator()(const domain_type & counter){
         using namespace impl;
-        boost::array<uint_type, N+1>  ks;
+        std::array<uint_type, N+1>  ks;
         domain_type c(counter);
 
         std::copy(k.begin(), k.end(), ks.begin());
-        ks[N] = std::accumulate(k.begin(), k.end(), Constants::KS_PARITY, std::bit_xor<uint_type>());
+        ks[N] = std::accumulate(k.begin(), k.end(), Constants::ks_parity(), std::bit_xor<uint_type>());
         std::transform(k.begin(), k.end(), c.begin(), c.begin(), std::plus<uint_type>());
 
         rounds_functor<R, R, uint_type, domain_type, Constants, N> func;
@@ -297,16 +370,16 @@ private:
 
 
 
-typedef threefry<4, boost::uint64_t> threefry4x64;
-typedef threefry<2, boost::uint64_t> threefry2x64;
+typedef threefry<4, std::uint64_t> threefry4x64;
+typedef threefry<2, std::uint64_t> threefry2x64;
 
 
-typedef threefry<4, boost::uint32_t> threefry4x32;
-typedef threefry<2, boost::uint32_t> threefry2x32;
+typedef threefry<4, std::uint32_t> threefry4x32;
+typedef threefry<2, std::uint32_t> threefry2x32;
 
 /// threefry4x64 is crush-resistant and the fastest one most
 /// of the current platforms: use it by default
-typedef threefry<4, boost::uint64_t> threefry_default;
+typedef threefry<4, std::uint64_t> threefry_default;
 
 
 }

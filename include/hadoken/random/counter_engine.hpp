@@ -32,15 +32,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #ifndef _HADOKEN_COUNTER_ENGINE_HPP_
 #define _HADOKEN_COUNTER_ENGINE_HPP_
 
-#include <boost/integer.hpp>
-#include <boost/array.hpp>
+
+#include <array>
+#include <cstdint>
 #include <limits>
 #include <stdexcept>
 #include <sstream>
 #include <algorithm>
 #include <vector>
 
-
+#include <hadoken/config/platform_config.hpp>
 #include <hadoken/random/random_derivate.hpp>
 
 ///
@@ -74,20 +75,25 @@ public:
     typedef typename ctr_type::value_type result_type;
     typedef size_t elem_type;
 
+    HADOKEN_DECORATE_HOST_DEVICE
     explicit counter_engine(const key_type &uk) :  b(uk), c(), elem(){}
+
+    HADOKEN_DECORATE_HOST_DEVICE
     explicit counter_engine(key_type &uk) : b(uk), c(), elem(){}
 
+    HADOKEN_DECORATE_HOST_DEVICE
     explicit counter_engine() : b(), c(), elem() {
 
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     explicit counter_engine(result_type r) : b(), c(), elem() {
         key_type key;
         std::fill(key.begin(), key.end(), typename key_type::value_type(r));
         b.set_key(key);
     }
 
-
+    HADOKEN_DECORATE_HOST_DEVICE
     explicit counter_engine(std::seed_seq & seq) : b(), c(), elem() {
         key_type key;
 
@@ -96,36 +102,45 @@ public:
     }
 
 
+    HADOKEN_DECORATE_HOST_DEVICE
     counter_engine(const counter_engine& e) : b(e.b), c(e.c), elem(e.elem){
     }
 
 
+    HADOKEN_DECORATE_HOST_DEVICE
     void seed(result_type r){
         *this = counter_engine(r);
     }
 
+
     template <typename SeedSeq>
+    HADOKEN_DECORATE_HOST_DEVICE
     void seed(SeedSeq &s
               ){ 
         *this = counter_engine(s);
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     void seed(){
         *this = counter_engine();
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     void seed(const key_type& uk){
         *this = counter_engine(uk);
     }
+
+    HADOKEN_DECORATE_HOST_DEVICE
     void seed(key_type& uk){
         *this = counter_engine(uk);
     }
 
-
+    HADOKEN_DECORATE_HOST_DEVICE
     friend bool operator==(const counter_engine& lhs, const counter_engine& rhs){
         return lhs.c==rhs.c && lhs.elem == rhs.elem && lhs.b == rhs.b;
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     friend bool operator!=(const counter_engine& lhs, const counter_engine& rhs){
         return lhs.c!=rhs.c || lhs.elem != rhs.elem || lhs.b!=rhs.b;
     }
@@ -138,9 +153,12 @@ public:
     const static result_type _min = 0;
     const static result_type _max = ~((result_type)0);
 
+    HADOKEN_DECORATE_HOST_DEVICE
     static constexpr result_type min () { return _min; }
+    HADOKEN_DECORATE_HOST_DEVICE
     static constexpr result_type max () { return _max; }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     result_type operator()(){
         if( elem == 0 ){
             incr_array(c.begin(), c.end());
@@ -151,11 +169,13 @@ public:
     }
 
 
+    HADOKEN_DECORATE_HOST_DEVICE
     result_type generate(){
         return (*this)();
     }
 
 
+    HADOKEN_DECORATE_HOST_DEVICE
     ctr_type generate_block(){
         elem = 0;
         incr_array(c.begin(), c.end());
@@ -163,15 +183,16 @@ public:
     }
 
 
-    void discard(boost::uintmax_t skip){
+    HADOKEN_DECORATE_HOST_DEVICE
+    void discard(std::uintmax_t skip){
         // any buffered turn need to be dropped
         while(elem != 0 && skip > 0){
             skip--;
             elem--;
         }
         const size_t nelem = c.size();
-        boost::uintmax_t counter_increment = skip / nelem;
-        boost::uintmax_t counter_rest = skip %  nelem;
+        std::uintmax_t counter_increment = skip / nelem;
+        std::uintmax_t counter_rest = skip %  nelem;
         incr_array(c.begin(), c.end(), counter_increment);
 
         // call generator for remaining turns
@@ -181,6 +202,7 @@ public:
         }
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     counter_engine<cbrng_type> derivate(const key_type & key) const{
         // for counter engine, derivate need to return a unique counter
         // from a tuple <old_counter_state, old_key, new_key>
@@ -209,6 +231,7 @@ public:
         return derivate_counter;
     }
 
+    HADOKEN_DECORATE_HOST_DEVICE
     counter_engine<cbrng_type> derivate(result_type r) const{
             key_type key;
             std::fill(key.begin(), key.end(), typename key_type::value_type(r));
@@ -217,17 +240,19 @@ public:
 
          
 
-
+    HADOKEN_DECORATE_HOST_DEVICE
     ctr_type operator()(const ctr_type& c) const{
         return b(c);
     }
 
 
+    HADOKEN_DECORATE_HOST_DEVICE
     key_type getseed() const{
         return c.get_key();
     }
 
 
+    HADOKEN_DECORATE_HOST_DEVICE
     ctr_type getcounter() const {
         return c;
     }
@@ -238,6 +263,7 @@ private:
 
 
     template<typename Iterator>
+    HADOKEN_DECORATE_HOST_DEVICE
     inline void incr_array(Iterator start, Iterator finish){
         static const typename cbrng_type::uint_type max_elem = std::numeric_limits<typename cbrng_type::uint_type>::max();
 
@@ -253,15 +279,16 @@ private:
     }
 
     template<typename Iterator>
-    void incr_array(Iterator start, Iterator finish, boost::uintmax_t inc_val){
+    HADOKEN_DECORATE_HOST_DEVICE
+    void incr_array(Iterator start, Iterator finish, std::uintmax_t inc_val){
         static const typename cbrng_type::uint_type max_elem = std::numeric_limits<typename cbrng_type::uint_type>::max();
 
         if(inc_val ==0 || start == finish){
             return;
         }
 
-        boost::uintmax_t current_inc_val = inc_val & max_elem;
-        const boost::uintmax_t next_inc_val = ( (sizeof(boost::uintmax_t) != sizeof(typename cbrng_type::uint_type)) ? (inc_val >> (sizeof(max_elem)*8)) : 0);
+        std::uintmax_t current_inc_val = inc_val & max_elem;
+        const std::uintmax_t next_inc_val = ( (sizeof(std::uintmax_t) != sizeof(typename cbrng_type::uint_type)) ? (inc_val >> (sizeof(max_elem)*8)) : 0);
 
         const typename cbrng_type::uint_type past_val = *start;
         *start += current_inc_val;

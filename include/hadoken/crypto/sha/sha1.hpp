@@ -29,13 +29,13 @@
 #ifndef _HADOKEN_SHA1_HPP_
 #define _HADOKEN_SHA1_HPP_
 
-#include <boost/integer.hpp>
-#include <boost/array.hpp>
 
 
+
+#include <array>
 #include <bitset>
 #include <cstdio>
-#include <cstdlib>
+#include <cstdint>
 #include <cstring>
 #include <sstream>
 #include <algorithm>
@@ -60,8 +60,8 @@ namespace hadoken
     class sha1
     {
     public:
-        typedef boost::array<boost::uint32_t, 5> digest32_t;
-        typedef boost::array<boost::uint8_t, 20> digest8_t;
+        typedef std::array<std::uint32_t, 5> digest32_t;
+        typedef std::array<std::uint8_t, 20> digest8_t;
 
         inline sha1(){ reset(); }
 
@@ -78,24 +78,24 @@ namespace hadoken
         }
 
 
-        inline void process(boost::uint8_t b) {
+        inline void process(std::uint8_t b) {
             process_byte(b);
         }
 
-        inline void process(boost::uint32_t value){
-            boost::uint32_t big_endian_value = hadoken::hton(value);
-            process_block(&big_endian_value, sizeof(boost::uint32_t));
+        inline void process(std::uint32_t value){
+            std::uint32_t big_endian_value = hadoken::hton(value);
+            process_block(&big_endian_value, sizeof(std::uint32_t));
         }
 
-        inline void process(boost::uint64_t value){
-            boost::uint64_t big_endian_value = hadoken::hton(value);
-            process_block(&big_endian_value, sizeof(boost::uint64_t));
+        inline void process(std::uint64_t value){
+            std::uint64_t big_endian_value = hadoken::hton(value);
+            process_block(&big_endian_value, sizeof(std::uint64_t));
         }
 
         template<typename Iterator>
         inline void process_block(const Iterator start, const Iterator end) {
-            const boost::uint8_t* begin = static_cast<const boost::uint8_t*>(&(*start));
-            const boost::uint8_t* finish = static_cast<const boost::uint8_t*>(&(*end));
+            const std::uint8_t* begin = static_cast<const std::uint8_t*>(&(*start));
+            const std::uint8_t* finish = static_cast<const std::uint8_t*>(&(*end));
             while(begin != finish) {
                 process_byte(*begin);
                 begin++;
@@ -103,7 +103,7 @@ namespace hadoken
         }
 
         inline void process_block(const void* const data, size_t len) {
-            const boost::uint8_t* block = static_cast<const boost::uint8_t*>(data);
+            const std::uint8_t* block = static_cast<const std::uint8_t*>(data);
             process_block(block, block + len);
         }
 
@@ -142,7 +142,7 @@ namespace hadoken
             digest32_t d32 =get_digest();
 
             // big endian to little endiant
-            typedef boost::uint32_t (*endian_ntoh) (boost::uint32_t);
+            typedef std::uint32_t (*endian_ntoh) (std::uint32_t);
             std::transform(d32.begin(), d32.end(), d32.begin(), static_cast< endian_ntoh >(hadoken::ntoh));
             ::memcpy(&digest[0], &(d32[0]), digest.size());
 
@@ -151,7 +151,7 @@ namespace hadoken
 
     private:
         digest32_t m_digest;
-        boost::array<boost::uint8_t, 64> m_block;
+        std::array<std::uint8_t, 64> m_block;
         size_t m_blockByteIndex;
         size_t m_byteCount;
         std::bitset<8> m_flags;
@@ -160,12 +160,12 @@ namespace hadoken
             completed = 0x00
         };
 
-        inline static boost::uint32_t left_rotate(boost::uint32_t value, size_t count) {
+        inline static std::uint32_t left_rotate(std::uint32_t value, size_t count) {
             return (value << count) ^ (value >> (32-count));
         }
 
 
-        inline void process_byte(boost::uint8_t b){
+        inline void process_byte(std::uint8_t b){
             this->m_block[this->m_blockByteIndex++] = b;
             ++this->m_byteCount;
             if(m_blockByteIndex == 64) {
@@ -207,7 +207,7 @@ namespace hadoken
 
 
         inline void process_internal() {
-            boost::uint32_t w[80];
+            std::uint32_t w[80];
             for (size_t i = 0; i < 16; i++) {
                 w[i]  = (m_block[i*4 + 0] << 24);
                 w[i] |= (m_block[i*4 + 1] << 16);
@@ -218,15 +218,15 @@ namespace hadoken
                 w[i] = left_rotate((w[i-3] ^ w[i-8] ^ w[i-14] ^ w[i-16]), 1);
             }
 
-            boost::uint32_t a = m_digest[0];
-            boost::uint32_t b = m_digest[1];
-            boost::uint32_t c = m_digest[2];
-            boost::uint32_t d = m_digest[3];
-            boost::uint32_t e = m_digest[4];
+            std::uint32_t a = m_digest[0];
+            std::uint32_t b = m_digest[1];
+            std::uint32_t c = m_digest[2];
+            std::uint32_t d = m_digest[3];
+            std::uint32_t e = m_digest[4];
 
             for (std::size_t i=0; i<80; ++i) {
-                boost::uint32_t f = 0;
-                boost::uint32_t k = 0;
+                std::uint32_t f = 0;
+                std::uint32_t k = 0;
 
                 if (i<20) {
                     f = (b & c) | (~b & d);
@@ -241,7 +241,7 @@ namespace hadoken
                     f = b ^ c ^ d;
                     k = 0xCA62C1D6;
                 }
-                boost::uint32_t temp = left_rotate(a, 5) + f + e + k + w[i];
+                std::uint32_t temp = left_rotate(a, 5) + f + e + k + w[i];
                 e = d;
                 d = c;
                 c = left_rotate(b, 30);

@@ -1,0 +1,108 @@
+../../include/hadoken/random/counter_engine.hpp(75): error: class "hadoken::array<uint64_t, 4UL>" has no member "value_type"
+          detected during instantiation of class "hadoken::counter_engine<CBRNG> [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(86): here
+
+../../include/hadoken/containers/static_array.hpp(52): error: identifier "_array" is undefined
+
+../../include/hadoken/random/counter_engine.hpp(164): error: class "hadoken::array<uint64_t, 4UL>" has no member "begin"
+          detected during instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/counter_engine.hpp(164): error: class "hadoken::array<uint64_t, 4UL>" has no member "end"
+          detected during instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(343): error: class "hadoken::array<uint64_t, 4UL>" has no member "begin"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(343): error: class "hadoken::array<uint64_t, 4UL>" has no member "end"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(344): error: class "hadoken::array<uint64_t, 4UL>" has no member "begin"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(344): error: class "hadoken::array<uint64_t, 4UL>" has no member "end"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(345): error: class "hadoken::array<uint64_t, 4UL>" has no member "begin"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(345): error: class "hadoken::array<uint64_t, 4UL>" has no member "end"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(345): error: class "hadoken::array<uint64_t, 4UL>" has no member "begin"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/threefry.hpp(345): error: class "hadoken::array<uint64_t, 4UL>" has no member "begin"
+          detected during:
+            instantiation of "hadoken::threefry<N, Uint, R, Constants>::range_type hadoken::threefry<N, Uint, R, Constants>::operator()(const hadoken::threefry<N, Uint, R, Constants>::domain_type &) [with N=4U, Uint=uint64_t, R=20U, Constants=hadoken::impl::threefry_constants<4U, uint64_t>]" 
+../../include/hadoken/random/counter_engine.hpp(165): here
+            instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/counter_engine.hpp(166): error: class "hadoken::array<uint64_t, 4UL>" has no member "size"
+          detected during instantiation of "hadoken::counter_engine<CBRNG>::result_type hadoken::counter_engine<CBRNG>::operator()() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(116): here
+
+../../include/hadoken/random/counter_engine.hpp(181): error: class "hadoken::array<uint64_t, 4UL>" has no member "begin"
+          detected during instantiation of "hadoken::counter_engine<CBRNG>::ctr_type hadoken::counter_engine<CBRNG>::generate_block() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(160): here
+
+../../include/hadoken/random/counter_engine.hpp(181): error: class "hadoken::array<uint64_t, 4UL>" has no member "end"
+          detected during instantiation of "hadoken::counter_engine<CBRNG>::ctr_type hadoken::counter_engine<CBRNG>::generate_block() [with CBRNG=hadoken::threefry4x64]" 
+random_perf.cu(160): here
+
+/usr/include/c++/6/type_traits(2243): error: class "std::__common_type_impl<<error-type>, uint_fast32_t>" has no member class "type"
+          detected during:
+            instantiation of class "std::common_type<_Tp, _Up> [with _Tp=<error-type>, _Up=uint_fast32_t]" 
+/usr/include/c++/6/bits/uniform_int_dist.h(224): here
+            instantiation of "std::uniform_int_distribution<_IntType>::result_type std::uniform_int_distribution<_IntType>::operator()(_UniformRandomNumberGenerator &, const std::uniform_int_distribution<_IntType>::param_type &) [with _IntType=std::size_t, _UniformRandomNumberGenerator=hadoken::counter_engine<hadoken::threefry4x64>]" 
+/usr/include/c++/6/bits/uniform_int_dist.h(165): here
+            instantiation of "std::uniform_int_distribution<_IntType>::result_type std::uniform_int_distribution<_IntType>::operator()(_UniformRandomNumberGenerator &) [with _IntType=std::size_t, _UniformRandomNumberGenerator=hadoken::counter_engine<hadoken::threefry4x64>]" 
+random_perf.cu(91): here
+
+/usr/include/c++/6/type_traits(2243): error: not a class or struct name
+          detected during:
+            instantiation of class "std::common_type<_Tp, _Up> [with _Tp=<error-type>, _Up=uint_fast32_t]" 
+/usr/include/c++/6/bits/uniform_int_dist.h(224): here
+            instantiation of "std::uniform_int_distribution<_IntType>::result_type std::uniform_int_distribution<_IntType>::operator()(_UniformRandomNumberGenerator &, const std::uniform_int_distribution<_IntType>::param_type &) [with _IntType=std::size_t, _UniformRandomNumberGenerator=hadoken::counter_engine<hadoken::threefry4x64>]" 
+/usr/include/c++/6/bits/uniform_int_dist.h(165): here
+            instantiation of "std::uniform_int_distribution<_IntType>::result_type std::uniform_int_distribution<_IntType>::operator()(_UniformRandomNumberGenerator &) [with _IntType=std::size_t, _UniformRandomNumberGenerator=hadoken::counter_engine<hadoken::threefry4x64>]" 
+random_perf.cu(91): here
+
+/usr/include/c++/6/bits/uniform_int_dist.h(224): error: class "std::common_type<<error-type>, uint_fast32_t>" has no member "type"
+          detected during:
+            instantiation of "std::uniform_int_distribution<_IntType>::result_type std::uniform_int_distribution<_IntType>::operator()(_UniformRandomNumberGenerator &, const std::uniform_int_distribution<_IntType>::param_type &) [with _IntType=std::size_t, _UniformRandomNumberGenerator=hadoken::counter_engine<hadoken::threefry4x64>]" 
+(165): here
+            instantiation of "std::uniform_int_distribution<_IntType>::result_type std::uniform_int_distribution<_IntType>::operator()(_UniformRandomNumberGenerator &) [with _IntType=std::size_t, _UniformRandomNumberGenerator=hadoken::counter_engine<hadoken::threefry4x64>]" 
+random_perf.cu(91): here
+
+18 errors detected in the compilation of "/tmp/tmpxft_00006989_00000000-8_random_perf.cpp1.ii".

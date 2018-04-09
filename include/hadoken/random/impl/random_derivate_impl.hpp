@@ -30,12 +30,10 @@
 #ifndef RANDOM_DERIVATE_IMPL_HPP
 #define RANDOM_DERIVATE_IMPL_HPP
 
-#include <vector>
+#include <array>
 #include <cstring>
 #include <bitset>
-
-#include <boost/array.hpp>
-#include <boost/integer.hpp>
+#include <cstdint>
 
 #include <hadoken/crypto/sha/sha1.hpp>
 
@@ -46,7 +44,7 @@ namespace impl {
 template<typename Uint>
 inline hadoken::sha1::digest32_t generate_deterministic_seed_160(Uint origin_seed, Uint key){
     // let's add a bit of salt to our meal today
-    boost::array<boost::uint8_t, 16> salt = { { 0x6c, 0x77, 0xad, 0xb8, 0x3e, 0xf8, 0x21, 0x61, 0xc3, 0xd8, 0x2e, 0x4c, 0x13, 0xfd, 0x75, 0xd3 } };
+    std::array<std::uint8_t, 16> salt = { { 0x6c, 0x77, 0xad, 0xb8, 0x3e, 0xf8, 0x21, 0x61, 0xc3, 0xd8, 0x2e, 0x4c, 0x13, 0xfd, 0x75, 0xd3 } };
 
     hadoken::sha1 sha_compute;
     //  we want to generate a new seed determinitically 'seed = f(old_seed, key)'
