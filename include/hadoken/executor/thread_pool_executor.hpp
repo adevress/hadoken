@@ -34,9 +34,12 @@
 #include <chrono>
 #include <functional>
 #include <vector>
+#include <type_traits>
 
 
+#include <hadoken/thread/future_helpers.hpp>
 #include <hadoken/containers/concurrent_queue.hpp>
+
 
 namespace hadoken{
 
@@ -118,14 +121,14 @@ public:
     }
 
     template<typename Function>
-    inline future<typename Function::result_type> twoway_execute(Function func){
-        auto prom = std::make_shared<promise<typename Function::result_type> >();
+    inline future<decltype(std::declval<Function>()())> twoway_execute(Function func){
+        auto prom = std::make_shared<promise<decltype(std::declval<Function>()()) > >();
         auto future_result = prom->get_future();
 
         _work_queue.push([prom, func]() mutable -> void{
 
             try{
-                prom->set_value(func());
+                set_promise_from_result(*prom, func);
             } catch(...) {
                 try {
                     prom->set_exception(std::current_exception());
