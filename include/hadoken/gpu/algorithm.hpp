@@ -26,71 +26,91 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef HADOKEN_STATIC_ARRAY_HPP
-#define HADOKEN_STATIC_ARRAY_HPP
+#ifndef HADOKEN_GPU_ALGORITHM_HPP
+#define HADOKEN_GPU_ALGORITHM_HPP
+
 
 
 #include <hadoken/config/platform_config.hpp>
 
 namespace hadoken {
-    
-    
-namespace gpu {    
+
+namespace gpu {
+
 
 //
-// hadoken::array is a drop-in replacement for std::array in case of GPU compilation ( CUDA )
+// simplified implementation of copy for GPU
 //
-// DO NOT use it for code which does not aim GPU
+template< class InputIt, class OutputIt >
+HADOKEN_DECORATE_HOST_DEVICE
+OutputIt copy( InputIt first, InputIt last, OutputIt d_first ){
+    while(first < last){
+        *d_first = *first;
+        first++;
+        d_first++;
+    }
+    return d_first;
+}
+
+
 //
-template<typename T, std::size_t N>
-class array{
-public:
-
-    typedef T value_type;
-
-    HADOKEN_DECORATE_HOST_DEVICE
-    inline T* begin(){
-        return _arr;
+// simplified implementation of accumulate for GPU
+//
+template< class InputIt, class T, class BinaryOperation >
+HADOKEN_DECORATE_HOST_DEVICE
+T accumulate( InputIt first, InputIt last, T init,
+              BinaryOperation op ){
+    T res = init;
+    while(first < last){
+        op(res, *first);
+        first++;
     }
+    return res;
+}
 
-    HADOKEN_DECORATE_HOST_DEVICE
-    inline T* begin() const{
-        return _arr;
+
+//
+// simplified implementation of transform for GPU
+//
+template< class InputIt1, class InputIt2, class OutputIt, class BinaryOperation >
+HADOKEN_DECORATE_HOST_DEVICE
+OutputIt transform( InputIt1 first1, InputIt1 last1, InputIt2 first2,
+                    OutputIt d_first, BinaryOperation binary_op ){
+    while(first1 < last1){
+        *d_first = binary_op(*first1, *first2);
+        first1++;
+        d_first++;
+        first2++;
     }
+    return d_first;
+}
 
+
+//
+// binary functions
+//
+template<typename T>
+
+struct bit_xor{
     HADOKEN_DECORATE_HOST_DEVICE
-    inline T* end(){
-        return _arr +N;
+    T operator()(const T& x, const T& y) const{
+        return x ^ y;
     }
-
-    HADOKEN_DECORATE_HOST_DEVICE
-    inline T* end() const{
-        return _arr + N;
-    }
-
-    HADOKEN_DECORATE_HOST_DEVICE
-    inline std::size_t size() const {
-        return N;
-    }
-
-    HADOKEN_DECORATE_HOST_DEVICE
-    inline T & operator[](int pos){
-        return _arr[pos];
-    }
-
-    HADOKEN_DECORATE_HOST_DEVICE
-    inline T operator[](int pos) const{
-        return _arr[pos];
-    }
-
-private:
-    T _arr[N];
 };
 
 
+template<typename T>
+struct plus {
+    HADOKEN_DECORATE_HOST_DEVICE
+    T operator()(const T& x, const T& y) const{
+        return x + y;
+    }
+
+
+};
+
 } // gpu
 
+} //hadoken
 
-} // hadoken
-
-#endif // STATIC_ARRAY_HPP
+#endif // HADOKEN_GPU_ALGORITHM_HPP

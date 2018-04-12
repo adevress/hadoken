@@ -44,6 +44,9 @@
 #include <hadoken/random/counter_engine.hpp>
 #include <hadoken/random/threefry.hpp>
 
+#include  <cuda.h>
+#include  <curand_kernel.h>
+
 
 typedef  std::chrono::system_clock::time_point tp;
 typedef  std::chrono::system_clock cl;
@@ -101,7 +104,6 @@ std::size_t test_random_threefry(std::size_t iter){
 
 #ifdef HADOKEN_COMPILER_IS_NVCC
 
-#include <thrust/random/uniform_int_distribution.h>
 
 __global__
 void kernel_rand_device_hadoken(std::size_t iter, std::size_t * res, std::size_t* canary){
@@ -117,9 +119,11 @@ void kernel_rand_device_hadoken(std::size_t iter, std::size_t * res, std::size_t
     std::size_t start_pos =  (blockIdx.x * blockDim.x + threadIdx.x) * iter;
 
     for(std::size_t i = start_pos; i < iter; ++i){
-        rengine_t
+
+        
         hadoken::counter_engine<hadoken::threefry4x64> threefry_engine;
-        res[start_pos+i] = dist(threefry_engine);
+        threefry_engine.seed(i);
+        res[start_pos+i] = threefry_engine();
     }
 
     *canary = iter;
@@ -138,7 +142,7 @@ std::size_t test_random_threefry_device_hadoken(std::size_t iter){
 
     std::size_t *tmp_res, *canary;
 
-    cudaMallocManaged( &tmp_res, sizeof(std::size_t));
+    cudaMallocManaged( &tmp_res, sizeof(std::size_t) * iter);
     cudaMallocManaged( &canary, sizeof(std::size_t));
 
     std::size_t piter = iter / 256 /256 ;
@@ -158,9 +162,69 @@ std::size_t test_random_threefry_device_hadoken(std::size_t iter){
 }
 
 
+#endif
 
 
 
+#ifdef HADOKEN_COMPILER_IS_NVCC
+
+
+__global__  void  setup_kernel(curandState *state, std::size_t pos)
+{
+    curand_init (1234 , pos, 0, &state[pos]);
+}
+
+__global__  void  generate_kernel_curand(std::size_t iter, curandState *state , std::size_t* res,
+std::size_t* canary)
+{
+    
+    std::size_t start_pos =  (blockIdx.x * blockDim.x + threadIdx.x) * iter;
+    
+    /* Copy  state  to local  memory  for  efficiency  */
+
+    /*  Generate  pseudo -random  unsigned  ints */
+    for(int n = 0; n < iter; n++) {
+        std::size_t pos = n+start_pos;
+        curandState  localState = state[start_pos];        
+        res[pos] = curand (& localState);
+    }
+    
+    *canary = iter;
+}
+
+
+std::size_t test_random_cuda_device_curand(std::size_t iter){
+
+    std::size_t c, res;
+    tp t1, t2;
+
+
+    t1 = cl::now();
+
+    std::size_t *tmp_res, *canary;
+    curandState * state;
+
+    cudaMallocManaged( &state, sizeof(curandState) * iter);
+    cudaMallocManaged( &tmp_res, sizeof(std::size_t) * iter);
+    cudaMallocManaged( &canary, sizeof(std::size_t));
+
+    std::size_t piter = iter / 256 /256 ;
+
+    setup_kernel<<<256, 256>>>(state, 256*256);
+    generate_kernel_curand<<<256, 256>>>(piter, state, tmp_res, canary);
+    cudaDeviceSynchronize();
+
+    c = *canary;
+
+    cudaFree( canary );
+
+    t2 = cl::now();
+    
+    res = tmp_res[0];
+
+    std::cout << "curand device: " << std::chrono::duration_cast<std::chrono::milliseconds>(t2 -t1).count() << " and canary " << c << std::endl;
+    return res;
+}
 
 
 #endif
@@ -211,6 +275,8 @@ int main(){
 
 #ifdef HADOKEN_COMPILER_IS_NVCC
     junk += test_random_threefry_device_hadoken(n_exec);
+    
+    junk += test_random_cuda_device_curand(n_exec);
 #endif
 
     std::cout << "end junk " << junk << std::endl;

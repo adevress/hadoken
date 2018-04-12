@@ -1,4 +1,4 @@
-/**
+#   include <algorithm>/**
  * Copyright (c) 2016, Adrien Devresse <adrien.devresse@epfl.ch>
  *
  * Boost Software License - Version 1.0
@@ -37,7 +37,7 @@
 #ifndef _HADOKEN_RANDOM_THREEFRY_
 #define _HADOKEN_RANDOM_THREEFRY_
 
-#include <algorithm>
+
 #include <numeric>
 #include <cstdint>
 #include <random>
@@ -46,18 +46,13 @@
 #include <hadoken/config/platform_config.hpp>
 
 #ifdef HADOKEN_COMPILER_IS_NVCC
+#   include <hadoken/gpu/algorithm.hpp>
 #   include <hadoken/gpu/array.hpp>
-
-    template<typename T, std::size_t N>
-    using threefry_array = hadoken::array<T,N>;
 #else
+#   include <algorithm>
 #   include <array>
 
-template<typename T, std::size_t N>
-using threefry_array = std::array<T,N>;
 #endif
-
-
 
 ///
 ///  threefry is a state-less counter base random generator
@@ -75,6 +70,17 @@ using threefry_array = std::array<T,N>;
 ///
 
 namespace hadoken{
+
+
+
+namespace utils{
+#ifdef  HADOKEN_COMPILER_IS_NVCC
+    using namespace gpu;
+#else    
+    using namespace std;
+#endif    
+};   
+
 
 namespace impl {
 
@@ -207,7 +213,7 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 4>{
     typedef Domain domain_type;
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline void operator() (const std::array<uint_type, 5> & ks,
+    inline void operator() (const utils::array<uint_type, 5> & ks,
                         domain_type & c){
         constexpr std::size_t r = r_max - r_remain;
 
@@ -249,7 +255,7 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 4>{
     typedef Domain domain_type;
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline void operator() (const std::array<uint_type, 5> & ks,
+    inline void operator() (const utils::array<uint_type, 5> & ks,
                         domain_type & c){
         (void) ks;
         (void) c;
@@ -265,7 +271,7 @@ struct rounds_functor<r_remain, r_max, Uint, Domain, Constants, 2>{
     typedef Domain domain_type;
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline void operator() (const std::array<uint_type, 3> & ks,
+    inline void operator() (const utils::array<uint_type, 3> & ks,
                         domain_type & c){
         constexpr std::size_t r = r_max - r_remain;
 
@@ -298,7 +304,7 @@ struct rounds_functor<0, r_max, Uint, Domain, Constants, 2>{
     typedef Domain domain_type;
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline void operator() (const std::array<uint_type, 3> & ks,
+    inline void operator() (const utils::array<uint_type, 3> & ks,
                         domain_type & c){
         (void) ks;
         (void) c;
@@ -312,9 +318,9 @@ template <unsigned N, typename Uint, unsigned R=20, typename Constants=impl::thr
 class threefry{
     static_assert( N==2 || N==4, "number of rounds should be 2 or 4");
 public:
-    typedef threefry_array<Uint, N> domain_type;
-    typedef threefry_array<Uint, N> range_type;
-    typedef threefry_array<Uint, N> key_type;
+    typedef utils::array<Uint, N> domain_type;
+    typedef utils::array<Uint, N> range_type;
+    typedef utils::array<Uint, N> key_type;
     typedef Uint                  uint_type;
 
     HADOKEN_DECORATE_HOST_DEVICE
@@ -348,12 +354,12 @@ public:
     HADOKEN_DECORATE_HOST_DEVICE
     inline range_type operator()(const domain_type & counter){
         using namespace impl;
-        std::array<uint_type, N+1>  ks;
+        utils::array<uint_type, N+1>  ks;
         domain_type c(counter);
 
-        std::copy(k.begin(), k.end(), ks.begin());
-        ks[N] = std::accumulate(k.begin(), k.end(), Constants::ks_parity(), std::bit_xor<uint_type>());
-        std::transform(k.begin(), k.end(), c.begin(), c.begin(), std::plus<uint_type>());
+        utils::copy(k.begin(), k.end(), ks.begin());
+        ks[N] = utils::accumulate(k.begin(), k.end(), Constants::ks_parity(), utils::bit_xor<uint_type>());
+        utils::transform(k.begin(), k.end(), c.begin(), c.begin(), utils::plus<uint_type>());
 
         rounds_functor<R, R, uint_type, domain_type, Constants, N> func;
         func(ks, c);
