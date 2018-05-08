@@ -1,7 +1,16 @@
 
 [![Build Status](https://travis-ci.org/adevress/hadoken.svg?branch=master)](https://travis-ci.org/adevress/hadoken)
 
-Hadoken
+
+      _    _               _           _                   
+     | |  | |             | |         | |                  
+     | |__| |   __ _    __| |   ___   | | __   ___   _ __  
+     |  __  |  / _` |  / _` |  / _ \  | |/ /  / _ \ | '_ \ 
+     | |  | | | (_| | | (_| | | (_) | |   <  |  __/ | | | |
+     |_|  |_|  \__,_|  \__,_|  \___/  |_|\_\  \___| |_| |_|
+                                                       
+                                                       
+
 
 # Summmary
 
