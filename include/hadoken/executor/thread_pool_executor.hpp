@@ -38,6 +38,7 @@
 
 
 #include <hadoken/thread/future_helpers.hpp>
+#include <hadoken/threading/std_thread_model.hpp>
 #include <hadoken/containers/concurrent_queue.hpp>
 
 
@@ -94,7 +95,7 @@ private:
 ///
 /// \brief Executor implementation for a simple thread
 ///
-class thread_pool_executor{
+class thread_pool_executor : public std_thread_model{
 public:
 
     template<typename T>
