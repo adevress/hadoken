@@ -63,11 +63,11 @@ inline string_view::string_view(const char *c_str) :
 
 
 
-string_view::const_iterator string_view::begin() const{
+inline string_view::const_iterator string_view::begin() const{
     return _pstr;
 }
 
-string_view::const_iterator string_view::end() const{
+inline string_view::const_iterator string_view::end() const{
     return _pstr + _len;
 }
 
