@@ -29,6 +29,9 @@
 #ifndef HADOKEN_SYSTEM_EXECUTOR_HPP
 #define HADOKEN_SYSTEM_EXECUTOR_HPP
 
+
+#include <future>
+
 #include <hadoken/executor/thread_pool_executor.hpp>
 #include <hadoken/utility/singleton.hpp>
 
@@ -41,16 +44,28 @@ namespace hadoken{
 ///
 class system_executor{
 public:
-    system_executor() {
+
+    template<typename T>
+    using future = std::future<T>;
+
+    template<typename T>
+    using promise = std::promise<T>;
+
+    inline system_executor() {
         singleton<thread_pool_executor>::init();
     }
 
-    ~system_executor(){
+    inline ~system_executor(){
 
     }
 
-    void execute(std::function<void (void)> task){
+    inline void execute(std::function<void (void)> task){
         singleton<thread_pool_executor>::instance().execute(std::move(task));
+    }
+
+    template<typename Function>
+    inline future<decltype(std::declval<Function>()())> twoway_execute(Function func){
+        return singleton<thread_pool_executor>::instance().twoway_execute(func);
     }
 
 

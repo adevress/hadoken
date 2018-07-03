@@ -107,6 +107,8 @@ public:
     inline thread_pool_executor(std::size_t n_thread =0) :
         _work_queue(),
         _executors(){
+        pthread_key_create(&_recursive_key, NULL);
+
         const std::size_t n_workers = (n_thread > 0) ? n_thread : (std::thread::hardware_concurrency());
         for(std::size_t i =0; i < n_workers; ++i){
             _executors.emplace_back( new details::worker_thread(_work_queue));
@@ -114,7 +116,7 @@ public:
     }
 
     inline ~thread_pool_executor(){
-
+        pthread_key_delete(_recursive_key);
     }
 
     inline void execute(std::function<void (void)> task){
@@ -123,27 +125,40 @@ public:
 
     template<typename Function>
     inline future<decltype(std::declval<Function>()())> twoway_execute(Function func){
-        auto prom = std::make_shared<promise<decltype(std::declval<Function>()()) > >();
-        auto future_result = prom->get_future();
 
-        _work_queue.push([prom, func]() mutable -> void{
+        // if our current thread is not part of the pool
+        // we execute in the pool
+        // if it is already a pooled_thread, we do not to avoid deadlock
+        if(pthread_getspecific(_recursive_key) == NULL){
 
-            try{
-                set_promise_from_result(*prom, func);
-            } catch(...) {
-                try {
-                    prom->set_exception(std::current_exception());
+            auto prom = std::make_shared<promise<decltype(std::declval<Function>()()) > >();
+            auto future_result = prom->get_future();
+
+            _work_queue.push([prom, func, this]() mutable -> void{
+                pthread_setspecific(this->_recursive_key, (void*)1);
+                try{
+                    set_promise_from_result(*prom, func);
                 } catch(...) {
-                    std::cerr << "error during set_exception in executor" << std::endl;
+                    try {
+                        prom->set_exception(std::current_exception());
+                    } catch(...) {
+                        std::cerr << "error during set_exception in executor" << std::endl;
+                    }
                 }
-            }
-        });
-        return future_result;
+            });
+            return future_result;
+        } else{
+            return std::async(std::launch::deferred, [func]() {
+                return func();
+            });
+        }
     }
 
 private:
     concurrent_queue<std::function<void ()>> _work_queue;
     std::vector<std::unique_ptr<details::worker_thread> > _executors;
+
+    pthread_key_t _recursive_key;
 };
 
 

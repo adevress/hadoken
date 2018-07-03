@@ -34,17 +34,12 @@
 #include <stdexcept>
 #include <cstdint>
 
-#if !(defined _OPENMP) || (defined CPP17_ALGORITHM_FORCE_SEQ)
-#warning "No OpenMP support available: parallel algorithm execution disabled"
-#define __ALGORITHM_NO_OPENMP
-#endif
-
-#ifndef __ALGORITHM_NO_OPENMP
-#include <omp.h>
-#endif
 
 #include <hadoken/parallel/algorithm.hpp>
 #include <hadoken/utility/range.hpp>
+#include <hadoken/executor/system_executor.hpp>
+#include <hadoken/thread/latch.hpp>
+#include <hadoken/containers/small_vector.hpp>
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
 #include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>
@@ -68,7 +63,7 @@ class parallel_vector_execution_policy;
 namespace detail{
 
 inline int __get_number_executor(){
-#ifndef __ALGORITHM_NO_OPENMP
+#ifndef __HADOKEN_ALGORITHM_ENFORCE_SERIAL
     // TODO : should be configurable parameter, extracted from execution_policy
     return std::thread::hardware_concurrency();
 #else
@@ -78,25 +73,23 @@ inline int __get_number_executor(){
 
 template<typename Function>
 inline void __execute_grid(int num_executor, Function fun){
-#ifndef __ALGORITHM_NO_OPENMP
-    //std::cout << "val " << num_executor << std::endl;
-    #pragma omp parallel
-    {
+#ifndef __HADOKEN_ALGORITHM_ENFORCE_SERIAL
 
-       #pragma omp single
-       {
+    system_executor sys_exec;
+    std::vector<std::future<void>> futures;
 
-           for(int id = 0; id < num_executor; ++id){
 
-               #pragma omp task firstprivate(id)
-               {
-                fun(id, num_executor);
-               }
-            }
 
-        }
-
+    for(int id = 0; id < num_executor; ++id){
+        futures.emplace_back( std::move(sys_exec.twoway_execute([id, num_executor, &fun]{
+                return fun(id, num_executor);
+        })));
     }
+
+    for(auto & f : futures){
+        f.get();
+    }
+
 #else
     for(int id =0 ; id < num_executor; ++id){
         fun(id, num_executor);
