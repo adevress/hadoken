@@ -148,7 +148,7 @@ inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, 
 } // hadoken
 
 
-#include <hadoken/parallel/bits/omp_algorithm_impl.hpp>
+#include <hadoken/parallel/bits/c11_thread_algorithm_impl.hpp>
 
 
 
