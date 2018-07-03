@@ -46,33 +46,34 @@ namespace thread{
 ///
 class spin_lock{
 public:
-    inline spin_lock() : _lock(false) {}
+    inline spin_lock() : _lock(ATOMIC_FLAG_INIT) {}
 
     inline void lock() noexcept {
-			while(1){
-	       		bool expected = false;
-				if(_lock.compare_exchange_strong(expected, true)){
-					return;
-				}
-				
-				while(_lock.load() == true){
+            std::uint64_t counter = 1;
+            while(1){
+                if(! _lock.test_and_set()){
+                    return;
+                }
+                
 #ifndef HADOKEN_SPIN_NO_YIELD
-					std::this_thread::yield();
-#endif 
-				}
-		     
-	       }
+                if(counter % 128 == 0){
+                    std::this_thread::yield();                    
+                }
+#endif                 
+                counter ++;
+             
+           }
     }
 
     inline void unlock() noexcept{
-        _lock.store(false);
+        _lock.clear();
     }
 
 private:
     spin_lock(const spin_lock &) = delete;
     spin_lock & operator=(const spin_lock&) = delete;
 
-    std::atomic<bool> _lock;
+    std::atomic_flag _lock;
 };
 
 
