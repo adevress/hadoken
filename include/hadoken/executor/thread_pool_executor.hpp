@@ -70,13 +70,11 @@ public:
     inline void run(){
         while(!finished){
             auto work_item = _queue_ref.try_pop(std::chrono::milliseconds(10));
-
             if(work_item){
                 work_item.get()();
             }
 
         }
-
     }
 
 private:
