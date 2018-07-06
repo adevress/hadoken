@@ -119,8 +119,22 @@ bool operator==(const string_view & first, const string_view & second);
 
 std::ostream & operator <<(std::ostream & o, const string_view & sv);
 
-
+///
+/// \brief to_string
+///
+///
 std::string to_string(const string_view & sv);
+
+///
+/// Construct a string view from an Iterator
+///
+template<typename StIterator>
+string_view make_string_view(StIterator first, StIterator last){
+    static_assert(std::is_same<decltype(char(*first)), char>::value , "(first,last) are not a string interator");
+
+    const std::size_t len = std::distance(first, last);
+    return string_view(&(*first), len);
+}
 
 } // namespace hadoken
 
