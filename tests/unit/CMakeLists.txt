@@ -84,6 +84,15 @@ target_link_libraries(test_string ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 add_test(NAME test_string_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_string)
 
 
+## os Test
+LIST(APPEND test_os_src "test_os.cpp")
+
+add_executable(test_os ${test_os_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_os ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_os_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_os)
+
+
 ## thread Test
 LIST(APPEND test_thread_src "test_thread.cpp")
 
