@@ -11,9 +11,6 @@ add_definitions( -DHADOKEN_VERSION_MAJOR=\"${HADOKEN_VERSION_MAJOR}\" -DHADOKEN_
 option(HADOKEN_DISABLE_INSTALL "Disable the installation for this component" TRUE)
 option(HADOKEN_UNIT_TESTS "Enable or disable unit tests execution" TRUE)
 option(HADOKEN_PERF_TESTS "Enable or disable performance tests execution" FALSE)
-option(TEST_WITH_TBB "Use Intel TBB to test parallel algorithms" FALSE)
-option(TEST_WITH_OMP "Use openMP to test parallel algorithms" FALSE)
-option(TEST_WITH_GNU_PSTL "Use the GNU parallel STL to test parallel algorithms" FALSE)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
       ${PROJECT_SOURCE_DIR}/CMake/portability

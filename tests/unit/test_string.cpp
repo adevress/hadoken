@@ -39,6 +39,7 @@
 
 
 #include <hadoken/string/string_view.hpp>
+#include <hadoken/string/algorithm.hpp>
 
 #include <hadoken/utility/range.hpp>
 
@@ -47,7 +48,7 @@
 
 
 
-BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
+BOOST_AUTO_TEST_CASE( string_view_simple)
 {
     using namespace hadoken;
 
@@ -76,6 +77,20 @@ BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
     std::ostringstream ss;
     ss << truncated;
     BOOST_CHECK_EQUAL(ss.str(), to_string(truncated));
+
+}
+
+
+
+BOOST_AUTO_TEST_CASE( string_tokenize_view)
+{
+    using namespace hadoken;
+
+    const char* msg = "hello bob #42~€é tada";
+
+    std::vector<std::string> res = string::split_string(msg, " ");
+
+    BOOST_CHECK_EQUAL(res.size(), 4);
 
 }
 

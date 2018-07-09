@@ -32,17 +32,20 @@
 
 #include <string>
 
+#include <hadoken/string/string_view.hpp>
+#include <hadoken/containers/small_vector.hpp>
+
 namespace hadoken{
 
-namespace {
+namespace internal{
 
 template<typename Iterator>
-bool __match_wildcard_rec(Iterator begin_expr, Iterator  end_expr, Iterator begin_str, Iterator end_str){
+inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterator begin_str, Iterator end_str){
     if(begin_expr == end_expr && begin_str == end_str){
         return true;
     }
 
-    if(begin_expr == end_expr || begin_str == end_str){
+    if(begin_expr >= end_expr || begin_str >= end_str){
         return false;
     }
 
@@ -60,12 +63,62 @@ bool __match_wildcard_rec(Iterator begin_expr, Iterator  end_expr, Iterator begi
 
 }
 
+template<typename Iterator, typename Vector>
+void add_fragment_if_new( Iterator first_match,
+                            Iterator last_match,
+                            Vector & v){
+    v.emplace_back(typename Vector::value_type(first_match, last_match));
+}
+
+template<typename Iterator, typename Vector>
+inline bool __extract_fragment_rec(Iterator begin_expr, Iterator end_expr,
+                                   Iterator begin_str, Iterator end_str,
+                                   Iterator first_match,
+                                   Vector & v){
+ /*   if(begin_expr == end_expr && begin_str == end_str){
+        return true;
+    }
+
+    if(begin_expr == end_expr || begin_str == end_str){
+        return false;
+    }
+
+    if(*begin_expr == *begin_str){
+        return __match_wildcard_rec(begin_expr+1, end_expr, begin_str+1, end_str);
+    }
+
+    if(*begin_expr != '*'){
+        return false;
+    }
+
+    const bool match_remaining = __match_wildcard_rec(begin_expr+1, end_expr, begin_str+1, end_str);
+    if(match_remaining){
+        if(first_match != end_str){
+            add_fragment_if_new(first_match, end_str, v);
+            return true;
+        }
+    }*/
 
 }
 
 
+}
+
+///
+/// match a string with a given wildcard expression
+///
+/// e.g "blablalba" matches "bla*a" or "*bla*" or "*"
+///     "hello" does not matches "*ol", "*hellop" or "*p"
+///
+///
 inline bool match_wildcard(const std::string & expression, const std::string & str){
-    return __match_wildcard_rec(expression.begin(), expression.end(), str.begin(), str.end());
+    return internal::__match_wildcard_rec(expression.begin(), expression.end(), str.begin(), str.end());
+}
+
+
+template<typename Vector>
+inline void extract_wildcard(const std::string & expression, const std::string & str, Vector & fragments){
+
 }
 
 
