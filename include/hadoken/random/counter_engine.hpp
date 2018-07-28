@@ -103,7 +103,7 @@ public:
 
 
     HADOKEN_DECORATE_HOST_DEVICE
-    counter_engine(const counter_engine& e) : b(e.b), c(e.c), elem(e.elem){
+    counter_engine(const counter_engine& e) : b(e.b), c(e.c), elem(e.elem), v(e.v) {
     }
 
 
