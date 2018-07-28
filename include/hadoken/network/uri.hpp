@@ -86,8 +86,9 @@ private:
     uri_view _scheme, _userinfo, _host, _port, _path, _query, _fragment;
 
 
-    inline int parse_uri(iterator_type begin, iterator_type last,
-                          iterator_type end, state s);
+    template<state s>
+    int parse_uri(iterator_type begin, iterator_type last,
+                          iterator_type end);
 };
 
 

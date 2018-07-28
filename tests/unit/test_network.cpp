@@ -164,7 +164,7 @@ BOOST_AUTO_TEST_CASE( uri_parsing_stack_breaker)
 
     BOOST_CHECK_EQUAL(my_uri.get_scheme(), std::string("http"));
     BOOST_CHECK_EQUAL(my_uri.get_host(), std::string(n, 'c'));
-    BOOST_CHECK_EQUAL(my_uri.get_path(), std::string(n, 'd'));
+    BOOST_CHECK_EQUAL(my_uri.get_path(), std::string("/") + std::string(n, 'd'));
 }
 
 
