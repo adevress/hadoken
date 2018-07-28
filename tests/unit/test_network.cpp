@@ -148,6 +148,25 @@ BOOST_AUTO_TEST_CASE( uri_parsing)
 }
 
 
+// test that the compiler unroll properly the recursive function
+// by triggering a stack explosion if it does not
+BOOST_AUTO_TEST_CASE( uri_parsing_stack_breaker)
+{
+
+    const std::size_t n = 10000000;
+    std::string very_long_url("http://johndoe:password@");
+
+    very_long_url.append(n, 'c');
+    very_long_url.append("/");
+    very_long_url.append(n, 'd');
+
+    uri my_uri(very_long_url);
+
+    BOOST_CHECK_EQUAL(my_uri.get_scheme(), std::string("http"));
+    BOOST_CHECK_EQUAL(my_uri.get_host(), std::string(n, 'c'));
+    BOOST_CHECK_EQUAL(my_uri.get_path(), std::string(n, 'd'));
+}
+
 
 BOOST_AUTO_TEST_CASE( test_encode)
 {
