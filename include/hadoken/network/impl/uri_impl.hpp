@@ -132,7 +132,7 @@ uri::uri(std::string uri_string) :
     _query(details::make_empty_view(_str_uri)),
     _fragment(details::make_empty_view(_str_uri))
 {
-    parse_uri<state::scheme>(_str_uri.begin(), _str_uri.begin(), _str_uri.end());
+    parse_uri(_str_uri.begin(), _str_uri.begin(), _str_uri.end());
 }
 
 uri::~uri(){
@@ -200,122 +200,177 @@ std::string uri::get_fragment() const{
 }
 
 
-template<uri::state pstate>
+// initially tail-recursive, unrolled manually due to some compilers
+// being unable to do it properly
 int uri::parse_uri(iterator_type begin, iterator_type last, iterator_type end){
     using namespace details;
     const char delim_query = '?';
     const char delim_fragment = '#';
     const char userinfo_delim = '@';
 
-    if(pstate == state::invalid){
-        _state = state::invalid;
-        return -1;
-    }
+    uri::state pstate = state::scheme;
 
-    if(pstate == state::valid){
-        _state = state::valid;
-        return 0;
-    }
+    while(1){
 
-
-    if(last >= end && ( pstate == state::scheme)){
-        return parse_uri<state::invalid>(end, end, end);
-    }
-
-    // parse scheme
-    if(pstate == state::scheme){
-        if( is_rfc3986_scheme_char(*last)){
-            return parse_uri<state::scheme>(begin, last+1, end);
+        if(pstate == state::invalid){
+            _state = state::invalid;
+            return -1;
         }
-        if( *last == ':'){ // normal scheme case
-            _scheme = make_view(begin, last);
-            return parse_uri<state::authority_delim>(last+1, last+1, end);
+
+        if(pstate == state::valid){
+            _state = state::valid;
+            return 0;
         }
-        return parse_uri<state::invalid>(end, end, end);
+
+
+        if(last >= end && ( pstate == state::scheme)){
+            begin = end;
+            last = end;
+            pstate = state::invalid;
+            continue;
+        }
+
+        // parse scheme
+        if(pstate == state::scheme){
+            if( is_rfc3986_scheme_char(*last)){
+                last +=1;
+                continue;
+            }
+            if( *last == ':'){ // normal scheme case
+                _scheme = make_view(begin, last);
+                last +=1;
+                begin = last;
+                pstate = state::authority_delim;
+                continue;
+            }
+            pstate = state::invalid;
+            continue;
+        }
+
+        // parse authority delimiter "://"
+        if(pstate == state::authority_delim){
+            if( (last+1) < end && *last == '/' && *(last+1) == '/' ){
+               begin += 2;
+               last += 2;
+               pstate = state::userinfo;
+               continue;
+            }
+            pstate = state::path;
+            continue;
+        }
+
+        // parse userinfo if any
+        if(pstate == state::userinfo){
+            iterator_type it = std::find(begin, end, userinfo_delim);
+            if( it == end){
+                _userinfo = make_view(end, end);
+                last = begin;
+                pstate = state::host;
+                continue;
+             } else {
+                _userinfo = make_view(begin, it);
+                begin = it + 1;
+                last = it + 1;
+                pstate = state::host;
+                continue;
+            }
+        }
+
+        // parse host
+        if(pstate == state::host){
+            // TODO: handle IPv6 URI [::]
+            if(*last == ':'){
+                _host = make_view(begin, last);
+                begin = last +1;
+                last = last + 1;
+                pstate = state::port;
+                continue;
+            }
+            if(*last == '/' || last == end){
+                _host = make_view(begin, last);
+                begin = last;
+                pstate = state::path;
+                continue;
+            }
+            last += 1;
+            pstate = state::host;
+            continue;
+        }
+
+        // parse port
+        if(pstate == state::port){
+            if(std::isdigit(*last)){
+                last += 1;
+                pstate = state::port;
+                continue;
+            }
+            _port = make_view(begin, last);
+            begin = last;
+            pstate = state::path;
+            continue;
+        }
+
+        // parse path
+        if(pstate == state::path){
+            if(last >= end){
+                _path = make_view(begin, end);
+                begin = end;
+                last = end;
+                pstate = state::valid;
+                continue;
+            }else if( *last == delim_query){
+                _path = make_view(begin, last);
+                last += 1;
+                begin = last;
+                pstate = state::query;
+                continue;
+            }else if (*last == delim_fragment){
+                _path = make_view(begin, last);
+                 last += 1;
+                 begin = last;
+                 pstate = state::fragment;
+                 continue;
+            }
+            last +=1;
+            pstate = state::path;
+            continue;
+        }
+
+        // parse query
+        if(pstate == state::query){
+            if(last >= end){
+                _query = make_view(begin, end);
+                begin = last = end;
+                pstate = state::valid;
+                continue;
+            }else if( *last == delim_fragment){
+                _query = make_view(begin, last);
+                last += 1;
+                begin = last;
+                pstate = state::fragment;
+                continue;
+            }
+            last += 1;
+            pstate = state::query;
+            continue;
+        }
+
+        // parse fragment
+        if(pstate == state::fragment){
+            if(last >= end){
+                _fragment = make_view(begin, end);
+                begin = last = end;
+                pstate = state::valid;
+                continue;
+            }
+            last +=1;
+            pstate = state::fragment;
+            continue;
+        }
+
+
+        pstate = state::invalid;
     }
-
-    // parse authority delimiter "://"
-    if(pstate == state::authority_delim){
-        if( (last+1) < end && *last == '/' && *(last+1) == '/' ){
-           return parse_uri<state::userinfo>(begin+2, last +2, end);
-        }
-        return parse_uri<state::path>(begin, last, end);
-    }
-
-    // parse userinfo if any
-    if(pstate == state::userinfo){
-        auto it = std::find(begin, end, userinfo_delim);
-        if( it == end){
-            _userinfo = make_view(end, end);
-            return parse_uri<state::host>(begin, begin, end);
-         } else {
-            _userinfo = make_view(begin, it);
-            return parse_uri<state::host>(it+1, it+1, end);
-        }
-    }
-
-    // parse host
-    if(pstate == state::host){
-        // TODO: handle IPv6 URI [::]
-        if(*last == ':'){
-            _host = make_view(begin, last);
-            return parse_uri<state::port>(last+1, last+1, end);
-        }
-        if(*last == '/' || last == end){
-            _host = make_view(begin, last);
-            return parse_uri<state::path>(last, last, end);
-        }
-        return parse_uri<state::host>(begin, last+1, end);
-    }
-
-    // parse port
-    if(pstate == state::port){
-        if(std::isdigit(*last)){
-            return parse_uri<state::port>(begin, last+1, end);
-        }
-        _port = make_view(begin, last);
-        return parse_uri<state::path>(last, last, end);
-    }
-
-    // parse path
-    if(pstate == state::path){
-        if(last >= end){
-            _path = make_view(begin, end);
-            return parse_uri<state::valid>(end, end, end);
-        }else if( *last == delim_query){
-            _path = make_view(begin, last);
-            return parse_uri<state::query>(last+1, last+1, end);
-        }else if (*last == delim_fragment){
-            _path = make_view(begin, last);
-             return parse_uri<state::fragment>(last+1, last+1, end);
-        }
-        return parse_uri<state::path>(begin, last+1, end);
-    }
-
-    // parse query
-    if(pstate == state::query){
-        if(last >= end){
-            _query = make_view(begin, end);
-            return parse_uri<state::valid>(end, end, end);
-        }else if( *last == delim_fragment){
-            _query = make_view(begin, last);
-             return parse_uri<state::fragment>(last+1, last+1, end);
-        }
-        return parse_uri<state::query>(begin, last+1, end);
-    }
-
-    // parse fragment
-    if(pstate == state::fragment){
-        if(last >= end){
-            _fragment = make_view(begin, end);
-            return parse_uri<state::valid>(end, end, end);
-        }
-        return parse_uri<state::fragment>(begin, last+1, end);
-    }
-
-
-    _state = state::invalid;
-    return -1;
 }
 
 
