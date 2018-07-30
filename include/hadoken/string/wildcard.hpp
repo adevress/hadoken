@@ -98,7 +98,7 @@ inline bool __extract_fragment_rec(Iterator begin_expr, Iterator end_expr,
             return true;
         }
     }*/
-
+    return false;
 }
 
 
