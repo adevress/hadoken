@@ -94,7 +94,7 @@ int main(){
 	const std::size_t ncore = std::thread::hardware_concurrency();
     std::size_t junk=0;
 
-    hadoken::format::scat(std::cout, "test lock with ", ncore, " cores");
+    hadoken::format::scat(std::cout, "test lock with ", ncore, " cores", "\n");
 
     junk += lock_test<std::mutex>(1, "std::mutex_single");
 
