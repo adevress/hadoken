@@ -69,27 +69,27 @@ public:
 
 
     ///
-    /// \brief return iterator to first value of the small_vector
+    /// \brief return iterator to first value of small_vector
     ///
     iterator begin() noexcept{
         return iterator(_begin);
     }
 
     ///
-    /// \brief return const_iterator to first value of the small_vector
+    /// \brief return const_iterator to first value of small_vector
     ///
     const_iterator begin() const noexcept{
         return const_iterator(_begin);
     }
     ///
-    /// \brief return iterator to first value of the small_vector
+    /// \brief return iterator to first value of small_vector
     ///
     iterator end() noexcept{
         return iterator(_end);
     }
 
     ///
-    /// \brief return const_iterator to first value of the small_vector
+    /// \brief return const_iterator after the last element of small_vector
     ///
     const_iterator end() const noexcept{
         return const_iterator(_end);
@@ -102,6 +102,11 @@ public:
     size_type size() const noexcept{
         return static_cast<std::size_t>(_end - _begin);
     }
+
+    ///
+    /// \brief return const_iterator to first value of the small_vector
+    ///
+    void resize(size_type new_size);
 
     ///
     /// \brief maximum number of element that the small_vector can contain
@@ -122,6 +127,10 @@ public:
     ///
     void emplace_back(value_type && elem);
 
+    ///
+    /// \brief pop_back
+    ///
+    void pop_back();
 
     ///
     /// \brief front

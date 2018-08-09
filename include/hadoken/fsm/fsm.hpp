@@ -47,33 +47,36 @@ namespace hadoken{
 template<typename State>
 class fsm{
 public:
-    inline fsm(State init_state);
+    fsm(State init_state);
 
-    inline void trigger();
+    void trigger();
 
-    inline State get_current_state() const;
+    State get_current_state() const;
 
 private:
     struct transition_handler{
-        State _prev, _next;
+        State _next;
 
         std::function<bool (void)> _trans;
     };
 
     struct state_handler{
-        std::function<void (void)> _on_enter;
+        std::function<void (const State & prev_state, const State & new_state)> _on_enter, _on_exit;
 
-        std::function<void (void)> _on_exit;
-
-        containers::small_vector<transition_handler> _transitions;
+        containers::small_vector<transition_handler, 4> _transitions;
     };
 
     containers::small_vector<state_handler, 8> _handlers;
     State _current_state;
+
+    void _resize(const State & st);
 };
 
 
-}
+} // hadoken
+
+
+#include "impl/fsm_impl.hpp"
 
 
 

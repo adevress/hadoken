@@ -121,6 +121,14 @@ target_link_libraries(test_network_base ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_T
 
 add_test(NAME test_network_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_network_base)
 
+# fsm Test
+LIST(APPEND test_fsm_src "test_fsm.cpp")
+
+add_executable(test_fsm_base ${test_fsm_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_fsm_base ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_fsm_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_fsm_base)
+
 
 endif()
 

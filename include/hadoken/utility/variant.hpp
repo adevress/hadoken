@@ -26,18 +26,27 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef HADOKEN_OPTIONAL_HPP
-#define HADOKEN_OPTIONAL_HPP
+#ifndef HADOKEN_VARIANT_HPP
+#define HADOKEN_VARIANT_HPP
 
 
-#include <boost/optional.hpp>
+#include <boost/variant.hpp>
+
+#include "optional.hpp"
 
 namespace hadoken {
 
-template<typename T>
-using optional = boost::optional<T>;
+template<typename... T>
+using variant = boost::variant<T...>;
 
 
+template<typename Variant, typename T>
+Variant to_variant(optional<T> optional){
+    if(optional){
+        return Variant(std::move(optional.get()));
+    }
+    return Variant();
+}
 
 } // namespace hadoken
 

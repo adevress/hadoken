@@ -37,9 +37,9 @@
 
 #include <hadoken/parallel/algorithm.hpp>
 #include <hadoken/utility/range.hpp>
-#include <hadoken/executor/system_executor.hpp>
 #include <hadoken/thread/latch.hpp>
 #include <hadoken/containers/small_vector.hpp>
+#include <hadoken/executor/system_executor.hpp>
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
 #include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>

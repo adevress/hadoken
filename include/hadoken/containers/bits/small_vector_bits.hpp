@@ -95,6 +95,21 @@ small_vector<T,N>::~small_vector(){
 }
 
 
+template<typename T, std::size_t N>
+void small_vector<T,N>::resize(size_type new_size){
+    const size_type current_size = size();
+    if(new_size == current_size){
+        return;
+    }else if(new_size >= current_size){
+        for(size_type i = 0; i < (new_size - current_size); ++i){
+            emplace_back(T());
+        }
+    }else{
+        for(size_type i = 0; i < (current_size - new_size); ++i){
+            pop_back();
+        }
+    }
+}
 
 template<typename T, std::size_t N>
 typename small_vector<T,N>::size_type
@@ -125,6 +140,17 @@ void small_vector<T,N>::emplace_back(value_type && v){
     _end = new (_end) T(std::move(v));
     _end++;
 }
+
+
+template<typename T, std::size_t N>
+void small_vector<T,N>::pop_back(){
+    assert(size() != 0);
+    _end--;
+
+    destroyer_func<pointer, T> _destroyer;
+    _destroyer(_end);
+}
+
 
 
 template<typename T, std::size_t N>

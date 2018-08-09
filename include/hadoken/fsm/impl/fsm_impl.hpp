@@ -26,19 +26,61 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef HADOKEN_OPTIONAL_HPP
-#define HADOKEN_OPTIONAL_HPP
+
+#ifndef HADOKEN_FSM_IMPL_HPP
+#define HADOKEN_FSM_IMPL_HPP
+
+#include "../fsm.hpp"
+
+namespace hadoken{
 
 
-#include <boost/optional.hpp>
-
-namespace hadoken {
-
-template<typename T>
-using optional = boost::optional<T>;
+template<typename State>
+int to_state_index_position(const State & s){
+    return int(s);
+}
 
 
+template<typename State>
+fsm<State>::fsm(State init_state) :
+    _current_state(init_state){
+    _resize(init_state);
+}
 
-} // namespace hadoken
+template<typename State>
+void fsm<State>::_resize(const State & st){
+    _handlers.resize(std::max<std::size_t>(to_state_index_position(st), _handlers.size()));
+}
 
-#endif // OPTIONAL_HPP
+template<typename State>
+State fsm<State>::get_current_state() const{
+    return _current_state;
+}
+
+
+template<typename State>
+void fsm<State>::trigger(){
+    auto & handler = _handlers.at(to_state_index_position(_current_state));
+    auto & transitions = handler._transitions;
+    for(auto & transition : transitions ){
+        const bool valid = transition._trans();
+        if(valid){
+            const State new_transtion = transition._next;
+            auto & new_handler = _handlers.at(to_state_index_position(new_transtion));
+
+            handler._on_exit(_current_state, new_transtion);
+
+            const State old_transition = _current_state;
+            _current_state = new_transtion;
+
+            new_handler._on_entry(old_transition, _current_state);
+            return;
+        }
+    }
+}
+
+
+
+} // hadoken
+
+#endif // FSM_IMPL_HPP

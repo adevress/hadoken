@@ -37,8 +37,11 @@
 #include <boost/test/floating_point_comparison.hpp>
 #include <boost/array.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/variant.hpp>
 
 #include <hadoken/string/wildcard.hpp>
+#include <hadoken/utility/optional.hpp>
+#include <hadoken/utility/variant.hpp>
 #include <hadoken/geometry/geometry_legacy.hpp>
 #include <hadoken/math/math_floating_point.hpp>
 
@@ -61,6 +64,25 @@ BOOST_AUTO_TEST_CASE(wildcard_simple)
     BOOST_CHECK(hadoken::match_wildcard("world*", "hello world") == false);
     BOOST_CHECK(hadoken::match_wildcard("*", "hello world"));
 }
+
+
+BOOST_AUTO_TEST_CASE(optional_to_variant)
+{
+
+    hadoken::variant<int, float, std::string> my_variant;
+
+    hadoken::optional<std::string> my_opt;
+
+    BOOST_CHECK( ! my_opt );
+    BOOST_CHECK_EQUAL(bool(my_opt), false);
+
+    BOOST_CHECK_EQUAL(my_variant.which(), 0);
+
+    my_variant = hadoken::to_variant<hadoken::variant<int, float, std::string>>(my_opt);
+    BOOST_CHECK_EQUAL(my_variant.which(), 0);
+
+}
+
 
 
 BOOST_AUTO_TEST_CASE( simple_rotation_tests )

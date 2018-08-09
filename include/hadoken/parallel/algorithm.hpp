@@ -37,6 +37,9 @@ namespace hadoken{
 
 namespace parallel{
 
+///
+/// basic policies
+///
 
 /// sequential execution, no parallelism
 class sequential_execution_policy{};
@@ -47,7 +50,6 @@ class parallel_execution_policy{};
 /// parallel execution allowed, vector execution allowed
 class parallel_vector_execution_policy{};
 
-
 /// constexpr for sequential execution
 constexpr sequential_execution_policy seq{};
 
@@ -57,6 +59,20 @@ constexpr parallel_execution_policy par{};
 /// constexpr for parallel vector execution
 constexpr parallel_vector_execution_policy par_vec{};
 
+///
+/// Extended policies
+///
+template<typename Executor>
+class parallel_shared_exec_policy{
+public:
+    inline parallel_shared_exec_policy(std::shared_ptr<Executor> executor) : _exec(std::move(executor)){}
+protected:
+    std::shared_ptr<Executor> _exec;
+};
+
+///
+/// algorithms
+///
 
 
 /// parallel for_each algorithm with execution specifier
