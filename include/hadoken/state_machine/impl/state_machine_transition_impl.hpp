@@ -26,57 +26,37 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef HADOKEN_FSM_HPP
-#define HADOKEN_FSM_HPP
+#ifndef HADOKEN_STATE_MACHINE_TRANSITION_HPP
+#define HADOKEN_STATE_MACHINE_TRANSITION_HPP
 
 #include <functional>
 
-#include <hadoken/containers/small_vector.hpp>
+#include "../state_machine.hpp"
 
 namespace hadoken{
 
-//
-// simple, stupid, easy Finite State Machine implementation C++11
-//
-// supports :
-// - on edge execution
-// - no memory allocation required for small machines
-// - O(1) complexity for number of states
-// - O(n) complexity for transition / states
-//
+
+namespace impl{
+
 template<typename State>
-class fsm{
-public:
-    fsm(State init_state);
+struct transition_handler{
+    State _next;
 
-    void trigger();
-
-    State get_current_state() const;
-
-private:
-    struct transition_handler{
-        State _next;
-
-        std::function<bool (void)> _trans;
-    };
-
-    struct state_handler{
-        std::function<void (const State & prev_state, const State & new_state)> _on_enter, _on_exit;
-
-        containers::small_vector<transition_handler, 4> _transitions;
-    };
-
-    containers::small_vector<state_handler, 8> _handlers;
-    State _current_state;
-
-    void _resize(const State & st);
+    std::function<bool (void)> _trans;
 };
 
+template<typename State>
+struct state_handler{
+    std::function<void (const State & prev_state, const State & new_state)> _on_enter, _on_exit;
+
+    containers::small_vector<transition_handler<State>, 4> _transitions;
+};
+
+} // impl
 
 } // hadoken
 
 
-#include "impl/fsm_impl.hpp"
 
 
 

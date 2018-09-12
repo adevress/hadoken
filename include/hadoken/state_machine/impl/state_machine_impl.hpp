@@ -27,13 +27,17 @@
 *
 */
 
-#ifndef HADOKEN_FSM_IMPL_HPP
-#define HADOKEN_FSM_IMPL_HPP
+#ifndef HADOKEN_STATE_MACHINE_IMPL_HPP
+#define HADOKEN_STATE_MACHINE_IMPL_HPP
 
-#include "../fsm.hpp"
+#include "../state_machine.hpp"
 
 namespace hadoken{
 
+
+namespace impl{
+
+} // impl
 
 template<typename State>
 int to_state_index_position(const State & s){
@@ -42,24 +46,24 @@ int to_state_index_position(const State & s){
 
 
 template<typename State>
-fsm<State>::fsm(State init_state) :
+state_machine<State>::state_machine(State init_state) :
     _current_state(init_state){
     _resize(init_state);
 }
 
 template<typename State>
-void fsm<State>::_resize(const State & st){
+void state_machine<State>::_resize(const State & st){
     _handlers.resize(std::max<std::size_t>(to_state_index_position(st), _handlers.size()));
 }
 
 template<typename State>
-State fsm<State>::get_current_state() const{
+State state_machine<State>::get_current_state() const{
     return _current_state;
 }
 
 
 template<typename State>
-void fsm<State>::trigger(){
+void state_machine<State>::trigger(){
     auto & handler = _handlers.at(to_state_index_position(_current_state));
     auto & transitions = handler._transitions;
     for(auto & transition : transitions ){
