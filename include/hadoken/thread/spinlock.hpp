@@ -46,12 +46,12 @@ namespace thread{
 ///
 class spin_lock{
 public:
-    inline spin_lock() : _lock(ATOMIC_FLAG_INIT) {}
+    inline spin_lock() : _lock(0) {}
 
     inline void lock() noexcept {
             std::uint64_t counter = 1;
             while(1){
-                if(! _lock.test_and_set()){
+                if(_lock.exchange(1) == 0){
                     return;
                 }
                 
@@ -66,14 +66,14 @@ public:
     }
 
     inline void unlock() noexcept{
-        _lock.clear();
+        _lock.exchange(0);
     }
 
 private:
     spin_lock(const spin_lock &) = delete;
     spin_lock & operator=(const spin_lock&) = delete;
 
-    std::atomic_flag _lock;
+    std::atomic<int> _lock;
 };
 
 
