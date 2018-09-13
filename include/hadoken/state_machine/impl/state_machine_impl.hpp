@@ -53,7 +53,10 @@ state_machine<State>::state_machine(State init_state) :
 
 template<typename State>
 void state_machine<State>::_resize(const State & st){
-    _handlers.resize(std::max<std::size_t>(to_state_index_position(st), _handlers.size()));
+    std::size_t pos = to_state_index_position(st);
+    if(pos >= _handlers.size()){
+       _handlers.resize(pos);
+    }
 }
 
 template<typename State>
@@ -63,28 +66,53 @@ State state_machine<State>::get_current_state() const{
 
 
 template<typename State>
-void state_machine<State>::trigger(){
+State state_machine<State>::trigger(){
+    auto old_state = _current_state;
+
     auto & handler = _handlers.at(to_state_index_position(_current_state));
     auto & transitions = handler._transitions;
+
+    // for every registered transition
+    // check if the conditional function is validated
     for(auto & transition : transitions ){
-        const bool valid = transition._trans();
-        if(valid){
+
+        if(transition._trans && transition._trans()){
             const State new_transtion = transition._next;
             auto & new_handler = _handlers.at(to_state_index_position(new_transtion));
 
-            handler._on_exit(_current_state, new_transtion);
+            if(handler._on_exit){
+                handler._on_exit(_current_state, new_transtion);
+            }
 
             const State old_transition = _current_state;
             _current_state = new_transtion;
 
-            new_handler._on_entry(old_transition, _current_state);
-            return;
+            if(new_handler._on_entry){
+                new_handler._on_entry(old_transition, _current_state);
+            }
+
+            return old_state;
         }
     }
+
+    return old_state;
 }
 
+template<typename State>
+State state_machine<State>::force_state(State state){
+    _current_state = state;
+}
 
+template<typename State>
+void state_machine<State>::add_transition(State from, State to, std::function<bool ()> condition){
+    _resize(from);
+    _resize(to);
+
+    auto & shandler = _handlers.at(to_state_index_position(_current_state));
+
+    shandler._transitions.emplace_back(condition);
+}
 
 } // hadoken
 
-#endif // FSM_IMPL_HPP
+#endif // HADOKEN_STATE_MACHINE_IMPL_HPP

@@ -41,7 +41,7 @@ namespace hadoken{
 //
 // supports :
 // - on edge execution
-// - no memory allocation required for small machines
+// - no memory allocation required for machines < 16 transitions
 // - O(1) complexity for number of states
 // - O(n) complexity for transition / states
 //
@@ -50,12 +50,30 @@ class state_machine{
 public:
     state_machine(State init_state);
 
-    void trigger();
+    /// trigger an event
+    ///
+    /// the state machine checks every possible transition and
+    /// switch to a new state if possible
+    ///
+    ///  @return the old state is return
+    State trigger();
 
+    /// return the current state
     State get_current_state() const;
 
-    void force_state(State state);
+    /// force to a new state
+    /// do not check transition
+    /// do not trigger any action
+    State force_state(State state);
 
+    /// Add a new transition to the state machine
+    ///
+    /// The transition conditional function will be called
+    /// every time the state machine is in a state "from" and
+    ///  "trigger()" is called
+    ///
+    /// If the conditional function return true, the state machine
+    ///  switch to state to
     void add_transition(State from, State to, std::function<bool ()> condition);
 
 private:
