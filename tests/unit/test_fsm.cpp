@@ -49,18 +49,21 @@
 using namespace hadoken;
 using cl = std::chrono::system_clock;
 
-enum class semaphore_status{
-    cross1 = 0,
-    cross2 = 1,
-    cross3 = 3,
-    emergency = 4
+enum class life_status{
+    home = 0,
+    work = 1,
+    bed = 3,
+    beer = 4
 };
 
 
 BOOST_AUTO_TEST_CASE( semaphore_test)
 {
 
-    state_machine<semaphore_status> semaphore_state_machine(semaphore_status::cross1);
+    state_machine<life_status> semaphore_state_machine(life_status::home);
 
-    BOOST_CHECK(semaphore_status::cross1 == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::home == semaphore_state_machine.get_current_state());
+
+
+    semaphore_state_machine.force_state(life_status::work);
 }

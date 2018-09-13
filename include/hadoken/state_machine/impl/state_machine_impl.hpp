@@ -100,7 +100,9 @@ State state_machine<State>::trigger(){
 
 template<typename State>
 State state_machine<State>::force_state(State state){
-    _current_state = state;
+    using namespace std;
+    swap(_current_state, state);
+    return state;
 }
 
 template<typename State>
