@@ -376,7 +376,7 @@ int uri::parse_uri(iterator_type begin, iterator_type last, iterator_type end){
 
 inline std::string percent_encode(std::string decoded_origin){
     if( std::all_of(decoded_origin.begin(), decoded_origin.end(), details::is_percent_unreserved)){
-        return std::move(decoded_origin);
+        return decoded_origin;
     }
     std::string encoded;
     for(char c : decoded_origin){
@@ -396,7 +396,7 @@ inline std::string percent_decode(std::string encoded_origin){
 
 
     if( std::all_of(encoded_origin.begin(), encoded_origin.end(), [](char c){ return c != '%'; })){
-        return std::move(encoded_origin);
+        return encoded_origin;
     }
 
     std::string decoded;
