@@ -43,6 +43,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <hadoken/state_machine/state_machine.hpp>
+#include <hadoken/format/format.hpp>
 
 
 
@@ -60,10 +61,122 @@ enum class life_status{
 BOOST_AUTO_TEST_CASE( semaphore_test)
 {
 
-    state_machine<life_status> semaphore_state_machine(life_status::home);
+    state_machine<life_status> semaphore_state_machine(life_status::work);
 
+    BOOST_CHECK(life_status::work == semaphore_state_machine.get_current_state());
+
+
+    auto prev = semaphore_state_machine.force_state(life_status::home);
+    BOOST_CHECK(life_status::home == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::work == prev);
+
+
+    edge_trigger<bool> drive_to(false), drive_back(false), need_sleep(false), morning(false), fun(false);
+
+    std::string entry_message, exit_message;
+
+    std::array<life_status,4> states = { life_status::home, life_status::work, life_status::bed, life_status::beer };
+
+    for( auto st : states){
+        semaphore_state_machine.on_entry(st, [st, &entry_message](life_status from, life_status to){
+            entry_message = scat("hello entry ", int(st), " from ", int(from), " to ", int(to));
+            std::cout << entry_message << "\n";
+        });
+
+        semaphore_state_machine.on_exit(st, [st, &exit_message](life_status from, life_status to){
+            exit_message = scat("hello exit ", int(st), " from ", int(from), " to ", int(to));
+            std::cout << exit_message << "\n";
+        });
+    }
+
+    semaphore_state_machine.add_transition(life_status::home, life_status::work, [&]() -> bool{
+        return drive_to.consume().operator bool();
+    });
+
+    semaphore_state_machine.add_transition(life_status::work, life_status::home, [&]() -> bool{
+        return bool(drive_back.consume());
+    });
+
+    semaphore_state_machine.add_transition(life_status::home, life_status::bed, [&]() -> bool{
+        return bool(need_sleep.consume());
+    });
+
+    semaphore_state_machine.add_transition(life_status::bed, life_status::home, [&]() -> bool{
+        return bool(morning.consume());
+    });
+
+    semaphore_state_machine.add_transition(life_status::home, life_status::beer, [&]() -> bool{
+        return bool(fun.consume());
+    });
+
+    semaphore_state_machine.add_transition(life_status::work, life_status::beer, [&]() -> bool{
+        return bool(fun.consume());
+    });
+
+
+    semaphore_state_machine.add_transition(life_status::beer, life_status::bed, [&]() -> bool{
+        return bool(need_sleep.consume());
+    });
+
+    // let's start from home
+    // and check we are home
     BOOST_CHECK(life_status::home == semaphore_state_machine.get_current_state());
 
+    prev = semaphore_state_machine.trigger();
+    BOOST_CHECK(life_status::home == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::home == prev);
 
-    semaphore_state_machine.force_state(life_status::work);
+    // we drove
+    drive_to.trigger(true);
+    prev = semaphore_state_machine.trigger();
+
+    // We are at work now
+    BOOST_CHECK(life_status::work == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::home == prev);
+
+    // still at work
+    prev = semaphore_state_machine.trigger();
+    BOOST_CHECK(life_status::work == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::work == prev);
+
+
+    need_sleep.trigger(true);
+    drive_to.trigger(true);
+
+    // we need some sleep and drive more
+    // but still we need to work
+    prev = semaphore_state_machine.trigger();
+    BOOST_CHECK(life_status::work == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::work == prev);
+
+    // time to drive back is here
+    drive_to.consume();
+    drive_back.trigger(true);
+    prev = semaphore_state_machine.trigger();
+
+    // we should be home now
+    BOOST_CHECK(life_status::home == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::work == prev);
+
+    // but we still need sleep, next step should be sleep
+    prev = semaphore_state_machine.trigger();
+    BOOST_CHECK(life_status::bed == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::home == prev);
+
+    // and a natural wake up
+    morning.trigger(true);
+    prev = semaphore_state_machine.trigger();
+
+
+    BOOST_CHECK(life_status::home == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::bed == prev);
+
+
+    // but at the end we all finish there
+
+    fun.trigger(true);
+    prev = semaphore_state_machine.trigger();
+    BOOST_CHECK(life_status::beer == semaphore_state_machine.get_current_state());
+    BOOST_CHECK(life_status::home == prev);
+
 }

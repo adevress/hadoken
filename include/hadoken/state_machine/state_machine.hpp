@@ -29,8 +29,8 @@
 #ifndef HADOKEN_STATE_MACHINE_HPP
 #define HADOKEN_STATE_MACHINE_HPP
 
-
-#include <hadoken/containers/small_vector.hpp>
+#include <vector>
+#include <hadoken/utility/optional.hpp>
 
 #include "impl/state_machine_transition_impl.hpp"
 
@@ -76,11 +76,30 @@ public:
     ///  switch to state to
     void add_transition(State from, State to, std::function<bool ()> condition);
 
+    void on_entry(State st, std::function<void (State before, State after)> event);
+
+    void on_exit(State st, std::function<void (State before, State after)> event);
+
 private:
-    containers::small_vector<impl::state_handler<State>, 8> _handlers;
+    std::vector<impl::state_handler<State>> _handlers;
     State _current_state;
 
     void _resize(const State & st);
+};
+
+
+template<typename Object>
+class edge_trigger{
+public:
+    edge_trigger(Object && o);
+
+    void trigger(Object && o);
+
+    hadoken::optional<Object> consume();
+
+private:
+    Object _o;
+    bool _is_new;
 };
 
 

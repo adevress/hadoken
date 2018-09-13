@@ -42,14 +42,14 @@ template<typename State>
 struct transition_handler{
     State _next;
 
-    std::function<bool (void)> _trans;
+    std::function<bool (void)> _cond;
 };
 
 template<typename State>
 struct state_handler{
-    std::function<void (const State & prev_state, const State & new_state)> _on_enter, _on_exit;
+    std::function<void (const State & prev_state, const State & new_state)> _on_entry, _on_exit;
 
-    containers::small_vector<transition_handler<State>, 4> _transitions;
+    std::vector<transition_handler<State>> _transitions;
 };
 
 } // impl

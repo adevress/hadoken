@@ -55,7 +55,7 @@ template<typename State>
 void state_machine<State>::_resize(const State & st){
     std::size_t pos = to_state_index_position(st);
     if(pos >= _handlers.size()){
-       _handlers.resize(pos);
+       _handlers.resize(pos+1);
     }
 }
 
@@ -76,7 +76,7 @@ State state_machine<State>::trigger(){
     // check if the conditional function is validated
     for(auto & transition : transitions ){
 
-        if(transition._trans && transition._trans()){
+        if(transition._cond && transition._cond()){
             const State new_transtion = transition._next;
             auto & new_handler = _handlers.at(to_state_index_position(new_transtion));
 
@@ -110,9 +110,50 @@ void state_machine<State>::add_transition(State from, State to, std::function<bo
     _resize(from);
     _resize(to);
 
-    auto & shandler = _handlers.at(to_state_index_position(_current_state));
+    auto & state_hdle = _handlers.at(to_state_index_position(from));
 
-    shandler._transitions.emplace_back(condition);
+    impl::transition_handler<State> handler;
+    handler._cond = condition;
+    handler._next = to;
+
+    state_hdle._transitions.push_back(handler);
+}
+
+template<typename State>
+void state_machine<State>::on_entry(State st, std::function<void (State, State)> event){
+    _resize(st);
+
+    auto & state_hdle = _handlers.at(to_state_index_position(st));
+    state_hdle._on_entry = std::move(event);
+}
+
+template<typename State>
+void state_machine<State>::on_exit(State st, std::function<void (State, State)> event){
+    _resize(st);
+
+    auto & state_hdle = _handlers.at(to_state_index_position(st));
+    state_hdle._on_exit = std::move(event);
+}
+
+template<typename Object>
+edge_trigger<Object>::edge_trigger(Object &&o) :
+    _o(o),
+    _is_new(false){}
+
+template<typename Object>
+void edge_trigger<Object>::trigger(Object &&o){
+    _o = std::move(o);
+    _is_new = true;
+}
+
+template<typename Object>
+hadoken::optional<Object> edge_trigger<Object>::consume(){
+    hadoken::optional<Object> result;
+    if(_is_new){
+        _is_new = false;
+        result = _o;
+    }
+    return result;
 }
 
 } // hadoken
