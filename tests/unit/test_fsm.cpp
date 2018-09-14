@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( semaphore_test)
     }
 
     semaphore_state_machine.add_transition(life_status::home, life_status::work, [&]() -> bool{
-        return drive_to.consume().operator bool();
+        return bool(drive_to.consume());
     });
 
     semaphore_state_machine.add_transition(life_status::work, life_status::home, [&]() -> bool{
