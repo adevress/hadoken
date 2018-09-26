@@ -55,12 +55,12 @@ namespace string{
 /// \param callback for every fragment
 ///
 template<typename Func>
-inline void split_string(const std::string & str, const std::string & delimiter, Func fragment_callback){
+inline void split_string_view(const std::string & str, const std::string & delimiter, Func fragment_callback){
         std::string::const_iterator it_prev, it_cur;
         for(it_prev = it_cur = str.begin(); it_cur < str.end(); ((it_prev != str.end())?(it_prev++):(it_prev))){
             it_cur = std::find_first_of(it_prev, str.end(), delimiter.begin(), delimiter.end());
             if(it_prev != it_cur){
-                fragment_callback(it_prev,it_cur);
+                fragment_callback(hadoken::make_string_view(it_prev,it_cur));
             }
             it_prev = it_cur;
         }
@@ -81,8 +81,8 @@ inline void split_string(const std::string & str, const std::string & delimiter,
 ///
 inline std::vector<std::string> split_string(const std::string & str, const std::string & delimiter){
         std::vector<std::string> res;
-        split_string(str, delimiter, [&](const std::string::const_iterator & it1, const std::string::const_iterator & it2){
-            res.push_back(std::string(it1, it2));
+        split_string_view(str, delimiter, [&](hadoken::string_view fragment){
+            res.emplace_back(to_string(fragment));
         });
         return res;
 
