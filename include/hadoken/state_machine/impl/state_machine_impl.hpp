@@ -101,6 +101,7 @@ State state_machine<State>::trigger(){
 template<typename State>
 State state_machine<State>::force_state(State state){
     using namespace std;
+    _resize(state);
     swap(_current_state, state);
     return state;
 }
@@ -133,6 +134,12 @@ void state_machine<State>::on_exit(State st, std::function<void (State, State)> 
 
     auto & state_hdle = _handlers.at(to_state_index_position(st));
     state_hdle._on_exit = std::move(event);
+}
+
+template<typename State>
+void state_machine<State>::clear(){
+    _handlers.clear();
+    _resize(_current_state);
 }
 
 template<typename Object>

@@ -80,6 +80,8 @@ public:
 
     void on_exit(State st, std::function<void (State before, State after)> event);
 
+    void clear();
+
 private:
     std::vector<impl::state_handler<State>> _handlers;
     State _current_state;
