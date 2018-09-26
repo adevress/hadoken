@@ -33,6 +33,9 @@
 #include <tuple>
 #include <vector>
 
+#include <hadoken/string/string_view.hpp>
+
+
 namespace hadoken {
 
 class uri{
@@ -91,10 +94,10 @@ private:
 };
 
 
-std::string percent_encode(std::string decoded_origin);
+std::string percent_encode(hadoken::string_view decoded_origin);
 
 
-std::string percent_decode(std::string encoded_string);
+std::string percent_decode(hadoken::string_view encoded_string);
 
 } //hadoken
 

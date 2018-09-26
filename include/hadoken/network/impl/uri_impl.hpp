@@ -374,11 +374,12 @@ int uri::parse_uri(iterator_type begin, iterator_type last, iterator_type end){
 }
 
 
-inline std::string percent_encode(std::string decoded_origin){
+inline std::string percent_encode(hadoken::string_view decoded_origin){
     if( std::all_of(decoded_origin.begin(), decoded_origin.end(), details::is_percent_unreserved)){
-        return decoded_origin;
+        return to_string(decoded_origin);
     }
     std::string encoded;
+    encoded.reserve(2*decoded_origin.size());
     for(char c : decoded_origin){
         if(details::is_percent_unreserved(c)){
             encoded.push_back(c);
@@ -392,14 +393,15 @@ inline std::string percent_encode(std::string decoded_origin){
 
 
 
-inline std::string percent_decode(std::string encoded_origin){
+inline std::string percent_decode(hadoken::string_view encoded_origin){
 
 
     if( std::all_of(encoded_origin.begin(), encoded_origin.end(), [](char c){ return c != '%'; })){
-        return encoded_origin;
+        return to_string(encoded_origin);
     }
 
     std::string decoded;
+    decoded.reserve(encoded_origin.size());
     details::decode_percent_rec(encoded_origin, decoded);
     return decoded;
 }
