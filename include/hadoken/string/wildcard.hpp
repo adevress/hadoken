@@ -40,25 +40,29 @@ namespace internal{
 
 template<typename Iterator>
 inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterator begin_str, Iterator end_str){
-    if(begin_expr == end_expr && begin_str == end_str){
-        return true;
-    }
+    while(1){
+        if(begin_expr == end_expr && begin_str == end_str){
+            return true;
+        }
 
-    if(begin_expr >= end_expr || begin_str >= end_str){
-        return false;
-    }
+        if(begin_expr >= end_expr || begin_str >= end_str){
+            return false;
+        }
 
-    if(*begin_expr == *begin_str){
-        return __match_wildcard_rec(begin_expr+1, end_expr, begin_str+1, end_str);
-    }
+        if(*begin_expr == *begin_str){
+            begin_expr+=1;
+            begin_str+= 1;
+            continue;
+        }
 
-    if(*begin_expr != '*'){
-        return false;
-    }
+        if(*begin_expr != '*'){
+            return false;
+        }
 
-    return __match_wildcard_rec(begin_expr+1, end_expr, begin_str+1, end_str)
-            || __match_wildcard_rec(begin_expr, end_expr, begin_str+1, end_str)
-            || __match_wildcard_rec(begin_expr+1, end_expr, begin_str, end_str);
+        return __match_wildcard_rec(begin_expr+1, end_expr, begin_str+1, end_str)
+                || __match_wildcard_rec(begin_expr, end_expr, begin_str+1, end_str)
+                || __match_wildcard_rec(begin_expr+1, end_expr, begin_str, end_str);
+    }
 
 }
 
