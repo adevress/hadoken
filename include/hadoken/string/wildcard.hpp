@@ -33,7 +33,6 @@
 #include <string>
 
 #include <hadoken/string/string_view.hpp>
-#include <hadoken/containers/small_vector.hpp>
 
 namespace hadoken{
 

@@ -47,23 +47,6 @@
 
 
 
-BOOST_AUTO_TEST_CASE(wildcard_simple)
-{
-
-    BOOST_CHECK(hadoken::match_wildcard("hello*ld", "hello world"));
-
-    BOOST_CHECK(hadoken::match_wildcard("dude", "hello world") == false);
-
-    BOOST_CHECK(hadoken::match_wildcard("h*", "hello world"));
-
-    BOOST_CHECK(hadoken::match_wildcard("hello world", "hello*") == false);
-
-    BOOST_CHECK(hadoken::match_wildcard("h**", "hello world"));
-    BOOST_CHECK(hadoken::match_wildcard("*hello*", "hello world"));
-
-    BOOST_CHECK(hadoken::match_wildcard("world*", "hello world") == false);
-    BOOST_CHECK(hadoken::match_wildcard("*", "hello world"));
-}
 
 
 BOOST_AUTO_TEST_CASE(optional_to_variant)

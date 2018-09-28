@@ -40,6 +40,7 @@
 
 #include <hadoken/string/string_view.hpp>
 #include <hadoken/string/algorithm.hpp>
+#include <hadoken/string/wildcard.hpp>
 
 #include <hadoken/utility/range.hpp>
 
@@ -94,3 +95,44 @@ BOOST_AUTO_TEST_CASE( string_tokenize_view)
 
 }
 
+BOOST_AUTO_TEST_CASE(wildcard_simple)
+{
+
+    BOOST_CHECK(hadoken::match_wildcard("hello*ld", "hello world"));
+
+    BOOST_CHECK(hadoken::match_wildcard("dude", "hello world") == false);
+
+    BOOST_CHECK(hadoken::match_wildcard("h*", "hello world"));
+
+    BOOST_CHECK(hadoken::match_wildcard("hello world", "hello*") == false);
+
+    BOOST_CHECK(hadoken::match_wildcard("h**", "hello world"));
+    BOOST_CHECK(hadoken::match_wildcard("*hello*", "hello world"));
+
+    BOOST_CHECK(hadoken::match_wildcard("world*", "hello world") == false);
+    BOOST_CHECK(hadoken::match_wildcard("*", "hello world"));
+}
+
+
+BOOST_AUTO_TEST_CASE(wildcard_stack_explosion_test)
+{
+
+    std::string message, pattern, bad_pattern;
+
+    message = random_string_generator(16*1024*1024, 42);
+
+    std::cout << " " << message.size() << std::endl;
+
+    pattern = message;
+
+    pattern[pattern.size() / 2] = '*';
+    pattern[pattern.size() / 4] = '*';
+    pattern[pattern.size() / 8] = '*';
+
+    bad_pattern = pattern;
+    bad_pattern.back() = bad_pattern.back()+1;
+
+    BOOST_CHECK(hadoken::match_wildcard(pattern, message));
+
+    BOOST_CHECK(hadoken::match_wildcard(bad_pattern, message) == false);
+}

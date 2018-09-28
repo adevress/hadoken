@@ -394,8 +394,6 @@ inline std::string percent_encode(hadoken::string_view decoded_origin){
 
 
 inline std::string percent_decode(hadoken::string_view encoded_origin){
-
-
     if( std::all_of(encoded_origin.begin(), encoded_origin.end(), [](char c){ return c != '%'; })){
         return to_string(encoded_origin);
     }

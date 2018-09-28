@@ -33,6 +33,7 @@
 #include <type_traits>
 #include <string>
 #include <memory>
+#include <random>
 #include <cmath>
 
 
@@ -83,7 +84,17 @@ struct content_generator<T, typename std::enable_if<std::is_arithmetic<T>::value
 };
 
 
+std::string random_string_generator(std::size_t string_size, int seed){
+    std::string random_string;
+    std::mt19937 gen(seed);
 
+    random_string.reserve(string_size);
+
+    for(std::size_t i = 0 ; i < string_size; ++i){
+        random_string.push_back(char(gen()));
+    }
+    return random_string;
+}
 
 
 #endif // TEST_HELPERS_HPP
