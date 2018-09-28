@@ -33,6 +33,7 @@
 #include <iostream>
 #include <map>
 #include <stdexcept>
+#include <chrono>
 
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
@@ -98,6 +99,8 @@ BOOST_AUTO_TEST_CASE( string_tokenize_view)
 BOOST_AUTO_TEST_CASE(wildcard_simple)
 {
 
+    auto t1 = std::chrono::steady_clock::now();
+
     BOOST_CHECK(hadoken::match_wildcard("hello*ld", "hello world"));
 
     BOOST_CHECK(hadoken::match_wildcard("dude", "hello world") == false);
@@ -111,6 +114,11 @@ BOOST_AUTO_TEST_CASE(wildcard_simple)
 
     BOOST_CHECK(hadoken::match_wildcard("world*", "hello world") == false);
     BOOST_CHECK(hadoken::match_wildcard("*", "hello world"));
+
+    auto t2 = std::chrono::steady_clock::now();
+
+    std::cout << "time taken wildcard " <<
+                 double( std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count())  << " µs" <<std::endl;
 }
 
 
@@ -132,7 +140,15 @@ BOOST_AUTO_TEST_CASE(wildcard_stack_explosion_test)
     bad_pattern = pattern;
     bad_pattern.back() = bad_pattern.back()+1;
 
+
+
+    auto t1 = std::chrono::steady_clock::now();
     BOOST_CHECK(hadoken::match_wildcard(pattern, message));
 
     BOOST_CHECK(hadoken::match_wildcard(bad_pattern, message) == false);
+
+    auto t2 = std::chrono::steady_clock::now();
+
+    std::cout << "time taken " << double( std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count()) / 1000.0 / 1000.0 << " s" <<std::endl;
+
 }

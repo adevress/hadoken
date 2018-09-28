@@ -31,8 +31,10 @@
 
 
 #include <string>
+#include <stack>
 
 #include <hadoken/string/string_view.hpp>
+#include <hadoken/containers/small_vector.hpp>
 
 namespace hadoken{
 
@@ -40,30 +42,43 @@ namespace internal{
 
 template<typename Iterator>
 inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterator begin_str, Iterator end_str){
-    while(1){
-        if(begin_expr == end_expr && begin_str == end_str){
+    using progress_iterator = std::tuple<Iterator, Iterator>;
+
+    std::vector<progress_iterator> stack_parser;
+
+    stack_parser.emplace_back(progress_iterator(begin_expr, begin_str));
+
+    while(stack_parser.size() > 0){
+        progress_iterator top = stack_parser.back();
+        stack_parser.pop_back();
+
+        const auto it_expr = std::get<0>(top);
+        const auto it_str = std::get<1>(top);
+
+        if(it_expr == end_expr && it_str == end_str){
             return true;
         }
 
-        if(begin_expr >= end_expr || begin_str >= end_str){
-            return false;
-        }
-
-        if(*begin_expr == *begin_str){
-            begin_expr+=1;
-            begin_str+= 1;
+        if(it_expr >= end_expr || it_str >= end_str){
             continue;
         }
 
-        if(*begin_expr != '*'){
-            return false;
+
+        if(*it_expr == *it_str){
+            stack_parser.emplace_back(progress_iterator(it_expr+1, it_str +1));
+            continue;
         }
 
-        return __match_wildcard_rec(begin_expr+1, end_expr, begin_str+1, end_str)
-                || __match_wildcard_rec(begin_expr, end_expr, begin_str+1, end_str)
-                || __match_wildcard_rec(begin_expr+1, end_expr, begin_str, end_str);
+        if(*it_expr != '*'){
+            continue;
+        }
+
+        stack_parser.emplace_back(progress_iterator(it_expr, it_str+1));
+        stack_parser.emplace_back(progress_iterator(it_expr+1, it_str+1));
+        stack_parser.emplace_back(progress_iterator(it_expr+1, it_str));
     }
 
+    return false;
 }
 
 
