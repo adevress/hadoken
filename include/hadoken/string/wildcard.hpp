@@ -31,7 +31,7 @@
 
 
 #include <string>
-#include <stack>
+#include <vector>
 
 #include <hadoken/string/string_view.hpp>
 #include <hadoken/containers/small_vector.hpp>
