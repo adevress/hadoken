@@ -224,7 +224,6 @@ BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
 
     swap(other, values);
     BOOST_CHECK_EQUAL(values.size(), 0);
-    BOOST_CHECK_EQUAL(values.capacity(), small_size);
 
     BOOST_CHECK_EQUAL(other.size(), size_push);
 
