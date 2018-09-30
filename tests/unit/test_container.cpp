@@ -70,7 +70,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( small_vector_test, T, small_vector_types )
 
     BOOST_CHECK_EQUAL(values.size(), 0);
     BOOST_CHECK_EQUAL(values.empty(), true);
-    BOOST_CHECK_EQUAL(values.capacity(), 0);
+    BOOST_CHECK_EQUAL(values.capacity(), small_size);
     BOOST_CHECK_EQUAL(values.data(), &(*values.begin()));
 
     const auto begin = values.begin();
@@ -96,7 +96,7 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( small_vector_test, T, small_vector_types )
 
         if(i < small_size){
             //std::cout << " capa " <<  values.capacity() << " " << i << std::endl;
-            BOOST_CHECK_EQUAL(values.capacity(), 0);
+            BOOST_CHECK_EQUAL(values.capacity(), small_size);
         }else{
             BOOST_CHECK_LE(i, values.capacity());
         }
@@ -111,6 +111,74 @@ BOOST_AUTO_TEST_CASE_TEMPLATE( small_vector_test, T, small_vector_types )
         BOOST_CHECK_EQUAL(values[i], gen(i));
         BOOST_CHECK_EQUAL(values.at(i), gen(i));
     }
+}
+
+
+
+BOOST_AUTO_TEST_CASE_TEMPLATE( small_vector_push_pop, T, small_vector_types )
+{
+
+    using namespace hadoken::containers;
+
+    constexpr std::size_t small_size = 16;
+
+    std::mt19937_64 gen_rand;
+    std::uniform_int_distribution<std::size_t> dist(0, 2048);
+
+    gen_rand.seed(88);
+
+
+    const std::size_t mul = 20;
+
+
+    content_generator<T> gen;
+
+    small_vector<T, small_size> values;
+
+    for(std::size_t i =0;  i < mul; ++i ){
+
+        const std::size_t size_push = dist(gen_rand);
+        const std::size_t size_pop = std::min<std::size_t>(dist(gen_rand), size_push);
+
+        std::size_t init_size = values.size();
+
+        for(std::size_t i = 0; i < size_push; ++i){
+            // alternate emplace back and push_back
+            if(i%3 == 0){
+                values.emplace_back(gen(i));
+             }else{
+                values.push_back(gen(i));
+            }
+        }
+
+        BOOST_CHECK_EQUAL(values.size(), init_size + size_push);
+
+
+        for(std::size_t i = 0; i < size_pop; ++i){
+                // alternate emplace back and push_back
+                values.pop_back();
+        }
+
+        BOOST_CHECK_EQUAL(values.size(), std::max<std::size_t>(0, init_size + size_push - size_pop) );
+    }
+
+
+    while(values.size() > 0){
+        values.pop_back();
+    }
+
+    BOOST_CHECK_EQUAL(values.size(), 0);
+
+    const std::size_t size_push_final = dist(gen_rand);
+
+    for(std::size_t i = 0; i < size_push_final; ++i){
+        // alternate emplace back and push_back
+        values.emplace_back(gen(i));
+    }
+
+
+    BOOST_CHECK_EQUAL(values.size(), size_push_final);
+
 }
 
 
@@ -133,7 +201,7 @@ BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
 
         if(i < small_size){
             //std::cout << " capa " <<  values.capacity() << " " << i << std::endl;
-            BOOST_CHECK_EQUAL(values.capacity(), 0);
+            BOOST_CHECK_EQUAL(values.capacity(), small_size);
         }else{
             BOOST_CHECK_LE(i, values.capacity());
         }
@@ -148,6 +216,19 @@ BOOST_AUTO_TEST_CASE( small_vector_test_unique_ptr)
         BOOST_CHECK_EQUAL(*values[i], *gen(i));
         BOOST_CHECK_EQUAL(*values.at(i), *gen(i));
     }
+
+    // test swapping feature
+
+    small_vector<content_type, small_size> other;
+    using namespace std;
+
+    swap(other, values);
+    BOOST_CHECK_EQUAL(values.size(), 0);
+    BOOST_CHECK_EQUAL(values.capacity(), small_size);
+
+    BOOST_CHECK_EQUAL(other.size(), size_push);
+
+
 }
 
 

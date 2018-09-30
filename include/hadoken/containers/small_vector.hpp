@@ -99,9 +99,7 @@ public:
     ///
     /// \brief return const_iterator to first value of the small_vector
     ///
-    size_type size() const noexcept{
-        return static_cast<std::size_t>(_end - _begin);
-    }
+    size_type size() const noexcept;
 
     ///
     /// \brief return const_iterator to first value of the small_vector
@@ -189,10 +187,7 @@ public:
     ///
     const_reference operator[] (std::size_t pos) const noexcept;
 
-    ///
-    /// \brief swap content of two small_vectors
-    ///
-    void swap(small_vector & other);
+
 
 private:
     pointer _begin, _end, _end_memory;
@@ -203,9 +198,21 @@ private:
     void _resize_to_fit(std::size_t);
 
     bool _is_static() const noexcept;
+
+    template<typename T2, std::size_t N2>
+    friend void swap(small_vector<T2,N2> & first, small_vector<T2,N2> & second);
 };
 
 
+
+
+
+
+///
+/// ADL for swap
+///
+template<typename T, std::size_t N>
+void swap(small_vector<T,N> & first, small_vector<T,N> & second);
 
 
 

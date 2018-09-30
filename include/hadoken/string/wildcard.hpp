@@ -44,7 +44,7 @@ template<typename Iterator>
 inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterator begin_str, Iterator end_str){
     using progress_iterator = std::tuple<Iterator, Iterator>;
 
-    std::vector<progress_iterator> stack_parser;
+    hadoken::containers::small_vector<progress_iterator, 7> stack_parser;
 
     stack_parser.emplace_back(progress_iterator(begin_expr, begin_str));
 
