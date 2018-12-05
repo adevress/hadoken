@@ -1,13 +1,14 @@
-###
-##          Copyright Adrien Devresse 2016
-## Distributed under the Boost Software License, Version 1.0.
-##    (See accompanying file LICENSE_1_0.txt or copy at
-##          http:##www.boost.org/LICENSE_1_0.txt)
-##
-## 
-## Detect C++ 11 support 
-## 
-##  CMAKE_SUPPORT_CXX11 ( TRUE if C++11 supported, else FALSE )
+# DetectCXX11Support.cmake
+#
+# Detect C++11 standard version support
+#
+# License: Boost Software License 1.0
+#
+# Copyright (c) 2018, Adrien Devresse
+#
+# Distributed under the Boost Software License, Version 1.0.
+#    (See accompanying file LICENSE_1_0.txt or copy at
+#          https://www.boost.org/LICENSE_1_0.txt)
 
 
 include(CheckCXXSourceCompiles)
