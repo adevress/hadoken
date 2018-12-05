@@ -19,7 +19,6 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
 
 set(Boost_NO_BOOST_CMAKE TRUE)
 
-include(BlueGenePortability)
 include(GNUInstallDirs)
 include(ReleaseDebugAutoFlags)
 include(DetectCXX11Support)
