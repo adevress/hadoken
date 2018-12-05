@@ -1,0 +1,10 @@
+prefix=${pcfiledir}/../../
+libdir=${pcfiledir}/../
+includedir=${prefix}/include
+
+Name: hadoken
+Description: C++ header only utility library 
+URL: https://github.com/adevress/hadoken
+Version: 1.0
+Cflags: -I${includedir}
+

@@ -40,8 +40,9 @@ include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include/  )
 include_directories(SYSTEM ${BOOST_INCLUDE_DIR} )
 
 if(NOT HADOKEN_DISABLE_INSTALL)
-install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/hadoken DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/)
-install(TARGETS hadoken_version DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}/)
+    install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/hadoken DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/)
+    install(TARGETS hadoken_version DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}/)
+    install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/misc/pkgconfig/hadoken.pc" DESTINATION  ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)
 endif()
 
 add_subdirectory(tests/perf)
