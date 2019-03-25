@@ -99,7 +99,7 @@ public:
     inline bool close_to(const point_type & other, CoordType delta = std::numeric_limits<CoordType>::epsilon()*100 ) const {
         bool res = true;
         for(std::size_t i =0; i < N; ++i){
-            res = res && hadoken::math::almost_equal(_point[i], other._point[i], delta, delta);
+            res = res && hadoken::math::close_to(_point[i], other._point[i], delta, delta);
         }
         return res;
     }

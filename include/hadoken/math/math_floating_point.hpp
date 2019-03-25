@@ -60,11 +60,10 @@ bool close_to_abs(const FloatType f1, const FloatType f2,
 /// @param f2: second float to compare
 /// @return true if f1 and f2 are close enought, otherwise, false
 ///
-///
 template <typename FloatType>
 bool close_to_rel(const FloatType f1, const FloatType f2,
                   const FloatType epsilon_rel = std::numeric_limits<FloatType>::epsilon()){
-    return ( (std::abs<FloatType>(f1 -f2) <=  (std::max(std::abs(f1), std::abs(f2)))) * epsilon_rel );
+    return ( (std::abs<FloatType>(f1 -f2) <=  ((std::max(std::abs(f1), std::abs(f2)))) * epsilon_rel) );
 }
 
 
@@ -76,14 +75,16 @@ inline bool delta_less(const FloatType f1, const FloatType f2, const FloatType d
 }
 
 
-
+///
+/// use absolute and relative comparison
+///
 template <typename FloatType>
-bool almost_equal(const FloatType f1, const FloatType f2,
+bool close_to(const FloatType f1, const FloatType f2,
                   const FloatType epsilon_rel  = std::numeric_limits<FloatType>::epsilon()*10,
                   const FloatType epsilon_abs = std::numeric_limits<FloatType>::epsilon()*10){
     return f1 == f2 /* ideal */
-            || (std::abs(f1 -f2) <= epsilon_abs)  /* absolute */
-            || ( (std::abs(f1 -f2)/ (std::max(std::abs(f1), std::abs(f2)))) <= epsilon_rel ) ; /* relative */
+            || close_to_abs(f1, f2, epsilon_abs)  /* absolute */
+            || close_to_rel(f1, f2, epsilon_rel) ; /* relative */
 
 }
 

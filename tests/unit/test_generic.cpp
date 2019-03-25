@@ -90,7 +90,7 @@ BOOST_AUTO_TEST_CASE( simple_rotation_tests )
         for(int i=0; i < 3; ++i){
             std::cout << "pos["<< i << "]: "<< pos[i] <<" \n";
             std::cout << "res["<< i << "]: "<< res[i] <<" \n";
-            BOOST_CHECK( almost_equal(pos[i], res[i]));
+            BOOST_CHECK( close_to(pos[i], res[i]));
         }
 
     }
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_CASE( simple_rotation_tests )
         for(int i=0; i < 3; ++i){
             std::cout << "pos["<< i << "]: "<< pos[i] <<" \n";
             std::cout << "res["<< i << "]: "<< res[i] <<" \n";
-            BOOST_CHECK( almost_equal(pos[i], res[i]));
+            BOOST_CHECK( close_to(pos[i], res[i]));
         }
 
 
@@ -169,7 +169,7 @@ BOOST_AUTO_TEST_CASE( rotation_mvd_compat_test )
 
     for(int i =0; i < 3; ++i){
         std::cout << i << " :" << res[i] << " " << old_res[i] << " \n";
-        BOOST_CHECK( almost_equal(old_res[i], res[i]));
+        BOOST_CHECK( close_to(old_res[i], res[i]));
     }
 
 }

@@ -130,6 +130,14 @@ target_link_libraries(test_fsm_base ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_
 add_test(NAME test_fsm_base_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_fsm_base)
 
 
+# opt_parsers Test
+LIST(APPEND test_opts_parser_src "test_opts_parser.cpp")
+
+add_executable(test_opts_parser ${test_opts_parser_src} ${HADOKEN_HEADERS} ${HADOKEN_HEADERS_1})
+target_link_libraries(test_opts_parser ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
+
+add_test(NAME test_opts_parser_uint COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_opts_parser)
+
 endif()
 
 
