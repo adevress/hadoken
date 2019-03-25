@@ -120,7 +120,7 @@ inline void print_help(const string_view &, sub_command &){
 }
 
 
-bool _compare_option(string_view candidate_opt, string_view value){
+bool _compare_option(string_view candidate_opt, string_view){
     if(candidate_opt.size() == 0){
         throw std::invalid_argument("empty option is not suppored");
     }

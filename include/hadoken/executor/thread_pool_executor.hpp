@@ -26,8 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef THREAD_POOL_EXECUTOR_HPP
-#define THREAD_POOL_EXECUTOR_HPP
+#pragma once
 
 #include <atomic>
 #include <thread>
@@ -162,5 +161,3 @@ private:
 
 }
 
-
-#endif // SIMPLE_THREAD_EXECUTOR_HPP

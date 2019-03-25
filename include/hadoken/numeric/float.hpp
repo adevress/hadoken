@@ -26,8 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
 * 
 */
-#ifndef _HADOKEN_FLOATING_POINT_HPP_
-#define _HADOKEN_FLOATING_POINT_HPP_
+#pragma once
 
 #include <numeric>
 #include <limits>
@@ -90,6 +89,3 @@ bool close_to(const FloatType f1, const FloatType f2,
 
 } // hadoken
 
-
-
-#endif // _HADOKEN_FLOATING_POINT_HPP_

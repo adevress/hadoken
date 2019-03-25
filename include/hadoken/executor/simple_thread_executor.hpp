@@ -26,8 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef SIMPLE_THREAD_EXECUTOR_HPP
-#define SIMPLE_THREAD_EXECUTOR_HPP
+#pragma once
 
 #include <thread>
 
@@ -55,5 +54,3 @@ private:
 
 }
 
-
-#endif // SIMPLE_THREAD_EXECUTOR_HPP

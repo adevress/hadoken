@@ -26,8 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
 *
 */
-#ifndef HADOKEN_SYSTEM_EXECUTOR_HPP
-#define HADOKEN_SYSTEM_EXECUTOR_HPP
+#pragma once
 
 
 #include <future>
@@ -74,7 +73,4 @@ private:
 };
 
 
-}
-
-
-#endif // SIMPLE_THREAD_EXECUTOR_HPP
+} // hadoken
