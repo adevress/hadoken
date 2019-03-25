@@ -106,7 +106,7 @@ Vector normalize(const Vector & v1){
     Vector res(v1);
     const coord_type norm_value = norm<Vector>(v1);
 
-    if(hadoken::math::close_to_abs<coord_type>(norm_value, 0.0)){
+    if(hadoken::close_to_abs<coord_type>(norm_value, 0.0)){
         throw std::logic_error("try to normalize a vector of norm 0");
     }
     res /= norm_value;

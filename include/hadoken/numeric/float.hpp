@@ -35,8 +35,6 @@
 
 namespace hadoken{
 
-namespace math{
-
 
 
 ///
@@ -89,9 +87,8 @@ bool close_to(const FloatType f1, const FloatType f2,
 }
 
 
-}
 
-}
+} // hadoken
 
 
 

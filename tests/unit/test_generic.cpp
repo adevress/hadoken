@@ -43,7 +43,7 @@
 #include <hadoken/utility/optional.hpp>
 #include <hadoken/utility/variant.hpp>
 #include <hadoken/geometry/geometry_legacy.hpp>
-#include <hadoken/math/math_floating_point.hpp>
+#include <hadoken/numeric/float.hpp>
 
 
 
@@ -73,7 +73,7 @@ BOOST_AUTO_TEST_CASE( simple_rotation_tests )
 
     using namespace hadoken::geometry;
     using namespace hadoken::geometry::quaternion;
-    using namespace hadoken::math;
+    using namespace hadoken;
 
     {
         // print eps for debugging on some paltforms
@@ -122,7 +122,7 @@ BOOST_AUTO_TEST_CASE( rotation_mvd_compat_test )
 {
     using namespace hadoken::geometry;
     using namespace hadoken::geometry::quaternion;
-    using namespace hadoken::math;
+    using namespace hadoken;
 
     const double translation_xyz[] = { 40.821401, 1986.506637, 10.788424 };
     const double y_angle_deg = -1.146572;
