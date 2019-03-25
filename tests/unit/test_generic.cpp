@@ -100,6 +100,11 @@ BOOST_AUTO_TEST_CASE(integral_convertion)
     // check fixed size convertion
     std::uint64_t u64_value = to_integral<std::uint64_t>("42");
     BOOST_CHECK_EQUAL(u64_value, 42);
+
+
+    // check floating point
+    double d = to_floating<double>("42.88");
+    BOOST_CHECK(close_to_abs(42.88, d));
 }
 
 

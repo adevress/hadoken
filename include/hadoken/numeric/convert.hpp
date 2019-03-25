@@ -49,7 +49,7 @@ template<typename Integral>
 inline typename std::enable_if<std::is_same<Integral, unsigned int>::value, Integral>::type to_integral(const std::string & value, int base = 10){
     const auto v =  std::stoul(value, nullptr, base);
     if ( v > std::numeric_limits<unsigned int>::max()){
-        throw std::out_of_range("can not convert to unsigned int");
+        throw std::out_of_range("overflow when converted to unsigned int");
     }
     return v;
 }
@@ -76,5 +76,16 @@ inline typename std::enable_if<std::is_same<Integral, unsigned long long>::value
     return std::stoull(value, nullptr, base);
 }
 
+
+template<typename Floating>
+inline typename std::enable_if<std::is_same<Floating, float>::value, Floating>::type to_floating(const std::string & value){
+    return std::stof(value, nullptr);
+}
+
+
+template<typename Floating>
+inline typename std::enable_if<std::is_same<Floating, double>::value, Floating>::type to_floating(const std::string & value){
+    return std::stod(value, nullptr);
+}
 
 } // hadoken
