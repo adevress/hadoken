@@ -44,7 +44,7 @@
 #include <hadoken/utility/variant.hpp>
 #include <hadoken/geometry/geometry_legacy.hpp>
 #include <hadoken/numeric/float.hpp>
-
+#include <hadoken/numeric/convert.hpp>
 
 
 
@@ -66,6 +66,41 @@ BOOST_AUTO_TEST_CASE(optional_to_variant)
 
 }
 
+
+
+
+BOOST_AUTO_TEST_CASE(integral_convertion)
+{
+    using namespace hadoken;
+
+    // dummy integer convert
+    int a = to_integral<int>("5");
+    BOOST_CHECK_EQUAL(a , 5);
+
+    // different base
+    a = to_integral<int>("0x10", 16);
+    BOOST_CHECK_EQUAL(a, 16);
+
+    // force on size_t
+    std::size_t value = to_integral<std::size_t>("5000");
+    BOOST_CHECK_EQUAL(value, 5000);
+
+
+    // check exception
+    BOOST_CHECK_THROW({
+        long long value = to_integral<long long>("to the infinite and beyond");
+        (void) value;
+    }, std::invalid_argument);
+
+
+    // check unsigned int
+    unsigned int u_value = to_integral<unsigned int>(std::to_string(std::numeric_limits<unsigned int>::max()));
+    BOOST_CHECK_EQUAL(u_value, std::numeric_limits<unsigned int>::max());
+
+    // check fixed size convertion
+    std::uint64_t u64_value = to_integral<std::uint64_t>("42");
+    BOOST_CHECK_EQUAL(u64_value, 42);
+}
 
 
 BOOST_AUTO_TEST_CASE( simple_rotation_tests )
