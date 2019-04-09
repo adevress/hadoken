@@ -34,6 +34,7 @@
 #include <functional>
 #include <vector>
 #include <type_traits>
+#include <bitset>
 
 
 #include <hadoken/thread/future_helpers.hpp>
@@ -95,6 +96,10 @@ private:
 class thread_pool_executor : public std_thread_model{
 public:
 
+    enum class flags : std::size_t {
+        complete_all_before_delete = 0
+    };
+
     template<typename T>
     using future = std::future<T>;
 
@@ -102,6 +107,7 @@ public:
     using promise = std::promise<T>;
 
     inline thread_pool_executor(std::size_t n_thread =0) :
+        _flags(0),
         _work_queue(),
         _executors(){
         pthread_key_create(&_recursive_key, NULL);
@@ -114,6 +120,9 @@ public:
 
     inline ~thread_pool_executor(){
         pthread_key_delete(_recursive_key);
+        if(_flags[static_cast<std::size_t>(flags::complete_all_before_delete)]){
+            wait();
+        }
     }
 
     inline void execute(std::function<void (void)> task){
@@ -151,11 +160,26 @@ public:
         }
     }
 
+    inline void set_flags(flags flag, bool value){
+        _flags[static_cast<std::size_t>(flag)] = value;
+    }
+
+    inline bool get_flag(flags flag) const {
+        return _flags[static_cast<std::size_t>(flag)];
+    }
+
+    inline void wait(){
+        while(_work_queue.empty() == false){
+            std::this_thread::yield();
+        }
+    }
+
 private:
+    std::bitset<32> _flags;
     concurrent_queue<std::function<void ()>> _work_queue;
     std::vector<std::unique_ptr<details::worker_thread> > _executors;
-
     pthread_key_t _recursive_key;
+
 };
 
 

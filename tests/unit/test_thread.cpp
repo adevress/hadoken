@@ -127,6 +127,32 @@ BOOST_AUTO_TEST_CASE( executor_pool_thread_test)
 }
 
 
+BOOST_AUTO_TEST_CASE( executor_pool_thread_wait)
+{
+    std::mutex lock;
+    std::size_t counter =0;
+    const std::size_t iterations = 256;
+
+    {
+        hadoken::thread_pool_executor exec_thread(32);
+
+        for(std::size_t  i = 0; i < iterations; ++i){
+            exec_thread.execute([&](){
+                std::lock_guard<std::mutex> _l(lock);
+                counter += 1;
+            });
+        }
+
+        // enforce thread pool destruction
+    }
+
+    BOOST_CHECK_EQUAL(counter, 256);
+
+
+}
+
+
+
 BOOST_AUTO_TEST_CASE( latch_test)
 {
     {
