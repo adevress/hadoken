@@ -35,7 +35,7 @@
 #include <vector>
 #include <type_traits>
 #include <bitset>
-
+#include <iostream>
 
 #include <hadoken/thread/future_helpers.hpp>
 #include <hadoken/threading/std_thread_model.hpp>

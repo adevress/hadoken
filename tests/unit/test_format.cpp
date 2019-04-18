@@ -36,6 +36,7 @@
 #include <boost/test/unit_test.hpp>
 
 #include <hadoken/format/format.hpp>
+#include <hadoken/format/format_template.hpp>
 
 BOOST_AUTO_TEST_CASE( simple_format_concat_test )
 {
@@ -87,4 +88,27 @@ BOOST_AUTO_TEST_CASE( concat_to_string_test )
 }
 
 
+
+
+
+
+BOOST_AUTO_TEST_CASE( format_template_test )
+{
+    using namespace hadoken::format;
+
+    const std::string string_template = "hello {my_var1}, from the {my_var2}";
+    std::string res;
+
+    // full replace
+    res = format_template(string_template, { std::make_tuple("my_var1", "world"), std::make_tuple("my_var2", "multiverse")});
+
+    BOOST_CHECK_EQUAL(res, "hello world, from the multiverse");
+
+    std::cout << res << std::endl;
+
+    // partial replace
+    res = format_template(string_template, { std::make_tuple("my_var1", "world")});
+    BOOST_CHECK_EQUAL(res, "hello world, from the {my_var2}");
+
+}
 
