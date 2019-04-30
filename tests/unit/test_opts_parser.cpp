@@ -42,22 +42,197 @@
 
 BOOST_AUTO_TEST_CASE( opt_parser)
 {
-  /*  using namespace hadoken;
+    using namespace hadoken;
 
-    options_handler options_h;
+    options_handler options_h("my_prog", "a demo for unit tests");
 
     std::string my_opt_value;
 
-    options_h.add_option(option("my_opt", "super helpfull message", [&](const std::string v) -> void {
-                                        my_opt_value = v;
-     }));
+    std::vector<std::string> positionals;
+
+    const std::string super_cool_help_message = "super useful message";
+    option opt("--my_opt", [&](std::string v) -> void {
+                                            my_opt_value = v;
+         }, super_cool_help_message);
+    options_h.add_option(opt);
+    BOOST_CHECK_EQUAL(opt.help_message(), super_cool_help_message);
+
+    options_h.add_option(option("never_called", [&](std::string ) -> void {
+                                        BOOST_TEST(false);
+     }, "not so useful message"));
 
 
+    options_h.set_positional_argument_handler([&](std::string a){
+        positionals.emplace_back(a);
+    });
 
 
-    std::vector<string_view> args = { "--my_opt", "message"};
+    std::vector<string_view> args = { "--my_opt", "random_val", "grand_ma", "super_end_argument"};
     parse_options(options_h, "binary", args);
 
-    BOOST_CHECK_EQUAL(my_opt_value, "message");*/
+
+    BOOST_CHECK_EQUAL(positionals[0], "grand_ma");
+
+    BOOST_CHECK_EQUAL(positionals[1], "super_end_argument");
+
+    BOOST_CHECK_EQUAL(my_opt_value, "random_val");
+
+
 }
+
+
+
+BOOST_AUTO_TEST_CASE( opt_parser_subcommand)
+{
+    using namespace hadoken;
+
+    options_handler options("my_prog", "a demo for unit tests");
+
+    std::string my_argument_value = "random_my_val", my_argument_value2 = "random_val2";
+
+    std::vector<std::string> positionals_sub_not_called;
+
+    options.add_option(option("--little-opt",[&](std::string v){
+        BOOST_CHECK_EQUAL(v, my_argument_value);
+    }, "help dude"));
+
+
+    options.add_option(option("--nothing-interesting",[&](std::string v){
+        BOOST_FAIL(hadoken::scat("option should not be called", v));
+    }, "help dude"));
+
+    options.set_positional_argument_handler([&](const std::string & v){
+        BOOST_FAIL(hadoken::scat(" no positional arguments should be called for pos arguments ", v));
+    });
+
+    sub_command sub_comm("sub_exec",[&](){
+            BOOST_TEST_CHECKPOINT("Sub exec scope triggered");
+        }, "help msg");
+
+    sub_comm.add_option(option("--subarg", [&](std::string v){
+        BOOST_TEST_CHECKPOINT("subarg called");
+        BOOST_CHECK_EQUAL(my_argument_value2, v);
+    }, "help msg"));
+
+    sub_comm.set_positional_argument_handler([&](std::string v){
+        positionals_sub_not_called.emplace_back(v);
+    });
+
+    options.add_subcommand(sub_comm);
+
+    options.add_subcommand(sub_command("other_command", [&](){
+        BOOST_FAIL("should not be called");
+    }, "help msg"));
+
+
+
+    std::vector<string_view> args = { "--little-opt", my_argument_value, "sub_exec", "--subarg", my_argument_value2, "pos1", "pos2"};
+    parse_options(options, "binary3", args);
+
+
+    BOOST_CHECK_EQUAL(positionals_sub_not_called.size(), 2);
+}
+
+
+
+
+
+BOOST_AUTO_TEST_CASE( opt_parser_throw_incorrect)
+{
+    using namespace hadoken;
+
+    options_handler options("my_prog", "a demo for unit tests");
+
+    std::vector<string_view> args = { "--not-an-opt", "pos2"};
+
+    try{
+        parse_options(options, "binary4", args);
+        BOOST_FAIL("should not succeed to parse");
+    }catch(parse_options_error & e){
+        BOOST_TEST_CHECKPOINT("should be a parsing error");
+
+        const std::string error_message("is not supported");
+
+        BOOST_CHECK( std::string(e.what()).find(error_message) != std::string::npos );
+    }
+
+}
+
+
+BOOST_AUTO_TEST_CASE( opt_parser_throw_end_of_list)
+{
+    using namespace hadoken;
+
+    options_handler options("my_prog", "a demo for unit tests");
+
+    options.add_option(option("--opt", [](std::string v){
+             BOOST_FAIL(hadoken::scat("should not reach here", v));
+    }, "msg"));
+
+    std::vector<string_view> args = { "--opt" };
+
+    try{
+        parse_options(options, "binary4", args);
+        BOOST_FAIL("should not succeed to parse");
+
+    }catch(parse_options_error & e){
+        BOOST_TEST_CHECKPOINT("should be a parsing error");
+
+        const std::string error_message("missing value for option");
+
+        BOOST_CHECK( std::string(e.what()).find(error_message) != std::string::npos );
+    }
+
+}
+
+
+BOOST_AUTO_TEST_CASE( opt_parser_type_check)
+{
+    using namespace hadoken;
+
+    std::string str_value= "awesome_opt";
+
+    int int_value = 42;
+
+
+    options_handler options("my_prog", "a demo for unit tests");
+
+    options.add_option(option("--opt-str", [&](std::string v){
+             BOOST_CHECK_EQUAL(v, str_value);
+    }, "msg"));
+
+    options.add_option(option("--opt-int", [&](int v){
+             BOOST_CHECK_EQUAL(v, int_value);
+    }, "msg"));
+
+    options.add_option(option("--opt-nothing", [&](){
+        BOOST_TEST_CHECKPOINT("should be called properly");
+    }, "msg"));
+
+    std::vector<string_view> args = { "--opt-str",  str_value, "--opt-int", std::to_string(int_value), "--opt-nothing"};
+
+    parse_options(options, "binary4", args);
+
+
+    // parse only int
+    args = { "--opt-int", std::to_string(int_value)};
+
+    parse_options(options, "binary5", args);
+
+    // parse wrong integer
+    // parse only int
+    args = { "--opt-int", "probably_not_so_integer"};
+
+    try{
+        parse_options(options, "binary5", args);
+        BOOST_FAIL("should not succeed to parse");
+
+    }catch(parse_options_error & e){
+        BOOST_TEST_CHECKPOINT("should be a parsing error");
+        const std::string error_message("invalid value");
+        BOOST_CHECK( std::string(e.what()).find(error_message) != std::string::npos );
+    }
+
+}
+
 

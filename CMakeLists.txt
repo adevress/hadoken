@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 enable_testing()
 
 set(HADOKEN_VERSION_MAJOR "1")
-set(HADOKEN_VERSION_MINOR "")
+set(HADOKEN_VERSION_MINOR "0")
 add_definitions( -DHADOKEN_VERSION_MAJOR=\"${HADOKEN_VERSION_MAJOR}\" -DHADOKEN_VERSION_MINOR=\"${HADOKEN_VERSION_MINOR}\")
 
 
@@ -33,7 +33,7 @@ file(GLOB HADOKEN_HEADERS_2 "${CMAKE_CURRENT_SOURCE_DIR}/include/hadoken/*/*.hpp
 
 
 set(hadoken_version_src "${CMAKE_CURRENT_SOURCE_DIR}/src/hadoken_version.cpp")
-add_executable(hadoken_version ${hadoken_version_src} )
+add_executable(hadoken ${hadoken_version_src} )
 
 
 include_directories( ${CMAKE_CURRENT_SOURCE_DIR}/include/  )
@@ -41,7 +41,7 @@ include_directories(SYSTEM ${BOOST_INCLUDE_DIR} )
 
 if(NOT HADOKEN_DISABLE_INSTALL)
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/include/hadoken DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/)
-    install(TARGETS hadoken_version DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}/)
+    install(TARGETS hadoken DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}/)
     install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/misc/pkgconfig/hadoken.pc" DESTINATION  ${CMAKE_INSTALL_FULL_LIBDIR}/pkgconfig)
 endif()
 

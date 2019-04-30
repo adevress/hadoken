@@ -30,19 +30,42 @@
 
 #include <iostream>
 
+#include <hadoken/getopts/getopts.hpp>
+
 //
 // Simple and stupid version tool for hadoken
 //
 
 std::string hadoken_help();
 
-int main(){
-    std::cout << "\n\t\t"<< "Hadoken: C++ STL-style header-only and modular utility library  "
-	<< "\n\n" << "hadoken_version: " << HADOKEN_VERSION_MAJOR << "." << HADOKEN_VERSION_MINOR
-    << "\n" << "hadoken_features: " << "range spinlock geometry parallelism threefry abstract_random string_utils ublas format small_vector spmd"
-	<< "\n\n\n\n"
-	<< hadoken_help() << "\n";
-	return 0;
+int main(int argc, char** argv){
+
+    try{
+        using namespace hadoken;
+
+        options_handler options("hadoken", "utility and config tool for hadoken : C++ STL-style minimalist header-only utility library");
+
+        options.add_subcommand(sub_command("version", [&](){
+            std::cout << "hadoken_version: " << HADOKEN_VERSION_MAJOR << "." << HADOKEN_VERSION_MINOR << "\n\n";
+        }, "print hadoken version"));
+
+        options.add_subcommand(sub_command("features", [&](){
+            std::cout << "\n\t\t"<< ""
+                      << "\n\n" << "hadoken_version: " << HADOKEN_VERSION_MAJOR << "." << HADOKEN_VERSION_MINOR
+                      << "\n" << "hadoken_features: " << "range spinlock executors getopts parallelism threefry abstract_random string_utils format small_vector"
+                      << "\n\n\n\n"
+                      << hadoken_help() << "\n";
+        }, "print hadoken feature support"));
+
+        options.set_flags(options_handler::flag::only_subcmd, true);
+
+
+        parse_options(options, argc, argv);
+        return 0;
+    } catch(std::exception & e){
+            std::cerr << e.what() << "\n";
+            return 1;
+    }
 }
 
 

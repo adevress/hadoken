@@ -30,6 +30,7 @@
 
 #include <functional>
 #include <vector>
+#include <bitset>
 #include <hadoken/string/string_view.hpp>
 
 namespace hadoken{
@@ -38,23 +39,76 @@ namespace hadoken{
 class option;
 class sub_command;
 class options_handler;
+struct options_format;
+
+///
+/// \brief generic error for error parsing
+///
+class parse_options_error : public std::runtime_error{
+public:
+    inline parse_options_error(const std::string & msg) : std::runtime_error(msg){}
+private:
+};
+
 
 ///
 /// \brief parameter subcommand
 ///
 class options_handler{
 public:
+    enum class flag{
+        only_subcmd = 0,
+        no_help = 1
+    };
 
+    // help format
+    struct help_format{
+        help_format()
+            :
+              margin(2),
+              padding(2)
+        {}
+        std::size_t margin;
+        std::size_t padding;
+    };
+
+    options_handler(const std::string & name, const std::string & help_msg);
+
+    /// add an option to the option handler
     void add_option(option opt);
 
+    /// add a subcommand with its own set of options to the handler
     void add_subcommand(sub_command sub_com);
+
+    /// add a positional argument handler
+    void set_positional_argument_handler(std::function<void (const std::string &)> handler);
+
+    /// set a flag
+    void set_flags(flag f, bool v);
+
+    bool get_flag(flag f) const;
+
 
     const std::vector<sub_command> & sub_commands() const;
 
     const std::vector<option> & options() const;
+
+
+    std::string help(const help_format & fmt = help_format()) const;
+
+    string_view name() const;
+
+    string_view help_message() const;
+
+    // internal use
+    void _call_positional(std::string arg) const;
+
 private:
+    std::bitset<32> _flags;
+    std::string _name, _help_msg;
     std::vector<option> _opts;
     std::vector<sub_command> _subcmd;
+    std::function<void (const std::string &)> _positional_argument;
 
 };
 
@@ -64,18 +118,12 @@ private:
 ///
 class sub_command : public options_handler{
 public:
-    sub_command(string_view subcommand_name, std::function<void (void)> & callback, string_view help_msg);
-
-    void add_option(option opt);
-
-    string_view name() const;
+    sub_command(std::string subcommand_name, std::function<void (void)> callback, std::string help_msg);
 
     // internal
     void _call() const;
 private:
-    string_view _name, _help_msg;
 
-    std::vector<option> _options;
     std::function<void (void)> _action;
 };
 
@@ -86,14 +134,28 @@ private:
 class option{
 public:
 
-    option(string_view option_name, string_view help_msg,  std::function<void (std::string)> callback);
-    option(string_view option_name,  string_view help_msg, std::function<void (int)> callback);
+    option(std::string option_name, std::function<void (const std::string &)> callback, std::string help_msg);
+    option(std::string option_name, std::function<void (int)> callback, std::string help_msg);
+    option(std::string option_name, std::function<void (void)> callback, std::string help_msg);
 
     string_view name() const;
-private:
-    string_view _name, _help_msg;
 
-    std::function<void (string_view opt)> _action;
+    bool match(string_view opt) const;
+
+
+    string_view help_message() const;
+
+
+    // internal
+    void _call(string_view value) const;
+
+    bool _get_flag(int v) const;
+private:
+    std::vector<std::string> _names;
+    std::string _help_msg;
+
+    std::function<void (const std::string &)> _action;
+    std::bitset<32> _flags;
 };
 
 
