@@ -140,8 +140,9 @@ public:
 
     string_view name() const;
 
-    bool match(string_view opt) const;
+    void add_alias(std::string alias);
 
+    bool match(string_view opt) const;
 
     string_view help_message() const;
 

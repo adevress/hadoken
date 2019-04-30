@@ -228,6 +228,10 @@ inline  string_view option::name() const{
     return _names.at(0);
 }
 
+inline void option::add_alias(std::string alias){
+    _names.emplace_back(alias);
+}
+
 inline bool option::match(string_view opt) const{
     return std::any_of(_names.begin(), _names.end(), [&](const std::string & v){
         return opt.compare(v) == 0;

@@ -236,3 +236,34 @@ BOOST_AUTO_TEST_CASE( opt_parser_type_check)
 }
 
 
+
+
+BOOST_AUTO_TEST_CASE( opt_parser_alias)
+{
+    using namespace hadoken;
+
+    int counter =  0;
+
+    options_handler options("my_prog", "a demo for unit tests");
+
+    option opt_nothing("--opt-nothing", [&](){
+            counter += 1;
+        }, "msg");
+    opt_nothing.add_alias("-n");
+
+
+
+    options.add_option(opt_nothing);
+
+    std::vector<string_view> args = { "-n", "--opt-nothing"};
+
+    parse_options(options, "binary6", args);
+
+
+    BOOST_CHECK_EQUAL(counter, 2);
+
+
+
+}
+
+
