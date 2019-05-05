@@ -1,4 +1,5 @@
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/9377f9f6f3dc45eba06982192c853ac7)](https://app.codacy.com/app/adevress/hadoken?utm_source=github.com&utm_medium=referral&utm_content=adevress/hadoken&utm_campaign=Badge_Grade_Dashboard)
 [![Build Status](https://travis-ci.org/adevress/hadoken.svg?branch=master)](https://travis-ci.org/adevress/hadoken)
 
 
