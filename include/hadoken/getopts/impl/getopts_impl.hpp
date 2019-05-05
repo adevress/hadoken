@@ -84,7 +84,7 @@ void _concat_as_colmun(std::ostream & ss, string_view text, std::size_t column_l
 
 }
 
-inline options_handler::options_handler(const std::string &name, const std::string &help_msg) :
+inline options_handler::options_handler(std::string name, std::string help_msg) :
     _flags(),
     _name(name),
     _help_msg(help_msg){}
@@ -192,11 +192,10 @@ inline void sub_command::_call() const{
 inline option::option(std::string option_name, std::function<void (const std::string &)> callback, std::string help_msg) :
     _names({ option_name} ),
     _help_msg(help_msg),
-    _action()
+    _action([callback](string_view arg) -> void{
+    callback(to_string(arg));
+    })
 {
-    _action = [callback](string_view arg) -> void{
-            callback(to_string(arg));
-    };
     _flags[_option_flag_require_str] = true;
 }
 

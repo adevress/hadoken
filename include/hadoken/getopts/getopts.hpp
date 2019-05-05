@@ -72,7 +72,7 @@ public:
         std::size_t padding;
     };
 
-    options_handler(const std::string & name, const std::string & help_msg);
+    options_handler(std::string name, std::string help_msg);
 
     /// add an option to the option handler
     void add_option(option opt);
