@@ -13,4 +13,4 @@ script:
  - cd build
  - cmake -G Ninja ../
  - ninja -v
- - ctest -V
+ - ctest 
