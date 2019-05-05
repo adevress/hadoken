@@ -41,10 +41,6 @@ target_link_libraries(test_crypto ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES} )
 add_test(NAME test_crypto_unit COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_crypto)
 
 
-##  C++11 only
-if(CMAKE_CXX_SUPPORT_CXX11)
-
-add_definitions(-std=c++11 )
 
 ## format related tests
 LIST(APPEND test_format_src "test_format.cpp")
@@ -137,8 +133,6 @@ add_executable(test_opts_parser ${test_opts_parser_src} ${HADOKEN_HEADERS} ${HAD
 target_link_libraries(test_opts_parser ${CMAKE_THREAD_LIBS_INIT} ${Boost_UNIT_TEST_FRAMEWORK_LIBRARIES})
 
 add_test(NAME test_opts_parser_uint COMMAND ${TESTS_PREFIX} ${TESTS_PREFIX_ARGS} ${CMAKE_CURRENT_BINARY_DIR}/test_opts_parser)
-
-endif()
 
 
 endif()
