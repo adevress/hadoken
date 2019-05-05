@@ -73,6 +73,11 @@ public:
       return ( p < other.p);
   }
 
+  iterator_ptr & operator =(const iterator_ptr & other){
+        p = other.p;
+        return *this;
+  }
+
 };
 
 

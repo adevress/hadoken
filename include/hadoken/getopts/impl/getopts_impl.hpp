@@ -91,11 +91,11 @@ inline options_handler::options_handler(std::string name, std::string help_msg) 
 
 
 inline void options_handler::add_option(option opt){
-    _opts.emplace_back(opt);
+    _opts.emplace_back(std::move(opt));
 }
 
 inline void options_handler::add_subcommand(sub_command sub_com){
-    _subcmd.emplace_back(sub_com);
+    _subcmd.emplace_back(std::move(sub_com));
 }
 
 inline void options_handler::set_positional_argument_handler(std::function<void (const std::string &)> handler){

@@ -57,7 +57,7 @@ inline string_view::string_view(const char *c_str, std::size_t length) :
 
 inline string_view::string_view(const char *c_str) :
     _pstr(c_str),
-    _len(strlen(c_str)){
+    _len(::strnlen(c_str, std::numeric_limits<std::size_t>::max())){
 
 }
 

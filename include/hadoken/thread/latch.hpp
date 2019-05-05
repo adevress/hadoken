@@ -30,6 +30,7 @@
 #define _HADOKEN_LATCH_HPP_
 
 #include <atomic>
+#include <chrono>
 #include <thread>
 #include <assert.h>
 #include <condition_variable>
@@ -108,7 +109,7 @@ public:
                 std::this_thread::yield();
 #else
                 // dummy implementation for platforms without sched_yield() support 
-                usleep(1);
+                std::this_thread::sleep_for(std::chrono::microseconds(1));
 #endif
             }
         }
