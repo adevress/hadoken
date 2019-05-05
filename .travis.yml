@@ -6,11 +6,11 @@ dist: trusty
 
 install:
  - sudo apt-get update -y
- - sudo apt-get install -y cmake libboost-all-dev
+ - sudo apt-get install -y cmake libboost-all-dev ninja-build
 
 script:
  - mkdir -p build
  - cd build
- - cmake ../
- - make
+ - cmake -G Ninja ../
+ - ninja -v
  - ctest -V
