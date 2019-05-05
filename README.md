@@ -31,11 +31,17 @@
 ## Format
  - Variadic template one-line string concatenator
 
-## Strings
- - Utility function for string manipulation
+## Strings / Format
+ - Utility function for one line string concatenation
+ - Utility function for wildcard matching
+ - Utility function for template substitution ( mustache style, minimalist ) 
 
 ## Network
  - Uri library
+
+## Numeric
+ - Float equality / close to functions
+ - string to integral / float converters 
 
 ## Containers
  - small_vector: Vector with small size optimization. In the spirit of [LLVM small vector](http://llvm.org/doxygen/classllvm_1_1SmallVector.html)
@@ -47,6 +53,19 @@
  - spinlock: simple implementation
  - latch: barrier with counter implementation
 
+## Executors
+ - C++ 20 Executors implementations
+ - Thread pool executor
+ - Single thread executor
+ 
+## State Machine
+ - Simple, type-safe, callback based Finite State Machine (FSM) implementation
+
+## Parse opts / getopts
+ - Command line option parser
+ - Support sub-commands
+ - Support auto-help generation
+ - Sax style parsing
 
 # How to use
 Hadoken is mainly header only, you can use one of this
