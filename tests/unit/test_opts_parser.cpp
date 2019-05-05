@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( opt_parser)
     BOOST_CHECK_EQUAL(opt.help_message(), super_cool_help_message);
 
     options_h.add_option(option("never_called", [&](std::string ) -> void {
-                                        BOOST_TEST(false);
+                                        BOOST_FAIL("should not reach here");
      }, "not so useful message"));
 
 
