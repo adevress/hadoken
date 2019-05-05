@@ -21,8 +21,9 @@ set(Boost_NO_BOOST_CMAKE TRUE)
 
 include(GNUInstallDirs)
 include(ReleaseDebugAutoFlags)
-include(DetectCXX11Support)
 
+## Enforce CXX standard
+set (CMAKE_CXX_STANDARD 11)
 
 ## Dependencies
 find_package(Threads QUIET)
