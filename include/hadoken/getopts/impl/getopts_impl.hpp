@@ -86,8 +86,8 @@ void _concat_as_colmun(std::ostream & ss, string_view text, std::size_t column_l
 
 inline options_handler::options_handler(std::string name, std::string help_msg) :
     _flags(),
-    _name(name),
-    _help_msg(help_msg){}
+    _name(std::move(name)),
+    _help_msg(std::move(help_msg)){}
 
 
 inline void options_handler::add_option(option opt){
@@ -190,8 +190,8 @@ inline void sub_command::_call() const{
 
 
 inline option::option(std::string option_name, std::function<void (const std::string &)> callback, std::string help_msg) :
-    _names({ option_name} ),
-    _help_msg(help_msg),
+    _names({ std::move(option_name)} ),
+    _help_msg(std::move(help_msg)),
     _action([callback](string_view arg) -> void{
     callback(to_string(arg));
     })
@@ -201,30 +201,38 @@ inline option::option(std::string option_name, std::function<void (const std::st
 
 
 inline option::option(std::string option_name, std::function<void (int)> callback, std::string help_msg) :
-    _names({option_name}),
-    _help_msg(help_msg),
-    _action()
+    _names({ std::move(option_name)}),
+    _help_msg(std::move(help_msg)),
+    _action([callback, this](string_view arg) -> void{
+    callback(std::stoi(to_string(arg)));
+})
 {
-    _action = [callback, this](string_view arg) -> void{
-            callback(std::stoi(to_string(arg)));
-    };
     _flags[_option_flag_require_int] = true;
 }
 
 inline option::option(std::string option_name, std::function<void ()> callback, std::string help_msg) :
-    _names({option_name}),
-    _help_msg(help_msg),
-    _action()
+    _names({std::move(option_name)}),
+    _help_msg(std::move(help_msg)),
+    _action([callback, this](string_view) -> void{
+    callback();
+})
 {
-    _action = [callback, this](string_view) -> void{
-            callback();
-    };
     _flags[_option_flag_require_none] = true;
 }
 
 
 inline  string_view option::name() const{
     return _names.at(0);
+}
+
+inline std::vector<string_view> option::name_and_aliases() const{
+    std::vector<string_view> res;
+    res.reserve(_names.size());
+
+    for(const auto & n : _names){
+        res.emplace_back(n);
+    }
+    return res;
 }
 
 inline void option::add_alias(std::string alias){

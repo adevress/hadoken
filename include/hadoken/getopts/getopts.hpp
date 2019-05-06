@@ -74,6 +74,12 @@ public:
 
     options_handler(std::string name, std::string help_msg);
 
+    options_handler(const options_handler &) = default;
+    options_handler(options_handler &&) = default;
+
+    options_handler& operator =(const options_handler &) = default;
+    options_handler& operator =(options_handler&&) = default;
+
     /// add an option to the option handler
     void add_option(option opt);
 
@@ -139,6 +145,8 @@ public:
     option(std::string option_name, std::function<void (void)> callback, std::string help_msg);
 
     string_view name() const;
+
+    std::vector<string_view> name_and_aliases() const;
 
     void add_alias(std::string alias);
 

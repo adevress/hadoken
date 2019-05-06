@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( string_view_simple)
     BOOST_CHECK_EQUAL(empty.size(), empty.length());
     BOOST_CHECK_EQUAL(truncated.size(), 5);
     BOOST_CHECK_EQUAL(truncated.size(), truncated.length());
-    BOOST_CHECK_EQUAL(full.size(), strlen(msg));
+    BOOST_CHECK_EQUAL(full.size(), std::string(msg).size());
 
     string_view new_view_copied = full;
     string_view truncated_copy = truncated;
