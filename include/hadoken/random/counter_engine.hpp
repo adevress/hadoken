@@ -82,9 +82,7 @@ public:
     explicit counter_engine(key_type &uk) : b(uk), c(), elem(){}
 
     HADOKEN_DECORATE_HOST_DEVICE
-    explicit counter_engine() : b(), c(), elem() {
-
-    }
+    explicit counter_engine() : b(), c(), elem() {}
 
     HADOKEN_DECORATE_HOST_DEVICE
     explicit counter_engine(result_type r) : b(), c(), elem() {
@@ -103,9 +101,14 @@ public:
 
 
     HADOKEN_DECORATE_HOST_DEVICE
-    counter_engine(const counter_engine& e) : b(e.b), c(e.c), elem(e.elem), v(e.v) {
-    }
+    counter_engine(const counter_engine&) = default;
+    HADOKEN_DECORATE_HOST_DEVICE
+    counter_engine(counter_engine && ) = default;
 
+    HADOKEN_DECORATE_HOST_DEVICE
+    counter_engine& operator =(const counter_engine &) = default;
+    HADOKEN_DECORATE_HOST_DEVICE
+    counter_engine& operator =(counter_engine && ) = default;
 
     HADOKEN_DECORATE_HOST_DEVICE
     void seed(result_type r){

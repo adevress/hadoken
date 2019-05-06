@@ -33,11 +33,10 @@
 #include <cassert>
 #include <algorithm>
 #include <vector>
+#include <memory>
 
 #include <boost/random.hpp>
-#include <boost/noncopyable.hpp>
 #include <boost/integer.hpp>
-#include <boost/scoped_ptr.hpp>
 
 namespace hadoken {
 
@@ -64,25 +63,27 @@ public:
 
     /// default constructor
     /// generate empty mapper
-    explicit inline random_engine_mapper();
+    explicit random_engine_mapper();
     ///
     /// map a specialized random generator in the C++11 / boost format
     ///  to a generic random_engine_mapper that can be used in any distribution
     ///
     template<typename Engine>
-    inline random_engine_mapper(const Engine & intern);
+    explicit random_engine_mapper(Engine && intern);
 
-    inline random_engine_mapper(const random_engine_mapper & other);
+    random_engine_mapper(random_engine_mapper && other);
+
+    random_engine_mapper & operator =(random_engine_mapper && );
 
 
     /// reset to defautl seed, mapping
     inline void seed();
 
     /// reset to seed X, mapping
-    inline void seed(result_type seed);
+    void seed(result_type seed);
 
     /// generator operation
-    inline result_type operator ()();
+    result_type operator ()();
 
     /// derivate create a random engine
     ///  derivated from the current random engine
@@ -94,22 +95,26 @@ public:
     ///  - Two different keys, even close in range guarantee two independent random streams
     ///
     ///
-    inline random_engine_mapper derivate(result_type key) const;
+    random_engine_mapper derivate(result_type key) const;
 
     /// minimum value returned by engine
     /// map to minimum value of the type
-    static inline result_type min(){
+    static result_type min(){
         return std::numeric_limits<result_type>::min();
     }
 
     /// minimum value returned by engine
     /// map to maximum value of the type
-    static inline result_type max(){
+    static result_type max(){
         return std::numeric_limits<result_type>::max();
     }
     
 private:    
-    boost::scoped_ptr< impl::abstract_engine<result_type> > _engine;
+    std::unique_ptr< impl::abstract_engine<result_type> > _engine;
+
+    random_engine_mapper(const random_engine_mapper & other) = delete;
+
+    random_engine_mapper & operator =(const random_engine_mapper & other) = delete;
 };
 
 

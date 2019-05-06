@@ -76,7 +76,7 @@ private:
 
 template< typename Uint >
 template< typename Engine >
-random_engine_mapper<Uint>::random_engine_mapper(const Engine & e) : _engine(new impl::map_engine_intern<Uint, Engine>(e)){
+random_engine_mapper<Uint>::random_engine_mapper(Engine && e) : _engine(new impl::map_engine_intern<Uint, Engine>(std::move(e))){
 
 }
 
@@ -87,10 +87,7 @@ random_engine_mapper<Uint>::random_engine_mapper() : _engine() {
 }
 
 template< typename Uint >
-random_engine_mapper<Uint>::random_engine_mapper(const random_engine_mapper<Uint> & other) : _engine(NULL){
-    if(other._engine.get() != NULL){
-        _engine.reset(other._engine->clone());
-    }
+random_engine_mapper<Uint>::random_engine_mapper(random_engine_mapper<Uint> && other) : _engine(std::move(other._engine)){
 }
 
 template< typename Uint >

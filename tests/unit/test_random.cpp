@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_CASE( simple_random_tests )
     }
 
     boost::random::mt11213b twister_engine_clone;
-    hadoken::random_engine_mapper_32 engine_mapper(twister_engine_clone);
+    hadoken::random_engine_mapper_32 engine_mapper(std::move(twister_engine_clone));
 
     std::vector<int> mapper_values;
     mapper_values.reserve(n_vals);
@@ -94,7 +94,7 @@ BOOST_AUTO_TEST_CASE( simple_derivate)
 
     const int seed = 424242;
     boost::random::mt11213b twister_engine_clone;
-    hadoken::random_engine_mapper_32 engine_mapper(twister_engine_clone);
+    hadoken::random_engine_mapper_32 engine_mapper(std::move(twister_engine_clone));
     engine_mapper.seed(seed);
 
 
@@ -133,7 +133,7 @@ BOOST_AUTO_TEST_CASE( determinism_derivate)
 
     const int seed = 1234;
     boost::random::mt11213b twister_engine_clone;
-    hadoken::random_engine_mapper_32 engine_mapper(twister_engine_clone);
+    hadoken::random_engine_mapper_32 engine_mapper(std::move(twister_engine_clone));
     engine_mapper.seed(seed);
 
 

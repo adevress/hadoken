@@ -324,11 +324,19 @@ public:
     typedef Uint                  uint_type;
 
     HADOKEN_DECORATE_HOST_DEVICE
-    threefry() : k(){}
+    explicit threefry() : k(){}
     HADOKEN_DECORATE_HOST_DEVICE
-    threefry(key_type _k) : k(_k) {}
+    explicit threefry(key_type _k) : k(_k) {}
+
     HADOKEN_DECORATE_HOST_DEVICE
-    threefry(const threefry& v) : k(v.k){}
+    threefry(const threefry&)  = default;
+    HADOKEN_DECORATE_HOST_DEVICE
+    threefry(threefry &&) = default;
+
+    HADOKEN_DECORATE_HOST_DEVICE
+    threefry& operator =(const threefry &) = default;
+    HADOKEN_DECORATE_HOST_DEVICE
+    threefry& operator =(threefry && ) = default;
 
     HADOKEN_DECORATE_HOST_DEVICE
     void set_key(key_type _k){
