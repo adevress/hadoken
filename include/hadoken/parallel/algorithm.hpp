@@ -24,31 +24,31 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef _HADOKEN_PARALLEL_ALGORITHM_HPP_
 #define _HADOKEN_PARALLEL_ALGORITHM_HPP_
 
 #include <algorithm>
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 ///
 /// basic policies
 ///
 
 /// sequential execution, no parallelism
-class sequential_execution_policy{};
+class sequential_execution_policy {};
 
 /// parallel execution allowed
-class parallel_execution_policy{};
+class parallel_execution_policy {};
 
 /// parallel execution allowed, vector execution allowed
-class parallel_vector_execution_policy{};
+class parallel_vector_execution_policy {};
 
 /// constexpr for sequential execution
 constexpr sequential_execution_policy seq{};
@@ -62,11 +62,12 @@ constexpr parallel_vector_execution_policy par_vec{};
 ///
 /// Extended policies
 ///
-template<typename Executor>
-class parallel_shared_exec_policy{
-public:
-    inline parallel_shared_exec_policy(std::shared_ptr<Executor> executor) : _exec(std::move(executor)){}
-protected:
+template <typename Executor>
+class parallel_shared_exec_policy {
+  public:
+    inline parallel_shared_exec_policy(std::shared_ptr<Executor> executor) : _exec(std::move(executor)) {}
+
+  protected:
     std::shared_ptr<Executor> _exec;
 };
 
@@ -76,92 +77,87 @@ protected:
 
 
 /// parallel for_each algorithm with execution specifier
-template<typename ExecPolicy, typename Iterator, typename Function>
-inline void for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun);
+template <typename ExecPolicy, typename Iterator, typename Function>
+inline void for_each(ExecPolicy&& policy, Iterator begin_it, Iterator end_it, Function fun);
 
 /// parallel fill algorithm
 template <typename ExecPolicy, class ForwardIterator, class T>
-void fill(ExecPolicy && policy, ForwardIterator first, ForwardIterator last, const T& val);
+void fill(ExecPolicy&& policy, ForwardIterator first, ForwardIterator last, const T& val);
 
 /// parallel fill_n algorithm
 template <typename ExecPolicy, class ForwardIterator, class Size, class T>
-void fill_n(ExecPolicy && policy, ForwardIterator first, Size n, const T& val);
+void fill_n(ExecPolicy&& policy, ForwardIterator first, Size n, const T& val);
 
 /// parallel generate algorithm
-template< class ExecutionPolicy, class ForwardIt, class Generator >
-void generate( ExecutionPolicy&& policy, ForwardIt first, ForwardIt last, Generator g );
+template <class ExecutionPolicy, class ForwardIt, class Generator>
+void generate(ExecutionPolicy&& policy, ForwardIt first, ForwardIt last, Generator g);
 
 /// parallel generate_n algorithm
-template< class ExecutionPolicy, class OutputIt, class Size, class Generator >
-OutputIt generate_n( ExecutionPolicy&& policy, OutputIt first, Size count, Generator g );
+template <class ExecutionPolicy, class OutputIt, class Size, class Generator>
+OutputIt generate_n(ExecutionPolicy&& policy, OutputIt first, Size count, Generator g);
 
 
 
 /// parallel transform algorithm binary
-template< class ExecutionPolicy, class InputIterator1, class InputIterator2, class OutputIterator, class BinaryOperation >
-OutputIterator transform( ExecutionPolicy&& policy, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
-                    OutputIterator d_first, BinaryOperation binary_op );
+template <class ExecutionPolicy, class InputIterator1, class InputIterator2, class OutputIterator, class BinaryOperation>
+OutputIterator transform(ExecutionPolicy&& policy, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
+                         OutputIterator d_first, BinaryOperation binary_op);
 
 /// parallel transform algorithm unary
-template< class ExecutionPolicy, class InputIt, class OutputIt, class UnaryOperation >
-OutputIt transform( ExecutionPolicy&& policy, InputIt first1, InputIt last1, OutputIt d_first,
-                    UnaryOperation unary_op );
+template <class ExecutionPolicy, class InputIt, class OutputIt, class UnaryOperation>
+OutputIt transform(ExecutionPolicy&& policy, InputIt first1, InputIt last1, OutputIt d_first, UnaryOperation unary_op);
 
 
 
 /// parallel all_of algorithm
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-inline bool all_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p );
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+inline bool all_of(ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p);
 
 /// parallel any_of algorithm
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-inline bool any_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p );
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+inline bool any_of(ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p);
 
 /// parallel none_of algorithm
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-inline bool none_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p );
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+inline bool none_of(ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p);
 
 
 
 
 /// sort algorithm
-template< class ExecutionPolicy, class RandomIt >
-void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last );
+template <class ExecutionPolicy, class RandomIt>
+void sort(ExecutionPolicy&& policy, RandomIt first, RandomIt last);
 
 /// sort algorithmwith comparator
-template< class ExecutionPolicy, class RandomIt, class Compare >
-void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp );
+template <class ExecutionPolicy, class RandomIt, class Compare>
+void sort(ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp);
 
 
 
 ///
 /// numerics
 /// inclusive scan algorithm
-template< class ExecutionPolicy, class InputIt, class OutputIt >
-OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first,
-                         InputIt last, OutputIt d_first );
-                         
+template <class ExecutionPolicy, class InputIt, class OutputIt>
+OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first, InputIt last, OutputIt d_first);
+
 /// inclusive scan algorithm binary op
-template< class ExecutionPolicy, class InputIt, class OutputIt,
-class BinaryOperation>
-OutputIt inclusive_scan( ExecutionPolicy&& policy,
-                         InputIt first, InputIt last, OutputIt d_first,
-                         BinaryOperation binary_op);
-                         
-                         
+template <class ExecutionPolicy, class InputIt, class OutputIt, class BinaryOperation>
+OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first, InputIt last, OutputIt d_first, BinaryOperation binary_op);
+
+
 
 /// Extension: for_range_ algorithm
 ///
 /// for_range is an extension to for_each where the function
 /// execute on a subrange, instead of a single element
-template<typename ExecPolicy, typename Iterator, typename RangeFunction>
-inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, RangeFunction fun);
+template <typename ExecPolicy, typename Iterator, typename RangeFunction>
+inline void for_range(ExecPolicy&& policy, Iterator begin_it, Iterator end_it, RangeFunction fun);
 
-} // parallel
+} // namespace parallel
 
 
 
-} // hadoken
+} // namespace hadoken
 
 
 #include <hadoken/parallel/bits/c11_thread_algorithm_impl.hpp>

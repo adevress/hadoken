@@ -24,13 +24,13 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_SINGLETON_HPP
 #define HADOKEN_SINGLETON_HPP
 
 
-namespace hadoken{
+namespace hadoken {
 
 ///
 /// @class singleton
@@ -39,31 +39,29 @@ namespace hadoken{
 ///
 ///  thread-safety: C++11 guarantee atomicity of static initialization
 ///
-template<typename Object>
-class singleton{
-public:
-    singleton(){}
+template <typename Object>
+class singleton {
+  public:
+    singleton() {}
 
-    ~singleton(){}
+    ~singleton() {}
 
 
-    static Object & instance(){
+    static Object& instance() {
         static Object obj;
         return obj;
     }
 
 
-    static void init(){
-        (void) instance();
-    }
-private:
-    singleton(const singleton& ) = delete;
-    singleton& operator=(const singleton &) = delete;
+    static void init() { (void)instance(); }
 
+  private:
+    singleton(const singleton&) = delete;
+    singleton& operator=(const singleton&) = delete;
 };
 
 
 
-}
+} // namespace hadoken
 
 #endif // SINGLETON_HPP

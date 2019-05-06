@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_FUTURE_HELPERS_HPP
 #define HADOKEN_FUTURE_HELPERS_HPP
 
@@ -36,20 +36,18 @@ namespace hadoken {
 //
 // set promise result, even in case of void result
 //
-template<typename F, typename R>
-void set_promise_from_result(std::promise<R> & p, F && f)
-{
+template <typename F, typename R>
+void set_promise_from_result(std::promise<R>& p, F&& f) {
     p.set_value(f());
 }
 
-template<typename F>
-void set_promise_from_result(std::promise<void> & p, F && f)
-{
+template <typename F>
+void set_promise_from_result(std::promise<void>& p, F&& f) {
     f();
     p.set_value();
 }
 
 
-} // hadoken
+} // namespace hadoken
 
 #endif // FUTURE_HELPERS_HPP

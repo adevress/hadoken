@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #pragma once
 
 
@@ -36,9 +36,7 @@
 
 namespace hadoken {
 
-inline void scat(std::ostream & ostream){
-    (void) ostream;
-}
+inline void scat(std::ostream& ostream) { (void)ostream; }
 
 ///
 /// @brief scat
@@ -52,8 +50,8 @@ inline void scat(std::ostream & ostream){
 ///  support any type handled by ostream
 ///
 ///
-template<typename T, typename ... Args>
-inline void scat(std::ostream & ostream, const T & arg1, const Args&...  args){
+template <typename T, typename... Args>
+inline void scat(std::ostream& ostream, const T& arg1, const Args&... args) {
     ostream << arg1;
     scat(ostream, args...);
 }
@@ -71,9 +69,9 @@ inline void scat(std::ostream & ostream, const T & arg1, const Args&...  args){
 ///  support any type handled by ostream
 ///
 ///
-template<typename T, typename ... Args>
-inline  typename std::enable_if<(not std::is_base_of<std::ostream, T>::value), std::string>::type
-scat(const T & arg1, const Args&...  args){
+template <typename T, typename... Args>
+inline typename std::enable_if<(not std::is_base_of<std::ostream, T>::value), std::string>::type scat(const T& arg1,
+                                                                                                      const Args&... args) {
     std::ostringstream oss;
     scat(oss, arg1, args...);
     return oss.str();
@@ -82,14 +80,11 @@ scat(const T & arg1, const Args&...  args){
 
 
 
-
 // for compatibility purpose with the deprecated
 // hadoken::format namespace
-namespace format{
-    using namespace hadoken;
+namespace format {
+using namespace hadoken;
 }
 
 
-} //hadoken
-
-
+} // namespace hadoken

@@ -24,33 +24,30 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #pragma once
 
 #include <thread>
 
-namespace hadoken{
+namespace hadoken {
 
 ///
 /// \brief Executor implementation for a simple thread
 ///
-class simple_thread_executor{
-public:
+class simple_thread_executor {
+  public:
     simple_thread_executor() {}
-    ~simple_thread_executor(){
+    ~simple_thread_executor() {}
 
+    void execute(std::function<void(void)> fun) {
+        std::thread exec(std::move(fun));
+        exec.detach();
     }
 
-    void execute(std::function<void (void)> fun){
-       std::thread exec(std::move(fun));
-       exec.detach();
-    }
 
-
-private:
+  private:
 };
 
 
-}
-
+} // namespace hadoken

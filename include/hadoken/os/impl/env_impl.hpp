@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_ENV_IMPL_HPP
 #define HADOKEN_ENV_IMPL_HPP
 
@@ -34,19 +34,19 @@
 #include <cstdlib>
 
 
-namespace hadoken{
+namespace hadoken {
 
 
 
-optional<std::string> get_env(const std::string &varname){
+optional<std::string> get_env(const std::string& varname) {
     char* ptr_env = ::getenv(varname.c_str());
-    if(ptr_env){
+    if (ptr_env) {
         return std::string(ptr_env);
     }
     return optional<std::string>();
 }
 
-} //hadoken
+} // namespace hadoken
 
 
 

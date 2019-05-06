@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef PARALLEL_ALGORITHM_GENERICS_BITS_HPP
 #define PARALLEL_ALGORITHM_GENERICS_BITS_HPP
 
@@ -36,65 +36,60 @@
 #include "parallel_generic_utils.hpp"
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 
 /// for_each algorithm
-template<typename ExecPolicy, typename Iterator, typename Function>
-inline void for_each(ExecPolicy && policy, Iterator begin_it, Iterator end_it, Function fun){
-    if(detail::is_parallel_policy(policy)){
-        for_range(std::forward<ExecPolicy>(policy), begin_it, end_it, [&fun](Iterator sub_begin, Iterator sub_end){
-            std::for_each(sub_begin, sub_end, fun);
-        });
+template <typename ExecPolicy, typename Iterator, typename Function>
+inline void for_each(ExecPolicy&& policy, Iterator begin_it, Iterator end_it, Function fun) {
+    if (detail::is_parallel_policy(policy)) {
+        for_range(std::forward<ExecPolicy>(policy), begin_it, end_it,
+                  [&fun](Iterator sub_begin, Iterator sub_end) { std::for_each(sub_begin, sub_end, fun); });
         return;
     }
 
-   std::for_each(begin_it, end_it, fun);
+    std::for_each(begin_it, end_it, fun);
 }
 
 
 // reimplement fill using for_each
 template <typename ExecutionPolicy, class ForwardIterator, class T>
-void fill(ExecutionPolicy && policy, ForwardIterator first, ForwardIterator last, const T& val){
+void fill(ExecutionPolicy&& policy, ForwardIterator first, ForwardIterator last, const T& val) {
     using value_type = typename std::iterator_traits<ForwardIterator>::value_type;
 
-    ::hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&val](value_type& elem){
-        elem = val;
-    });
+    ::hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&val](value_type& elem) { elem = val; });
 }
 
 
 //  reimplement fill_n using fill
 template <typename ExecutionPolicy, class ForwardIterator, class Size, class T>
-void fill_n(ExecutionPolicy && policy, ForwardIterator first, Size n, const T& val){
+void fill_n(ExecutionPolicy&& policy, ForwardIterator first, Size n, const T& val) {
     ::hadoken::parallel::fill(std::forward<ExecutionPolicy>(policy), first,
                               ::hadoken::parallel::detail::get_end_iterator(first, n), val);
 }
 
 
 // parallel generate algorithm
-template< class ExecutionPolicy, class ForwardIterator, class Generator >
-void generate( ExecutionPolicy&& policy, ForwardIterator first, ForwardIterator last, Generator g ){
+template <class ExecutionPolicy, class ForwardIterator, class Generator>
+void generate(ExecutionPolicy&& policy, ForwardIterator first, ForwardIterator last, Generator g) {
     using value_type = typename std::iterator_traits<ForwardIterator>::value_type;
 
-    ::hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&g](value_type& elem){
-        elem = g();
-    });
+    ::hadoken::parallel::for_each(std::forward<ExecutionPolicy>(policy), first, last, [&g](value_type& elem) { elem = g(); });
 }
 
 // parallel generate_n algorithm
-template< class ExecutionPolicy, class OutputIt, class Size, class Generator >
-OutputIt generate_n( ExecutionPolicy&& policy, OutputIt first, Size count, Generator g ){
+template <class ExecutionPolicy, class OutputIt, class Size, class Generator>
+OutputIt generate_n(ExecutionPolicy&& policy, OutputIt first, Size count, Generator g) {
     ::hadoken::parallel::generate(std::forward<ExecutionPolicy>(policy), first,
                                   ::hadoken::parallel::detail::get_end_iterator(first, count), std::forward<Generator>(g));
 }
 
 
-} //parallel
+} // namespace parallel
 
-} // hadoken
+} // namespace hadoken
 
 #endif // PARALLEL_ALGORITHM_GENERICS_HPP

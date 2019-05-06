@@ -24,21 +24,21 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef _HADOKEN_LATCH_HPP_
 #define _HADOKEN_LATCH_HPP_
 
+#include <assert.h>
 #include <atomic>
 #include <chrono>
-#include <thread>
-#include <assert.h>
 #include <condition_variable>
+#include <thread>
 
 
 namespace hadoken {
 
-namespace thread{
+namespace thread {
 
 ///
 /// \brief latch class
@@ -46,21 +46,18 @@ namespace thread{
 /// latch ( C++17 implementation )
 ///
 /// ( extract from http://en.cppreference.com/w/cpp/experimental/latch )
-/// The latch class is a downward counter of type ptrdiff_t which can be used to synchronize threads. The value of the counter is initialized on creation.
-/// Threads may block on the latch until the counter is decremented to zero.
-/// There is no possibility to increase or reset the counter, which makes the latch a single-use barrier.
+/// The latch class is a downward counter of type ptrdiff_t which can be used to synchronize threads. The value of the counter
+/// is initialized on creation. Threads may block on the latch until the counter is decremented to zero. There is no possibility
+/// to increase or reset the counter, which makes the latch a single-use barrier.
 ///
 ///
-class latch{
-public:
+class latch {
+  public:
     ///
     /// \brief construct a new latch
     /// \param value : the initial value of the counter, must be non negative
     ///
-    inline latch(std::ptrdiff_t value) :
-        _counter((value !=0)?(value):(unlocked)),
-        _cond(),
-        _latch_lock(){
+    inline latch(std::ptrdiff_t value) : _counter((value != 0) ? (value) : (unlocked)), _cond(), _latch_lock() {
         assert(value >= 0);
     }
 
@@ -72,7 +69,7 @@ public:
     ///
     /// \param n : value to decremement
     ///
-    inline void count_down(std::ptrdiff_t n = 1){
+    inline void count_down(std::ptrdiff_t n = 1) {
         const std::ptrdiff_t previous_val = _counter.fetch_sub(n);
         __check_and_notify(previous_val - n);
     }
@@ -81,7 +78,7 @@ public:
     /// count down and wait until the counter is 0
     /// \param n : value to decremement
     ///
-    inline void count_down_and_wait(std::ptrdiff_t n = 1){
+    inline void count_down_and_wait(std::ptrdiff_t n = 1) {
         count_down(n);
         wait();
     }
@@ -89,26 +86,24 @@ public:
     ///
     /// \brief return  true if the counter reached 0
     ///
-    inline bool is_ready() const{
-        return (_counter.load() <= unlocked);
-    }
+    inline bool is_ready() const { return (_counter.load() <= unlocked); }
 
     ///
     /// \brief wait untile the counter reach 0
     ///
-    inline void wait(){
+    inline void wait() {
         // lightweight optimistic two phases unlock
         // avoid race condition on condition variable/mutex destruction
         // if the lifetime of the latch is the same that one of the waiting thread
-        while(_counter.load() > unlocked){
-            if(_counter.load() > 0){
+        while (_counter.load() > unlocked) {
+            if (_counter.load() > 0) {
                 std::unique_lock<std::mutex> _l(_latch_lock);
                 _cond.wait_for(_l, std::chrono::milliseconds(1));
-            }else{
+            } else {
 #ifndef HADOKEN_SPIN_NO_YIELD
                 std::this_thread::yield();
 #else
-                // dummy implementation for platforms without sched_yield() support 
+                // dummy implementation for platforms without sched_yield() support
                 std::this_thread::sleep_for(std::chrono::microseconds(1));
 #endif
             }
@@ -116,11 +111,11 @@ public:
     }
 
 
-private:
+  private:
     static constexpr std::ptrdiff_t unlocked = -2048;
 
-    inline void __check_and_notify(std::ptrdiff_t v){
-        if(v <= 0){
+    inline void __check_and_notify(std::ptrdiff_t v) {
+        if (v <= 0) {
             _cond.notify_all();
             _counter.store(unlocked);
         }
@@ -128,8 +123,8 @@ private:
 
 
 
-    latch(const latch &) = delete;
-    latch & operator=(const latch&) = delete;
+    latch(const latch&) = delete;
+    latch& operator=(const latch&) = delete;
 
     std::atomic<std::ptrdiff_t> _counter;
     std::condition_variable _cond;
@@ -137,9 +132,9 @@ private:
 };
 
 
-} // thread
+} // namespace thread
 
 
-} //hadoken
+} // namespace hadoken
 
 #endif // _HADOKEN_LATCH_HPP_

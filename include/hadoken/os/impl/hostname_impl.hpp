@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_HOSTNAME_IMPL_HPP
 #define HADOKEN_HOSTNAME_IMPL_HPP
 
@@ -33,23 +33,23 @@
 
 #include <system_error>
 
-#include <unistd.h>
 #include <cstring>
+#include <unistd.h>
 
-namespace hadoken{
+namespace hadoken {
 
 
-std::string get_hostname(){
+std::string get_hostname() {
     char hostname_str[256];
 
-    if( ::gethostname(hostname_str, 255) != 0){
+    if (::gethostname(hostname_str, 255) != 0) {
         throw std::system_error(std::error_code(errno, std::system_category()));
     }
     return std::string(hostname_str);
 }
 
 
-} //hadoken
+} // namespace hadoken
 
 
 

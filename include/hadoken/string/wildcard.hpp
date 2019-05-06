@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_WILDCARD_HPP
 #define HADOKEN_WILDCARD_HPP
 
@@ -33,56 +33,56 @@
 #include <string>
 #include <vector>
 
-#include <hadoken/string/string_view.hpp>
 #include <hadoken/containers/small_vector.hpp>
+#include <hadoken/string/string_view.hpp>
 
-namespace hadoken{
+namespace hadoken {
 
-namespace internal{
+namespace internal {
 
-template<typename Iterator>
-inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterator begin_str, Iterator end_str){
+template <typename Iterator>
+inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterator begin_str, Iterator end_str) {
     using progress_iterator = std::tuple<Iterator, Iterator>;
 
     hadoken::containers::small_vector<progress_iterator, 7> stack_parser;
 
     stack_parser.emplace_back(progress_iterator(begin_expr, begin_str));
 
-    while(stack_parser.size() > 0){
+    while (stack_parser.size() > 0) {
         progress_iterator top = stack_parser.back();
         stack_parser.pop_back();
 
         const auto it_expr = std::get<0>(top);
         const auto it_str = std::get<1>(top);
 
-        if(it_expr == end_expr && it_str == end_str){
+        if (it_expr == end_expr && it_str == end_str) {
             return true;
         }
 
-        if(it_expr >= end_expr || it_str >= end_str){
+        if (it_expr >= end_expr || it_str >= end_str) {
             continue;
         }
 
 
-        if(*it_expr == *it_str){
-            stack_parser.emplace_back(progress_iterator(it_expr+1, it_str +1));
+        if (*it_expr == *it_str) {
+            stack_parser.emplace_back(progress_iterator(it_expr + 1, it_str + 1));
             continue;
         }
 
-        if(*it_expr != '*'){
+        if (*it_expr != '*') {
             continue;
         }
 
-        stack_parser.emplace_back(progress_iterator(it_expr, it_str+1));
-        stack_parser.emplace_back(progress_iterator(it_expr+1, it_str+1));
-        stack_parser.emplace_back(progress_iterator(it_expr+1, it_str));
+        stack_parser.emplace_back(progress_iterator(it_expr, it_str + 1));
+        stack_parser.emplace_back(progress_iterator(it_expr + 1, it_str + 1));
+        stack_parser.emplace_back(progress_iterator(it_expr + 1, it_str));
     }
 
     return false;
 }
 
 
-}
+} // namespace internal
 
 ///
 /// match a string with a given wildcard expression
@@ -91,12 +91,12 @@ inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterato
 ///     "hello" does not matches "*ol", "*hellop" or "*p"
 ///
 ///
-inline bool match_wildcard(const std::string & expression, const std::string & str){
+inline bool match_wildcard(const std::string& expression, const std::string& str) {
     return internal::__match_wildcard_rec(expression.begin(), expression.end(), str.begin(), str.end());
 }
 
 
-} // hadoken
+} // namespace hadoken
 
 
 #endif // WILDCARD_HPP

@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef PARALLEL_GENERIC_UTILS_HPP
 #define PARALLEL_GENERIC_UTILS_HPP
 
@@ -34,27 +34,27 @@
 
 #include <hadoken/parallel/algorithm.hpp>
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 
-namespace detail{
+namespace detail {
 
 
-template<typename Iterator, typename Size>
-inline Iterator get_end_iterator(Iterator first, Size n){
+template <typename Iterator, typename Size>
+inline Iterator get_end_iterator(Iterator first, Size n) {
     std::advance(first, n);
     return first;
 }
 
 // determine if a policy is parallel or sequential
-template<typename ExecPolicy>
-inline bool is_parallel_policy(const ExecPolicy & policy){
-    (void ) policy;
-    if(std::is_same<ExecPolicy, parallel_execution_policy>::value
-            || std::is_same<ExecPolicy, parallel_vector_execution_policy>::value ){
+template <typename ExecPolicy>
+inline bool is_parallel_policy(const ExecPolicy& policy) {
+    (void)policy;
+    if (std::is_same<ExecPolicy, parallel_execution_policy>::value ||
+        std::is_same<ExecPolicy, parallel_vector_execution_policy>::value) {
         return true;
     }
     return false;
@@ -63,10 +63,10 @@ inline bool is_parallel_policy(const ExecPolicy & policy){
 
 
 
-} //detail
+} // namespace detail
 
-} //parallel
+} // namespace parallel
 
-}// hadoken
+} // namespace hadoken
 
 #endif // PARALLEL_GENERIC_UTILS_HPP

@@ -24,13 +24,13 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef _SMALLVECTOR_HPP_
 #define _SMALLVECTOR_HPP_
 
-#include <memory>
 #include <cstddef>
+#include <memory>
 
 
 #include <boost/type_traits.hpp>
@@ -42,23 +42,23 @@ namespace hadoken {
 
 namespace containers {
 
-template<typename T, std::size_t N>
-class small_vector{
-public:
-    typedef T                                               value_type;
-    typedef T*                                              pointer;
-    typedef const pointer                                   const_pointer;
-    typedef value_type &                                    reference;
-    typedef const value_type &                              const_reference;
-    typedef iterator_ptr<value_type>                        iterator;
-    typedef const iterator                                  const_iterator;
-    typedef std::size_t                                     size_type;
-    typedef std::ptrdiff_t                                  difference_type;
+template <typename T, std::size_t N>
+class small_vector {
+  public:
+    typedef T value_type;
+    typedef T* pointer;
+    typedef const pointer const_pointer;
+    typedef value_type& reference;
+    typedef const value_type& const_reference;
+    typedef iterator_ptr<value_type> iterator;
+    typedef const iterator const_iterator;
+    typedef std::size_t size_type;
+    typedef std::ptrdiff_t difference_type;
 
-// not implemented now
-//    typedef std::reverse_iterator<const_iterator>  const_reverse_iterator;
-//    typedef std::reverse_iterator<iterator>		 reverse_iterator;
-//    typedef _Alloc                        		 allocator_type;
+    // not implemented now
+    //    typedef std::reverse_iterator<const_iterator>  const_reverse_iterator;
+    //    typedef std::reverse_iterator<iterator>		 reverse_iterator;
+    //    typedef _Alloc                        		 allocator_type;
 
     ///
     /// \brief default constructor, empty small_vector
@@ -71,29 +71,21 @@ public:
     ///
     /// \brief return iterator to first value of small_vector
     ///
-    iterator begin() noexcept{
-        return iterator(_begin);
-    }
+    iterator begin() noexcept { return iterator(_begin); }
 
     ///
     /// \brief return const_iterator to first value of small_vector
     ///
-    const_iterator begin() const noexcept{
-        return const_iterator(_begin);
-    }
+    const_iterator begin() const noexcept { return const_iterator(_begin); }
     ///
     /// \brief return iterator to first value of small_vector
     ///
-    iterator end() noexcept{
-        return iterator(_end);
-    }
+    iterator end() noexcept { return iterator(_end); }
 
     ///
     /// \brief return const_iterator after the last element of small_vector
     ///
-    const_iterator end() const noexcept{
-        return const_iterator(_end);
-    }
+    const_iterator end() const noexcept { return const_iterator(_end); }
 
 
     ///
@@ -123,7 +115,7 @@ public:
     /// \brief emplace_back
     /// \param v
     ///
-    void emplace_back(value_type && elem);
+    void emplace_back(value_type&& elem);
 
     ///
     /// \brief pop_back
@@ -143,7 +135,7 @@ public:
     const_reference front() const noexcept;
 
 
-    reference & back();
+    reference& back();
 
     ///
     /// \brief pointer to first element
@@ -178,18 +170,18 @@ public:
     /// \param position of the element to access
     /// \return reference to element pos
     ///
-    reference operator[] (std::size_t pos) noexcept;
+    reference operator[](std::size_t pos) noexcept;
 
     ///
     /// \brief access operator
     /// \param position of the element to access
     /// \return const reference to element pos
     ///
-    const_reference operator[] (std::size_t pos) const noexcept;
+    const_reference operator[](std::size_t pos) const noexcept;
 
 
 
-private:
+  private:
     pointer _begin, _end, _end_memory;
 
     T _internal_array[N];
@@ -199,11 +191,9 @@ private:
 
     bool _is_static() const noexcept;
 
-    template<typename T2, std::size_t N2>
-    friend void swap(small_vector<T2,N2> & first, small_vector<T2,N2> & second);
+    template <typename T2, std::size_t N2>
+    friend void swap(small_vector<T2, N2>& first, small_vector<T2, N2>& second);
 };
-
-
 
 
 
@@ -211,16 +201,16 @@ private:
 ///
 /// ADL for swap
 ///
-template<typename T, std::size_t N>
-void swap(small_vector<T,N> & first, small_vector<T,N> & second);
+template <typename T, std::size_t N>
+void swap(small_vector<T, N>& first, small_vector<T, N>& second);
 
 
 
-} // containers
+} // namespace containers
 
 
 
-} //hadoken
+} // namespace hadoken
 
 #include "bits/small_vector_bits.hpp"
 

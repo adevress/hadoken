@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_URI_HPP
 #define HADOKEN_URI_HPP
 
@@ -38,9 +38,9 @@
 
 namespace hadoken {
 
-class uri{
-public:
-    enum class state{
+class uri {
+  public:
+    enum class state {
         valid,
         invalid,
 
@@ -61,8 +61,8 @@ public:
     typedef std::tuple<std::string, std::string> query_pair;
 
     inline explicit uri(std::string uri_string);
-    inline explicit uri(const uri &) = default;
-    inline explicit uri(uri &&) = default;
+    inline explicit uri(const uri&) = default;
+    inline explicit uri(uri&&) = default;
     inline ~uri();
 
     inline bool is_valid() const;
@@ -83,14 +83,13 @@ public:
 
     inline std::string get_fragment() const;
 
-private:
+  private:
     std::string _str_uri;
     state _state;
     uri_view _scheme, _userinfo, _host, _port, _path, _query, _fragment;
 
 
-    inline int parse_uri(iterator_type begin, iterator_type last,
-                          iterator_type end);
+    inline int parse_uri(iterator_type begin, iterator_type last, iterator_type end);
 };
 
 
@@ -99,7 +98,7 @@ std::string percent_encode(hadoken::string_view decoded_origin);
 
 std::string percent_decode(hadoken::string_view encoded_string);
 
-} //hadoken
+} // namespace hadoken
 
 
 #include "impl/uri_impl.hpp"

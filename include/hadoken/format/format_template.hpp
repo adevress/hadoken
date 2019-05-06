@@ -24,17 +24,17 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #pragma once
 
 
+#include <algorithm>
 #include <ostream>
 #include <sstream>
 #include <string>
 #include <type_traits>
 #include <vector>
-#include <algorithm>
 
 #include <hadoken/string/string_view.hpp>
 
@@ -55,36 +55,34 @@ using format_arg = std::tuple<hadoken::string_view, hadoken::string_view>;
 /// \param variables
 /// \return
 ///
-inline std::string format_template(hadoken::string_view template_string, const std::vector<format_arg> & args){
+inline std::string format_template(hadoken::string_view template_string, const std::vector<format_arg>& args) {
     std::string result(to_string(template_string));
 
-    for(const auto & var : args){
+    for (const auto& var : args) {
         std::string tmpl_key;
         tmpl_key.push_back('{');
         tmpl_key.append(to_string(std::get<0>(var)));
         tmpl_key.push_back('}');
 
         auto it_begin = result.begin();
-        while(1){
+        while (1) {
             it_begin = std::search(it_begin, result.end(), tmpl_key.begin(), tmpl_key.end());
 
-            if(it_begin == result.end()){
+            if (it_begin == result.end()) {
                 break;
             }
 
             const std::size_t offset = std::distance(result.begin(), it_begin);
 
-            const auto  & replacer = std::get<1>(var);
-            result = result.replace(it_begin, it_begin + std::distance(tmpl_key.begin(), tmpl_key.end()), replacer.begin(), replacer.end());
+            const auto& replacer = std::get<1>(var);
+            result = result.replace(it_begin, it_begin + std::distance(tmpl_key.begin(), tmpl_key.end()), replacer.begin(),
+                                    replacer.end());
 
             it_begin = result.begin() + offset + std::distance(replacer.begin(), replacer.end());
         }
-
     }
     return result;
 }
 
 
-} //hadoken
-
-
+} // namespace hadoken

@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 
 #define BOOST_TEST_MODULE hostnameTests
 #define BOOST_TEST_MAIN
@@ -34,32 +34,29 @@
 #include <map>
 #include <stdexcept>
 
-#include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/test/unit_test.hpp>
 
 
-#include <hadoken/os/hostname.hpp>
 #include <hadoken/os/env.hpp>
+#include <hadoken/os/hostname.hpp>
 
 #include "test_helpers.hpp"
 
 
 
-BOOST_AUTO_TEST_CASE( hostname_check_simple )
-{
+BOOST_AUTO_TEST_CASE(hostname_check_simple) {
 
 
     const std::string my_hostname = hadoken::get_hostname();
 
     BOOST_CHECK(my_hostname.size() > 0);
-
 }
 
 
 
 
-BOOST_AUTO_TEST_CASE( getenv_check_simple )
-{
+BOOST_AUTO_TEST_CASE(getenv_check_simple) {
 
 
     hadoken::optional<std::string> my_user = hadoken::get_env("USER");
@@ -67,7 +64,5 @@ BOOST_AUTO_TEST_CASE( getenv_check_simple )
     BOOST_CHECK(my_user.get().size() > 0);
 
     hadoken::optional<std::string> unexisting = hadoken::get_env("BLOUBLOUBLOUBLOUBLOU_TOTALLY_EXISTING");
-    BOOST_CHECK(! unexisting);
+    BOOST_CHECK(!unexisting);
 }
-
-

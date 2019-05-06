@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #pragma once
 
 #include <cstdint>
@@ -35,57 +35,63 @@
 #include <string>
 #include <type_traits>
 
-namespace hadoken{
+namespace hadoken {
 
 ///
 /// string to any integral number conversion
 ///
-template<typename Integral>
-inline  typename std::enable_if<std::is_same<Integral, int>::value, Integral>::type to_integral(const std::string & value, int base = 10){
+template <typename Integral>
+inline typename std::enable_if<std::is_same<Integral, int>::value, Integral>::type to_integral(const std::string& value,
+                                                                                               int base = 10) {
     return std::stoi(value, nullptr, base);
 }
 
-template<typename Integral>
-inline typename std::enable_if<std::is_same<Integral, unsigned int>::value, Integral>::type to_integral(const std::string & value, int base = 10){
-    const auto v =  std::stoul(value, nullptr, base);
-    if ( v > std::numeric_limits<unsigned int>::max()){
+template <typename Integral>
+inline typename std::enable_if<std::is_same<Integral, unsigned int>::value, Integral>::type
+to_integral(const std::string& value, int base = 10) {
+    const auto v = std::stoul(value, nullptr, base);
+    if (v > std::numeric_limits<unsigned int>::max()) {
         throw std::out_of_range("overflow when converted to unsigned int");
     }
     return v;
 }
 
 
-template<typename Integral>
-inline typename std::enable_if<std::is_same<Integral, long>::value, Integral>::type to_integral(const std::string & value, int base = 10){
+template <typename Integral>
+inline typename std::enable_if<std::is_same<Integral, long>::value, Integral>::type to_integral(const std::string& value,
+                                                                                                int base = 10) {
     return std::stol(value, nullptr, base);
 }
 
 
-template<typename Integral>
-inline typename std::enable_if<std::is_same<Integral, unsigned long>::value, Integral>::type to_integral(const std::string & value, int base = 10){
+template <typename Integral>
+inline typename std::enable_if<std::is_same<Integral, unsigned long>::value, Integral>::type
+to_integral(const std::string& value, int base = 10) {
     return std::stoul(value, nullptr, base);
 }
 
-template<typename Integral>
-inline typename std::enable_if<std::is_same<Integral, long long>::value, Integral>::type to_integral(const std::string & value, int base = 10){
+template <typename Integral>
+inline typename std::enable_if<std::is_same<Integral, long long>::value, Integral>::type to_integral(const std::string& value,
+                                                                                                     int base = 10) {
     return std::stoll(value, nullptr, base);
 }
 
-template<typename Integral>
-inline typename std::enable_if<std::is_same<Integral, unsigned long long>::value, Integral>::type to_integral(const std::string & value, int base = 10){
+template <typename Integral>
+inline typename std::enable_if<std::is_same<Integral, unsigned long long>::value, Integral>::type
+to_integral(const std::string& value, int base = 10) {
     return std::stoull(value, nullptr, base);
 }
 
 
-template<typename Floating>
-inline typename std::enable_if<std::is_same<Floating, float>::value, Floating>::type to_floating(const std::string & value){
+template <typename Floating>
+inline typename std::enable_if<std::is_same<Floating, float>::value, Floating>::type to_floating(const std::string& value) {
     return std::stof(value, nullptr);
 }
 
 
-template<typename Floating>
-inline typename std::enable_if<std::is_same<Floating, double>::value, Floating>::type to_floating(const std::string & value){
+template <typename Floating>
+inline typename std::enable_if<std::is_same<Floating, double>::value, Floating>::type to_floating(const std::string& value) {
     return std::stod(value, nullptr);
 }
 
-} // hadoken
+} // namespace hadoken

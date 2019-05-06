@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef CONCURRENT_QUEUE_HPP
 #define CONCURRENT_QUEUE_HPP
 
@@ -35,25 +35,24 @@
 #include <memory>
 
 
-#include <hadoken/utility/optional.hpp>
 #include <hadoken/threading/std_thread_model.hpp>
+#include <hadoken/utility/optional.hpp>
 
 namespace hadoken {
 
 ///
 /// simple thread-safe queue around STL container
 ///
-template<typename T, typename ThreadModel = std_thread_model, typename Allocator = std::allocator<T>>
-class concurrent_queue_stl_mut
-{
-public:
-    concurrent_queue_stl_mut(const Allocator & allocator = Allocator());
+template <typename T, typename ThreadModel = std_thread_model, typename Allocator = std::allocator<T>>
+class concurrent_queue_stl_mut {
+  public:
+    concurrent_queue_stl_mut(const Allocator& allocator = Allocator());
 
     void push(T element);
 
 
-    template<typename Duration >
-    optional<T> try_pop(const Duration & d);
+    template <typename Duration>
+    optional<T> try_pop(const Duration& d);
 
     optional<T> try_pop();
 
@@ -62,16 +61,15 @@ public:
 
     std::size_t size() const;
 
-private:
+  private:
     mutable typename ThreadModel::mutex _qmut;
     typename ThreadModel::condition_variable _qcond;
     std::deque<T, Allocator> _dek;
-
 };
 
 
 
-template<typename T>
+template <typename T>
 using concurrent_queue = concurrent_queue_stl_mut<T>;
 
 } // namespace hadoken

@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 
 #ifndef _PTR_ITERATOR_HPP_
 #define _PTR_ITERATOR_HPP_
@@ -33,59 +33,48 @@
 #include <iterator>
 
 
-namespace hadoken{
+namespace hadoken {
 
-namespace containers{
-
-
-template<typename T>
-class iterator_ptr : public std::iterator<std::input_iterator_tag, T>
-{
-  T* p;
-public:
-  explicit iterator_ptr(T* x) :p(x) {}
-
-  iterator_ptr(const iterator_ptr& other) : p(other.p) {}
-
-  iterator_ptr& operator++() {
-      ++p;
-      return *this;
-  }
+namespace containers {
 
 
-  bool operator==(const iterator_ptr& other) const noexcept{
-      return p==other.p;
-  }
+template <typename T>
+class iterator_ptr : public std::iterator<std::input_iterator_tag, T> {
+    T* p;
 
-  bool operator!=(const iterator_ptr& other) const noexcept{
-      return p!=other.p;
-  }
+  public:
+    explicit iterator_ptr(T* x) : p(x) {}
 
-  T& operator*() noexcept{
-      return *p;
-  }
+    iterator_ptr(const iterator_ptr& other) : p(other.p) {}
 
-  T* operator->() noexcept{
-      return p;
-  }
+    iterator_ptr& operator++() {
+        ++p;
+        return *this;
+    }
 
-  bool operator<(const iterator_ptr& other) noexcept{
-      return ( p < other.p);
-  }
 
-  iterator_ptr & operator =(const iterator_ptr & other){
+    bool operator==(const iterator_ptr& other) const noexcept { return p == other.p; }
+
+    bool operator!=(const iterator_ptr& other) const noexcept { return p != other.p; }
+
+    T& operator*() noexcept { return *p; }
+
+    T* operator->() noexcept { return p; }
+
+    bool operator<(const iterator_ptr& other) noexcept { return (p < other.p); }
+
+    iterator_ptr& operator=(const iterator_ptr& other) {
         p = other.p;
         return *this;
-  }
-
+    }
 };
 
 
-} //containers
+} // namespace containers
 
 
 
-} //hadoken
+} // namespace hadoken
 
 
 #endif // PTR_ITERATOR_HPP

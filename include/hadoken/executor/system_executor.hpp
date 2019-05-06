@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #pragma once
 
 
@@ -35,42 +35,37 @@
 #include <hadoken/utility/singleton.hpp>
 
 
-namespace hadoken{
+namespace hadoken {
 
 
 ///
 /// \brief Executor implementation for a simple thread
 ///
-class system_executor{
-public:
-
-    template<typename T>
+class system_executor {
+  public:
+    template <typename T>
     using future = std::future<T>;
 
-    template<typename T>
+    template <typename T>
     using promise = std::promise<T>;
 
-    inline system_executor() {
-        singleton<thread_pool_executor>::init();
-    }
+    inline system_executor() { singleton<thread_pool_executor>::init(); }
 
-    inline ~system_executor(){
+    inline ~system_executor() {}
 
-    }
-
-    inline void execute(std::function<void (void)> task){
+    inline void execute(std::function<void(void)> task) {
         singleton<thread_pool_executor>::instance().execute(std::move(task));
     }
 
-    template<typename Function>
-    inline future<decltype(std::declval<Function>()())> twoway_execute(Function func){
+    template <typename Function>
+    inline future<decltype(std::declval<Function>()())> twoway_execute(Function func) {
         return singleton<thread_pool_executor>::instance().twoway_execute(func);
     }
 
 
-private:
+  private:
     singleton<thread_pool_executor> _s;
 };
 
 
-} // hadoken
+} // namespace hadoken

@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_VARIANT_HPP
 #define HADOKEN_VARIANT_HPP
 
@@ -36,13 +36,13 @@
 
 namespace hadoken {
 
-template<typename... T>
+template <typename... T>
 using variant = boost::variant<T...>;
 
 
-template<typename Variant, typename T>
-Variant to_variant(optional<T> optional){
-    if(optional){
+template <typename Variant, typename T>
+Variant to_variant(optional<T> optional) {
+    if (optional) {
         return Variant(std::move(optional.get()));
     }
     return Variant();

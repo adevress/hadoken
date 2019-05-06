@@ -24,14 +24,14 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_STRING_VIEW_HPP
 #define HADOKEN_STRING_VIEW_HPP
 
-#include <string>
 #include <cstdint>
 #include <ostream>
+#include <string>
 #include <utility>
 
 namespace hadoken {
@@ -45,10 +45,9 @@ namespace hadoken {
 ///
 /// We support for now only single byte char
 ///
-class string_view
-{
-public:
-    //traits_type 	Traits
+class string_view {
+  public:
+    // traits_type 	Traits
     typedef char value_type;
     typedef value_type* pointer;
     typedef const value_type* const_pointer;
@@ -56,7 +55,7 @@ public:
     typedef const value_type& const_reference;
 
 
-    typedef  char* iterator;
+    typedef char* iterator;
     typedef char const* const_iterator;
 
     typedef std::size_t size_type;
@@ -66,7 +65,7 @@ public:
     string_view() noexcept;
 
     /// constructor from std::string
-    string_view(const std::string & str) noexcept;
+    string_view(const std::string& str) noexcept;
 
     /// default copy constructor
     string_view(const string_view& other) noexcept = default;
@@ -94,43 +93,43 @@ public:
     size_type max_size() const noexcept;
 
     // operations
-    int compare(const string_view & other) const noexcept;
+    int compare(const string_view& other) const noexcept;
 
     // utility
-    void swap(string_view & other) noexcept;
+    void swap(string_view& other) noexcept;
 
     const_pointer data() const noexcept;
 
     // operators
-    string_view & operator =(const string_view & other) noexcept = default;
+    string_view& operator=(const string_view& other) noexcept = default;
 
-    char operator [](std::size_t pos) const;
+    char operator[](std::size_t pos) const;
 
-private:
+  private:
     char const* _pstr;
     size_type _len;
 
-    friend std::ostream & operator <<(std::ostream & o, const string_view & sv);
+    friend std::ostream& operator<<(std::ostream& o, const string_view& sv);
 };
 
 
-bool operator==(const string_view & first, const string_view & second);
+bool operator==(const string_view& first, const string_view& second);
 
 
-std::ostream & operator <<(std::ostream & o, const string_view & sv);
+std::ostream& operator<<(std::ostream& o, const string_view& sv);
 
 ///
 /// \brief to_string
 ///
 ///
-std::string to_string(const string_view & sv);
+std::string to_string(const string_view& sv);
 
 ///
 /// Construct a string view from an Iterator
 ///
-template<typename StIterator>
-string_view make_string_view(StIterator first, StIterator last){
-    static_assert(std::is_same<decltype(char(*first)), char>::value , "(first,last) are not a string interator");
+template <typename StIterator>
+string_view make_string_view(StIterator first, StIterator last) {
+    static_assert(std::is_same<decltype(char(*first)), char>::value, "(first,last) are not a string interator");
 
     const std::size_t len = std::distance(first, last);
     return string_view(&(*first), len);

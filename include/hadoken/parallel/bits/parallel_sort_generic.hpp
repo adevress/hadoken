@@ -24,50 +24,46 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef PARALLEL_SORT_GENERIC_HPP
 #define PARALLEL_SORT_GENERIC_HPP
 
-#include <atomic>
 #include <algorithm>
+#include <atomic>
 #include <hadoken/parallel/algorithm.hpp>
 
 
 #include "parallel_generic_utils.hpp"
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 
-namespace detail{
-
-
-
-} // detail
+namespace detail {} // namespace detail
 
 // sort algorithm
-template< class ExecutionPolicy, class RandomIt >
-void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last ){
+template <class ExecutionPolicy, class RandomIt>
+void sort(ExecutionPolicy&& policy, RandomIt first, RandomIt last) {
     // temporary dummy implementation
-    (void) policy;
+    (void)policy;
     std::sort(first, last);
 }
 
 // sort algorithm with comparator
-template< class ExecutionPolicy, class RandomIt, class Compare >
-void sort( ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp ){
+template <class ExecutionPolicy, class RandomIt, class Compare>
+void sort(ExecutionPolicy&& policy, RandomIt first, RandomIt last, Compare comp) {
     // temporary dummy implementation
-    (void) policy;
+    (void)policy;
     std::sort(first, last, comp);
 }
 
 
-} //parallel
+} // namespace parallel
 
-} // hadoken
+} // namespace hadoken
 
 #endif // PARALLEL_ALGORITHM_GENERICS_HPP

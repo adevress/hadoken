@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef CONCURRENT_QUEUE_BITS_HPP
 #define CONCURRENT_QUEUE_BITS_HPP
 
@@ -34,67 +34,60 @@
 namespace hadoken {
 
 
-template<typename T, typename ThreadModel, typename Allocator>
-inline concurrent_queue_stl_mut<T, ThreadModel, Allocator>::concurrent_queue_stl_mut(const Allocator & allocator) :
-    _qmut(),
-    _qcond(),
-    _dek(allocator)
-{
+template <typename T, typename ThreadModel, typename Allocator>
+inline concurrent_queue_stl_mut<T, ThreadModel, Allocator>::concurrent_queue_stl_mut(const Allocator& allocator)
+    : _qmut(), _qcond(), _dek(allocator) {}
 
-}
-
-template<typename T, typename ThreadModel, typename Allocator>
-inline void concurrent_queue_stl_mut<T, ThreadModel, Allocator>::push(T element){
+template <typename T, typename ThreadModel, typename Allocator>
+inline void concurrent_queue_stl_mut<T, ThreadModel, Allocator>::push(T element) {
     {
         std::lock_guard<std::mutex> l(_qmut);
 
         _dek.push_back(std::move(element));
         _qcond.notify_one();
     }
-
 }
 
 
-template<typename T, typename ThreadModel, typename Allocator>
-template<typename Duration>
-inline optional<T> concurrent_queue_stl_mut<T, ThreadModel, Allocator>::try_pop(const Duration & d){
+template <typename T, typename ThreadModel, typename Allocator>
+template <typename Duration>
+inline optional<T> concurrent_queue_stl_mut<T, ThreadModel, Allocator>::try_pop(const Duration& d) {
     optional<T> res;
     bool timeout = false;
 
     {
         std::unique_lock<decltype(_qmut)> l(_qmut);
 
-        while(!timeout){
-            if( ! _dek.empty()){
+        while (!timeout) {
+            if (!_dek.empty()) {
                 res = std::move(_dek.front());
                 _dek.pop_front();
                 return res;
             }
 
 
-            if( _qcond.wait_for(l, d) == std::cv_status::timeout){
+            if (_qcond.wait_for(l, d) == std::cv_status::timeout) {
                 timeout = true;
             }
         }
     }
     return res;
-
 }
 
-template<typename T, typename ThreadModel, typename Allocator>
-inline optional<T> concurrent_queue_stl_mut<T, ThreadModel, Allocator>::try_pop(){
+template <typename T, typename ThreadModel, typename Allocator>
+inline optional<T> concurrent_queue_stl_mut<T, ThreadModel, Allocator>::try_pop() {
     return try_pop(std::chrono::milliseconds(0));
 }
 
 
-template<typename T, typename ThreadModel, typename Allocator>
-bool concurrent_queue_stl_mut<T, ThreadModel, Allocator>::empty() const{
+template <typename T, typename ThreadModel, typename Allocator>
+bool concurrent_queue_stl_mut<T, ThreadModel, Allocator>::empty() const {
     std::lock_guard<decltype(_qmut)> l(_qmut);
     return _dek.empty();
 }
 
-template<typename T, typename ThreadModel, typename Allocator>
-std::size_t concurrent_queue_stl_mut<T, ThreadModel, Allocator>::size() const{
+template <typename T, typename ThreadModel, typename Allocator>
+std::size_t concurrent_queue_stl_mut<T, ThreadModel, Allocator>::size() const {
     std::lock_guard<decltype(_qmut)> l(_qmut);
     return _dek.size();
 }

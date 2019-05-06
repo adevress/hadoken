@@ -24,17 +24,17 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_STATE_MACHINE_HPP
 #define HADOKEN_STATE_MACHINE_HPP
 
-#include <vector>
 #include <hadoken/utility/optional.hpp>
+#include <vector>
 
 #include "impl/state_machine_transition_impl.hpp"
 
-namespace hadoken{
+namespace hadoken {
 
 //
 // simple, stupid, easy Finite State Machine implementation C++11
@@ -45,9 +45,9 @@ namespace hadoken{
 // - O(1) complexity for number of states
 // - O(n) complexity for transition / states
 //
-template<typename State>
-class state_machine{
-public:
+template <typename State>
+class state_machine {
+  public:
     state_machine(State init_state);
 
     /// trigger an event
@@ -74,38 +74,38 @@ public:
     ///
     /// If the conditional function return true, the state machine
     ///  switch to state to
-    void add_transition(State from, State to, std::function<bool ()> condition);
+    void add_transition(State from, State to, std::function<bool()> condition);
 
-    void on_entry(State st, std::function<void (State before, State after)> event);
+    void on_entry(State st, std::function<void(State before, State after)> event);
 
-    void on_exit(State st, std::function<void (State before, State after)> event);
+    void on_exit(State st, std::function<void(State before, State after)> event);
 
     void clear();
 
-private:
+  private:
     std::vector<impl::state_handler<State>> _handlers;
     State _current_state;
 
-    void _resize(const State & st);
+    void _resize(const State& st);
 };
 
 
-template<typename Object>
-class edge_trigger{
-public:
-    edge_trigger(Object && o);
+template <typename Object>
+class edge_trigger {
+  public:
+    edge_trigger(Object&& o);
 
-    void trigger(Object && o);
+    void trigger(Object&& o);
 
     hadoken::optional<Object> consume();
 
-private:
+  private:
     Object _o;
     bool _is_new;
 };
 
 
-} // hadoken
+} // namespace hadoken
 
 
 #include "impl/state_machine_impl.hpp"

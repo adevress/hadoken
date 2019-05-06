@@ -24,30 +24,28 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_STD_THREAD_MODEL_HPP
 #define HADOKEN_STD_THREAD_MODEL_HPP
 
-#include <mutex>
 #include <condition_variable>
 #include <future>
+#include <mutex>
 
 namespace hadoken {
 
 
-class std_thread_model{
-public:
+class std_thread_model {
+  public:
     using mutex = std::mutex;
     using condition_variable = std::condition_variable;
 
-    template<typename T>
+    template <typename T>
     using future = std::future<T>;
-
-
 };
 
 
-} //hadoken
+} // namespace hadoken
 
 #endif // STD_THREAD_MODEL_HPP

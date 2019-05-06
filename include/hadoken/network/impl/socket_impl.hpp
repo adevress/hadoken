@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_SOCKET_IMPL_HPP
 #define HADOKEN_SOCKET_IMPL_HPP
 
@@ -33,27 +33,27 @@
 
 #include "../socket.hpp"
 
-namespace hadoken{
+namespace hadoken {
 
 
-template<typename Protocol>
-basic_socket_acceptor<Protocol>::~basic_socket_acceptor(){
-    if( native_handle() >= 0){
+template <typename Protocol>
+basic_socket_acceptor<Protocol>::~basic_socket_acceptor() {
+    if (native_handle() >= 0) {
         close(native_handle());
     }
 }
 
 
-template<typename Protocol>
-basic_socket_acceptor<Protocol>::native_handle_type basic_socket_acceptor<Protocol>::native_handle(){
+template <typename Protocol>
+basic_socket_acceptor<Protocol>::native_handle_type basic_socket_acceptor<Protocol>::native_handle() {
     return _fd;
 }
 
-template<typename Protocol>
-void basic_socket_acceptor<Protocol>::close(){
+template <typename Protocol>
+void basic_socket_acceptor<Protocol>::close() {
     close(native_handle());
 }
 
-} // hadoken
+} // namespace hadoken
 
 #endif // HADOKEN_SOCKET_IMPL_HPP

@@ -24,67 +24,65 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef PARALLEL_NONE_ANY_ALL_GENERIC_HPP
 #define PARALLEL_NONE_ANY_ALL_GENERIC_HPP
 
-#include <atomic>
 #include <algorithm>
+#include <atomic>
 #include <hadoken/parallel/algorithm.hpp>
 
 
 #include "parallel_generic_utils.hpp"
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 
-namespace detail{
+namespace detail {} // namespace detail
 
 
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+inline bool all_of(ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p) {
 
-} // detail
+    if (detail::is_parallel_policy(policy)) {
+        std::atomic<bool> res(true);
 
+        hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last,
+                                     [&res, &p](InputIterator local_first, InputIterator local_end) {
+                                         const bool local_res = std::all_of(local_first, local_end, p);
 
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-inline bool all_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p ){
-
-    if(detail::is_parallel_policy(policy)){
-        std::atomic<bool>  res(true);
-
-        hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last, [&res, &p](InputIterator local_first, InputIterator local_end){
-            const bool local_res = std::all_of(local_first, local_end, p);
-
-            if(local_res == false){
-                res.store(false);
-            }
-        });
+                                         if (local_res == false) {
+                                             res.store(false);
+                                         }
+                                     });
         return res.load();
-    }else{
+    } else {
         return std::all_of(first, last, p);
     }
 }
 
 
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-inline bool any_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p ){
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+inline bool any_of(ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p) {
 
-    if(detail::is_parallel_policy(policy)){
-        std::atomic<bool>  res(false);
+    if (detail::is_parallel_policy(policy)) {
+        std::atomic<bool> res(false);
 
-        hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last, [&res, &p](InputIterator local_first, InputIterator local_end){
-            const bool local_res = std::any_of(local_first, local_end, p);
+        hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last,
+                                     [&res, &p](InputIterator local_first, InputIterator local_end) {
+                                         const bool local_res = std::any_of(local_first, local_end, p);
 
-            if(local_res == true){
-                res.store(true);
-            }
-        });
+                                         if (local_res == true) {
+                                             res.store(true);
+                                         }
+                                     });
         return res.load();
-    }else{
+    } else {
         return std::any_of(first, last, p);
     }
 }
@@ -92,28 +90,29 @@ inline bool any_of( ExecutionPolicy&& policy, InputIterator first, InputIterator
 
 
 
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-inline bool none_of( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p ){
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+inline bool none_of(ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p) {
 
-    if(detail::is_parallel_policy(policy)){
-        std::atomic<bool>  res(true);
+    if (detail::is_parallel_policy(policy)) {
+        std::atomic<bool> res(true);
 
-        hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last, [&res, &p](InputIterator local_first, InputIterator local_end){
-            const bool local_res = std::none_of(local_first, local_end, p);
+        hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last,
+                                     [&res, &p](InputIterator local_first, InputIterator local_end) {
+                                         const bool local_res = std::none_of(local_first, local_end, p);
 
-            if(local_res == false){
-                res.store(false);
-            }
-        });
+                                         if (local_res == false) {
+                                             res.store(false);
+                                         }
+                                     });
         return res.load();
-    }else{
+    } else {
         return std::none_of(first, last, p);
     }
 }
 
 
-} //parallel
+} // namespace parallel
 
-} // hadoken
+} // namespace hadoken
 
 #endif // PARALLEL_ALGORITHM_GENERICS_HPP

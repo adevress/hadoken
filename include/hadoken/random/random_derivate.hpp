@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 
 #ifndef RANDOM_DERIVATE_HPP
 #define RANDOM_DERIVATE_HPP
@@ -33,8 +33,8 @@
 
 namespace hadoken {
 
-template<typename Engine>
-inline Engine random_engine_derivate(const Engine & engine, const typename Engine::result_type & key );
+template <typename Engine>
+inline Engine random_engine_derivate(const Engine& engine, const typename Engine::result_type& key);
 
 
 }

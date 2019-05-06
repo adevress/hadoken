@@ -24,23 +24,23 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 
 #define BOOST_TEST_MODULE stringTests
 #define BOOST_TEST_MAIN
 
+#include <chrono>
 #include <iostream>
 #include <map>
 #include <stdexcept>
-#include <chrono>
 
-#include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
+#include <boost/test/unit_test.hpp>
 
 
-#include <hadoken/string/string_view.hpp>
 #include <hadoken/string/algorithm.hpp>
+#include <hadoken/string/string_view.hpp>
 #include <hadoken/string/wildcard.hpp>
 
 #include <hadoken/utility/range.hpp>
@@ -50,8 +50,7 @@
 
 
 
-BOOST_AUTO_TEST_CASE( string_view_simple)
-{
+BOOST_AUTO_TEST_CASE(string_view_simple) {
     using namespace hadoken;
 
     const char* msg = "hello bob #42~€é";
@@ -79,13 +78,11 @@ BOOST_AUTO_TEST_CASE( string_view_simple)
     std::ostringstream ss;
     ss << truncated;
     BOOST_CHECK_EQUAL(ss.str(), to_string(truncated));
-
 }
 
 
 
-BOOST_AUTO_TEST_CASE( string_tokenize_view)
-{
+BOOST_AUTO_TEST_CASE(string_tokenize_view) {
     using namespace hadoken;
 
     const char* msg = "hello bob #42~€é tada";
@@ -93,11 +90,9 @@ BOOST_AUTO_TEST_CASE( string_tokenize_view)
     std::vector<std::string> res = string::split_string(msg, " ");
 
     BOOST_CHECK_EQUAL(res.size(), 4);
-
 }
 
-BOOST_AUTO_TEST_CASE(wildcard_simple)
-{
+BOOST_AUTO_TEST_CASE(wildcard_simple) {
 
     auto t1 = std::chrono::steady_clock::now();
 
@@ -117,17 +112,16 @@ BOOST_AUTO_TEST_CASE(wildcard_simple)
 
     auto t2 = std::chrono::steady_clock::now();
 
-    std::cout << "time taken wildcard " <<
-                 double( std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count())  << " µs" <<std::endl;
+    std::cout << "time taken wildcard " << double(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count())
+              << " µs" << std::endl;
 }
 
 
-BOOST_AUTO_TEST_CASE(wildcard_stack_explosion_test)
-{
+BOOST_AUTO_TEST_CASE(wildcard_stack_explosion_test) {
 
     std::string message, pattern, bad_pattern;
 
-    message = random_string_generator(16*1024*1024, 42);
+    message = random_string_generator(16 * 1024 * 1024, 42);
 
     std::cout << " " << message.size() << std::endl;
 
@@ -138,7 +132,7 @@ BOOST_AUTO_TEST_CASE(wildcard_stack_explosion_test)
     pattern[pattern.size() / 8] = '*';
 
     bad_pattern = pattern;
-    bad_pattern.back() = bad_pattern.back()+1;
+    bad_pattern.back() = bad_pattern.back() + 1;
 
 
 
@@ -149,6 +143,7 @@ BOOST_AUTO_TEST_CASE(wildcard_stack_explosion_test)
 
     auto t2 = std::chrono::steady_clock::now();
 
-    std::cout << "time taken " << double( std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count()) / 1000.0 / 1000.0 << " s" <<std::endl;
-
+    std::cout << "time taken "
+              << double(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count()) / 1000.0 / 1000.0 << " s"
+              << std::endl;
 }

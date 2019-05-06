@@ -24,16 +24,16 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 
 #ifndef RANDOM_DERIVATE_IMPL_HPP
 #define RANDOM_DERIVATE_IMPL_HPP
 
 #include <array>
-#include <cstring>
 #include <bitset>
 #include <cstdint>
+#include <cstring>
 
 #include <hadoken/crypto/sha/sha1.hpp>
 
@@ -41,10 +41,11 @@ namespace hadoken {
 
 namespace impl {
 
-template<typename Uint>
-inline hadoken::sha1::digest32_t generate_deterministic_seed_160(Uint origin_seed, Uint key){
+template <typename Uint>
+inline hadoken::sha1::digest32_t generate_deterministic_seed_160(Uint origin_seed, Uint key) {
     // let's add a bit of salt to our meal today
-    std::array<std::uint8_t, 16> salt = { { 0x6c, 0x77, 0xad, 0xb8, 0x3e, 0xf8, 0x21, 0x61, 0xc3, 0xd8, 0x2e, 0x4c, 0x13, 0xfd, 0x75, 0xd3 } };
+    std::array<std::uint8_t, 16> salt = {
+        {0x6c, 0x77, 0xad, 0xb8, 0x3e, 0xf8, 0x21, 0x61, 0xc3, 0xd8, 0x2e, 0x4c, 0x13, 0xfd, 0x75, 0xd3}};
 
     hadoken::sha1 sha_compute;
     //  we want to generate a new seed determinitically 'seed = f(old_seed, key)'
@@ -62,18 +63,18 @@ inline hadoken::sha1::digest32_t generate_deterministic_seed_160(Uint origin_see
 
 
 
-} // end imple
+} // namespace impl
 
 
 
-template<typename Engine>
-inline Engine random_engine_derivate(const Engine & engine, const typename Engine::result_type & key ){
+template <typename Engine>
+inline Engine random_engine_derivate(const Engine& engine, const typename Engine::result_type& key) {
     Engine res(engine);
 
     typename Engine::result_type old_val = res();
 
     // compute a new  seed determinitically
-    hadoken::sha1::digest32_t digest = impl::generate_deterministic_seed_160<typename Engine::result_type> (old_val, key);
+    hadoken::sha1::digest32_t digest = impl::generate_deterministic_seed_160<typename Engine::result_type>(old_val, key);
     typename Engine::result_type new_seed;
     std::memcpy(&new_seed, &(digest[0]), sizeof(typename Engine::result_type));
 
@@ -83,13 +84,12 @@ inline Engine random_engine_derivate(const Engine & engine, const typename Engin
     // use the digest to increase entropy even more
     // we get the number of 1 bits in our digest and
     // initialize our random engine from 0 to n
-    for(hadoken::sha1::digest32_t::iterator it = digest.begin();
-        it < digest.end(); ++it){
+    for (hadoken::sha1::digest32_t::iterator it = digest.begin(); it < digest.end(); ++it) {
 
         std::bitset<32> bits(*it);
         const std::size_t iteration = bits.count();
-        for(std::size_t i =0; i <iteration; ++i){
-            (void) res();
+        for (std::size_t i = 0; i < iteration; ++i) {
+            (void)res();
         }
     }
 
@@ -98,7 +98,7 @@ inline Engine random_engine_derivate(const Engine & engine, const typename Engin
 
 
 
-} // end hadoken
+} // namespace hadoken
 
 
 #endif // RANDOM_DERIVATE_IMPL_HPP

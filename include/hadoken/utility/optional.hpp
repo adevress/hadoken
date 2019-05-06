@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_OPTIONAL_HPP
 #define HADOKEN_OPTIONAL_HPP
 
@@ -34,7 +34,7 @@
 
 namespace hadoken {
 
-template<typename T>
+template <typename T>
 using optional = boost::optional<T>;
 
 

@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_STATIC_ARRAY_HPP
 #define HADOKEN_STATIC_ARRAY_HPP
 
@@ -33,64 +33,49 @@
 #include <hadoken/config/platform_config.hpp>
 
 namespace hadoken {
-    
-    
-namespace gpu {    
+
+
+namespace gpu {
 
 //
 // hadoken::array is a drop-in replacement for std::array in case of GPU compilation ( CUDA )
 //
 // DO NOT use it for code which does not aim GPU
 //
-template<typename T, std::size_t N>
-class array{
-public:
-
+template <typename T, std::size_t N>
+class array {
+  public:
     typedef T value_type;
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline T* begin(){
-        return _arr;
-    }
+    inline T* begin() { return _arr; }
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline T* begin() const{
-        return _arr;
-    }
+    inline T* begin() const { return _arr; }
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline T* end(){
-        return _arr +N;
-    }
+    inline T* end() { return _arr + N; }
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline T* end() const{
-        return _arr + N;
-    }
+    inline T* end() const { return _arr + N; }
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline std::size_t size() const {
-        return N;
-    }
+    inline std::size_t size() const { return N; }
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline T & operator[](int pos){
-        return _arr[pos];
-    }
+    inline T& operator[](int pos) { return _arr[pos]; }
 
     HADOKEN_DECORATE_HOST_DEVICE
-    inline T operator[](int pos) const{
-        return _arr[pos];
-    }
+    inline T operator[](int pos) const { return _arr[pos]; }
 
-private:
+  private:
     T _arr[N];
 };
 
 
-} // gpu
+} // namespace gpu
 
 
-} // hadoken
+} // namespace hadoken
 
 #endif // STATIC_ARRAY_HPP

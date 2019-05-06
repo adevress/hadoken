@@ -24,34 +24,34 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef _HADOKEN_OMP_ALGORITHM_BITS_HPP_
 #define _HADOKEN_OMP_ALGORITHM_BITS_HPP_
 
-#include <type_traits>
+#include <cstdint>
 #include <iterator>
 #include <stdexcept>
-#include <cstdint>
+#include <type_traits>
 
 
-#include <hadoken/parallel/algorithm.hpp>
-#include <hadoken/utility/range.hpp>
-#include <hadoken/thread/latch.hpp>
 #include <hadoken/containers/small_vector.hpp>
 #include <hadoken/executor/system_executor.hpp>
+#include <hadoken/parallel/algorithm.hpp>
+#include <hadoken/thread/latch.hpp>
+#include <hadoken/utility/range.hpp>
 
 #include <hadoken/parallel/bits/parallel_algorithm_generics.hpp>
 #include <hadoken/parallel/bits/parallel_none_any_all_generic.hpp>
-#include <hadoken/parallel/bits/parallel_transform_generic.hpp>
-#include <hadoken/parallel/bits/parallel_sort_generic.hpp>
 #include <hadoken/parallel/bits/parallel_numeric_generic.hpp>
+#include <hadoken/parallel/bits/parallel_sort_generic.hpp>
+#include <hadoken/parallel/bits/parallel_transform_generic.hpp>
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 
 class sequential_execution_policy;
@@ -60,9 +60,9 @@ class parallel_vector_execution_policy;
 
 
 
-namespace detail{
+namespace detail {
 
-inline int __get_number_executor(){
+inline int __get_number_executor() {
 #ifndef __HADOKEN_ALGORITHM_ENFORCE_SERIAL
     // TODO : should be configurable parameter, extracted from execution_policy
     return std::thread::hardware_concurrency();
@@ -71,8 +71,8 @@ inline int __get_number_executor(){
 #endif
 }
 
-template<typename Function>
-inline void __execute_grid(int num_executor, Function fun){
+template <typename Function>
+inline void __execute_grid(int num_executor, Function fun) {
 #ifndef __HADOKEN_ALGORITHM_ENFORCE_SERIAL
 
     system_executor sys_exec;
@@ -80,106 +80,100 @@ inline void __execute_grid(int num_executor, Function fun){
 
 
 
-    for(int id = 0; id < num_executor; ++id){
-        futures.emplace_back( std::move(sys_exec.twoway_execute([id, num_executor, &fun]{
-                return fun(id, num_executor);
-        })));
+    for (int id = 0; id < num_executor; ++id) {
+        futures.emplace_back(std::move(sys_exec.twoway_execute([id, num_executor, &fun] { return fun(id, num_executor); })));
     }
 
-    for(auto & f : futures){
+    for (auto& f : futures) {
         f.get();
     }
 
 #else
-    for(int id =0 ; id < num_executor; ++id){
+    for (int id = 0; id < num_executor; ++id) {
         fun(id, num_executor);
     }
 #endif
 }
 
 /// for_each algorithm
-template<typename Iterator, typename Function>
-inline void _omp_parallel_for_range(Iterator begin_it, Iterator end_it, Function fun){
+template <typename Iterator, typename Function>
+inline void _omp_parallel_for_range(Iterator begin_it, Iterator end_it, Function fun) {
     range<Iterator> global_range(begin_it, end_it);
 
     const int num_exec = __get_number_executor();
 
-    __execute_grid(num_exec, [&](int id, int num_executor){
-                range<Iterator> my_range = take_splice(global_range, id, num_executor);
-                fun(my_range.begin(), my_range.end());
+    __execute_grid(num_exec, [&](int id, int num_executor) {
+        range<Iterator> my_range = take_splice(global_range, id, num_executor);
+        fun(my_range.begin(), my_range.end());
     });
 }
 
-} // detail
+} // namespace detail
 
 
 
 /// for_each algorithm
-template<typename ExecPolicy, typename Iterator, typename RangeFunction>
-inline void for_range(ExecPolicy && policy, Iterator begin_it, Iterator end_it, RangeFunction fun){
-    if( detail::is_parallel_policy(policy) ){
+template <typename ExecPolicy, typename Iterator, typename RangeFunction>
+inline void for_range(ExecPolicy&& policy, Iterator begin_it, Iterator end_it, RangeFunction fun) {
+    if (detail::is_parallel_policy(policy)) {
         detail::_omp_parallel_for_range(begin_it, end_it, fun);
         return;
     }
 
-   fun(begin_it, end_it);
+    fun(begin_it, end_it);
 }
 
 /// parallel count_if algorithm
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-typename std::iterator_traits<InputIterator>::difference_type
-    count_if( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p ){
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+typename std::iterator_traits<InputIterator>::difference_type count_if(ExecutionPolicy&& policy, InputIterator first,
+                                                                       InputIterator last, UnaryPredicate p) {
 
     typedef typename std::iterator_traits<InputIterator>::difference_type counter_type;
 
-    static_assert(std::is_same< typename std::iterator_traits<InputIterator>::iterator_category, std::random_access_iterator_tag>::value , "parallel::count requires random_access_iterator");
+    static_assert(
+        std::is_same<typename std::iterator_traits<InputIterator>::iterator_category, std::random_access_iterator_tag>::value,
+        "parallel::count requires random_access_iterator");
 
-    if( detail::is_parallel_policy(policy) ){
+    if (detail::is_parallel_policy(policy)) {
 
         const std::size_t nelems = std::distance(first, last);
         std::atomic<uint64_t> counter(0);
 
         const int number_executor = detail::__get_number_executor();
 
-        detail::__execute_grid(number_executor, [&](int id, int number_executor){
-           std::size_t nelem_per_slice = nelems / number_executor;
+        detail::__execute_grid(number_executor, [&](int id, int number_executor) {
+            std::size_t nelem_per_slice = nelems / number_executor;
 
-           InputIterator my_begin = first + (id * nelem_per_slice);
-           InputIterator my_end = ( ((id +1) == number_executor) ? (last): (my_begin + nelem_per_slice));
+            InputIterator my_begin = first + (id * nelem_per_slice);
+            InputIterator my_end = (((id + 1) == number_executor) ? (last) : (my_begin + nelem_per_slice));
 
-           counter += std::count_if(my_begin, my_end, p);
+            counter += std::count_if(my_begin, my_end, p);
         });
 
         return counter_type(counter.load());
-    }else{
+    } else {
         return std::count_if(first, last, p);
     }
 }
 
 /// parallel count algorithm
-template< class ExecutionPolicy, class InputIterator, class T >
-typename std::iterator_traits<InputIterator>::difference_type
-    count( ExecutionPolicy&& policy, InputIterator first, InputIterator last, const T &value ){
+template <class ExecutionPolicy, class InputIterator, class T>
+typename std::iterator_traits<InputIterator>::difference_type count(ExecutionPolicy&& policy, InputIterator first,
+                                                                    InputIterator last, const T& value) {
     using value_type = typename std::iterator_traits<InputIterator>::value_type;
 
-    return count_if(std::move(policy),
-                    first, last,
-                    [&value](const value_type & v){
-                        return (v == static_cast<value_type>(value));
-                    }
-    );
-
+    return count_if(std::move(policy), first, last,
+                    [&value](const value_type& v) { return (v == static_cast<value_type>(value)); });
 }
 
 
 
 
-
-} // parallel
-
+} // namespace parallel
 
 
-} // hadoken
+
+} // namespace hadoken
 
 
 #endif

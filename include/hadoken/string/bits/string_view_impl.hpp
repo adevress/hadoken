@@ -24,115 +24,84 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_STRING_VIEW_IMPL_HPP
 #define HADOKEN_STRING_VIEW_IMPL_HPP
 
 #include "../string_view.hpp"
 
-#include <cstring>
 #include <cassert>
+#include <cstring>
 #include <limits>
 
 namespace hadoken {
 
-inline string_view::string_view() noexcept :
-    _pstr(nullptr),
-    _len(0){
+inline string_view::string_view() noexcept : _pstr(nullptr), _len(0) {}
 
-}
+inline string_view::string_view(const std::string& str) noexcept : _pstr(str.c_str()), _len(str.size()) {}
 
-inline string_view::string_view(const std::string &str) noexcept :
-    _pstr(str.c_str()),
-    _len(str.size()){
+inline string_view::string_view(const char* c_str, std::size_t length) : _pstr(c_str), _len(length) {}
 
-}
-
-inline string_view::string_view(const char *c_str, std::size_t length) :
-    _pstr(c_str),
-    _len(length){
-
-}
-
-inline string_view::string_view(const char *c_str) :
-    _pstr(c_str),
-    _len(::strnlen(c_str, std::numeric_limits<std::size_t>::max())){
-
-}
+inline string_view::string_view(const char* c_str)
+    : _pstr(c_str), _len(::strnlen(c_str, std::numeric_limits<std::size_t>::max())) {}
 
 
 
-inline string_view::const_iterator string_view::begin() const{
-    return _pstr;
-}
+inline string_view::const_iterator string_view::begin() const { return _pstr; }
 
-inline string_view::const_iterator string_view::end() const{
-    return _pstr + _len;
-}
+inline string_view::const_iterator string_view::end() const { return _pstr + _len; }
 
 
-inline string_view::size_type string_view::size() const noexcept{
-    return _len;
-}
+inline string_view::size_type string_view::size() const noexcept { return _len; }
 
-inline string_view::size_type string_view::length() const noexcept{
-    return size();
-}
+inline string_view::size_type string_view::length() const noexcept { return size(); }
 
-inline bool string_view::empty() const noexcept{
-    return (_len == 0);
-}
+inline bool string_view::empty() const noexcept { return (_len == 0); }
 
-inline string_view::size_type string_view::max_size() const noexcept{
-    return std::numeric_limits<decltype(_len)>::max();
-}
+inline string_view::size_type string_view::max_size() const noexcept { return std::numeric_limits<decltype(_len)>::max(); }
 
 
-inline int string_view::compare(const string_view &other) const noexcept{
+inline int string_view::compare(const string_view& other) const noexcept {
     const size_type min_size = std::min(_len, other._len);
 
-    for(size_type i =0; i < min_size; ++i){
-        if(_pstr[i] < other._pstr[i])
+    for (size_type i = 0; i < min_size; ++i) {
+        if (_pstr[i] < other._pstr[i])
             return -1;
-        if(_pstr[i] > other._pstr[i])
+        if (_pstr[i] > other._pstr[i])
             return 1;
     }
-    if (_len < other._len) return -1;
-    if (_len > other._len) return 1;
+    if (_len < other._len)
+        return -1;
+    if (_len > other._len)
+        return 1;
     return 0;
 }
 
-inline string_view::const_pointer string_view::data() const noexcept{
-    return _pstr;
-}
+inline string_view::const_pointer string_view::data() const noexcept { return _pstr; }
 
-inline char string_view::operator [](std::size_t pos) const{
+inline char string_view::operator[](std::size_t pos) const {
     assert(pos < _len);
     return _pstr[pos];
 }
 
 
-inline void string_view::swap(string_view &other) noexcept{
+inline void string_view::swap(string_view& other) noexcept {
     using std::swap;
     swap(_pstr, other._pstr);
     swap(_len, other._len);
 }
 
 
-inline bool operator==(const string_view & first, const string_view & second){
-    return first.compare(second) == 0;
-}
+inline bool operator==(const string_view& first, const string_view& second) { return first.compare(second) == 0; }
 
-inline std::ostream & operator <<(std::ostream & o, const string_view & sv){
+inline std::ostream& operator<<(std::ostream& o, const string_view& sv) {
     o.write(sv._pstr, sv._len);
     return o;
 }
 
-inline std::string to_string(const string_view &sv){
-    return std::string(sv.data(), sv.size());
-}
+inline std::string to_string(const string_view& sv) { return std::string(sv.data(), sv.size()); }
 
-} // hadoken
+} // namespace hadoken
 
 #endif // STRING_VIEW_IMPL_HPP

@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_GPU_ALGORITHM_HPP
 #define HADOKEN_GPU_ALGORITHM_HPP
 
@@ -41,10 +41,9 @@ namespace gpu {
 //
 // simplified implementation of copy for GPU
 //
-template< class InputIt, class OutputIt >
-HADOKEN_DECORATE_HOST_DEVICE
-OutputIt copy( InputIt first, InputIt last, OutputIt d_first ){
-    while(first < last){
+template <class InputIt, class OutputIt>
+HADOKEN_DECORATE_HOST_DEVICE OutputIt copy(InputIt first, InputIt last, OutputIt d_first) {
+    while (first < last) {
         *d_first = *first;
         first++;
         d_first++;
@@ -56,12 +55,10 @@ OutputIt copy( InputIt first, InputIt last, OutputIt d_first ){
 //
 // simplified implementation of accumulate for GPU
 //
-template< class InputIt, class T, class BinaryOperation >
-HADOKEN_DECORATE_HOST_DEVICE
-T accumulate( InputIt first, InputIt last, T init,
-              BinaryOperation op ){
+template <class InputIt, class T, class BinaryOperation>
+HADOKEN_DECORATE_HOST_DEVICE T accumulate(InputIt first, InputIt last, T init, BinaryOperation op) {
     T res = init;
-    while(first < last){
+    while (first < last) {
         op(res, *first);
         first++;
     }
@@ -72,11 +69,10 @@ T accumulate( InputIt first, InputIt last, T init,
 //
 // simplified implementation of transform for GPU
 //
-template< class InputIt1, class InputIt2, class OutputIt, class BinaryOperation >
-HADOKEN_DECORATE_HOST_DEVICE
-OutputIt transform( InputIt1 first1, InputIt1 last1, InputIt2 first2,
-                    OutputIt d_first, BinaryOperation binary_op ){
-    while(first1 < last1){
+template <class InputIt1, class InputIt2, class OutputIt, class BinaryOperation>
+HADOKEN_DECORATE_HOST_DEVICE OutputIt transform(InputIt1 first1, InputIt1 last1, InputIt2 first2, OutputIt d_first,
+                                                BinaryOperation binary_op) {
+    while (first1 < last1) {
         *d_first = binary_op(*first1, *first2);
         first1++;
         d_first++;
@@ -89,28 +85,22 @@ OutputIt transform( InputIt1 first1, InputIt1 last1, InputIt2 first2,
 //
 // binary functions
 //
-template<typename T>
+template <typename T>
 
-struct bit_xor{
+struct bit_xor {
     HADOKEN_DECORATE_HOST_DEVICE
-    T operator()(const T& x, const T& y) const{
-        return x ^ y;
-    }
+    T operator()(const T& x, const T& y) const { return x ^ y; }
 };
 
 
-template<typename T>
+template <typename T>
 struct plus {
     HADOKEN_DECORATE_HOST_DEVICE
-    T operator()(const T& x, const T& y) const{
-        return x + y;
-    }
-
-
+    T operator()(const T& x, const T& y) const { return x + y; }
 };
 
-} // gpu
+} // namespace gpu
 
-} //hadoken
+} // namespace hadoken
 
 #endif // HADOKEN_GPU_ALGORITHM_HPP

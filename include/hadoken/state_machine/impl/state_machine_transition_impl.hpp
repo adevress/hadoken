@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_STATE_MACHINE_TRANSITION_HPP
 #define HADOKEN_STATE_MACHINE_TRANSITION_HPP
 
@@ -33,29 +33,28 @@
 
 #include "../state_machine.hpp"
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace impl{
+namespace impl {
 
-template<typename State>
-struct transition_handler{
+template <typename State>
+struct transition_handler {
     State _next;
 
-    std::function<bool (void)> _cond;
+    std::function<bool(void)> _cond;
 };
 
-template<typename State>
-struct state_handler{
-    std::function<void (const State & prev_state, const State & new_state)> _on_entry, _on_exit;
+template <typename State>
+struct state_handler {
+    std::function<void(const State&prev_state, const State&new_state)> _on_entry, _on_exit;
 
     std::vector<transition_handler<State>> _transitions;
 };
 
-} // impl
+} // namespace impl
 
-} // hadoken
-
+} // namespace hadoken
 
 
 

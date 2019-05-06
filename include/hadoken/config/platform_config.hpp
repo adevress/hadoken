@@ -24,26 +24,26 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_PLATFORM_CONFIG_HPP
 #define HADOKEN_PLATFORM_CONFIG_HPP
 
 
 // detect if cuda
 #if (defined __CUDACC__)
-#   define HADOKEN_COMPILER_IS_NVCC 1
+#define HADOKEN_COMPILER_IS_NVCC 1
 #endif
 
 // cuda decorators
 // __host__ / __device__ decorator for CUDA
 #ifndef HADOKEN_DECORATE_HOST_DEVICE
 
-#   if (defined HADOKEN_COMPILER_IS_NVCC)
-#       define HADOKEN_DECORATE_HOST_DEVICE __host__ __device__
-#   else
-#       define HADOKEN_DECORATE_HOST_DEVICE
-#   endif
+#if (defined HADOKEN_COMPILER_IS_NVCC)
+#define HADOKEN_DECORATE_HOST_DEVICE __host__ __device__
+#else
+#define HADOKEN_DECORATE_HOST_DEVICE
+#endif
 
 #endif // HADOKEN_DECORATE_HOST_DEVICE
 

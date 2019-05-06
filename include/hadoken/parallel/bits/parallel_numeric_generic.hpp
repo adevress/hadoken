@@ -24,132 +24,122 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef PARALLEL_NUMERIC_GENERIC_HPP
 #define PARALLEL_NUMERIC_GENERIC_HPP
 
-#include <atomic>
 #include <algorithm>
+#include <atomic>
 #include <cmath>
 #include <mutex>
 
 
 #include <hadoken/thread/spinlock.hpp>
 
-#include <hadoken/parallel/algorithm.hpp>
 #include "parallel_generic_utils.hpp"
+#include <hadoken/parallel/algorithm.hpp>
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 
-namespace detail{
+namespace detail {
 
-template< class ExecutionPolicy, class InputIt, class OutputIt,
-class BinaryOperation>
-OutputIt _internal_inclusive_scan( ExecutionPolicy&& policy,
-                         InputIt first, InputIt last, OutputIt d_first,
-                         BinaryOperation binary_op){
-    (void) (policy);
+template <class ExecutionPolicy, class InputIt, class OutputIt, class BinaryOperation>
+OutputIt _internal_inclusive_scan(ExecutionPolicy&& policy, InputIt first, InputIt last, OutputIt d_first,
+                                  BinaryOperation binary_op) {
+    (void)(policy);
     using value_type = typename std::iterator_traits<OutputIt>::value_type;
     using tuple_it_val = std::tuple<OutputIt, value_type>;
-                             
+
     std::size_t n_elems = std::distance(first, last);
     OutputIt d_end = d_first;
     std::advance(d_end, n_elems);
-    
-    if(n_elems ==0){
+
+    if (n_elems == 0) {
         return d_first;
     }
 
-        
+
     std::vector<tuple_it_val> limits_vec;
     hadoken::thread::spin_lock _limit_lock;
     limits_vec.reserve(64);
 
-    // first local inclusive scan 
-    for_range(policy, first, last, [&](InputIt local_first, InputIt local_last){
+    // first local inclusive scan
+    for_range(policy, first, last, [&](InputIt local_first, InputIt local_last) {
         std::size_t distance_from_first = std::distance(first, local_first);
         std::size_t local_n_elems = std::distance(local_first, local_last);
-        
+
         OutputIt local_d_first = d_first;
         std::advance(local_d_first, distance_from_first);
-        
+
         std::partial_sum(local_first, local_last, local_d_first, binary_op);
-        
+
         OutputIt d_local_end;
-        std::advance(local_d_first, local_n_elems-1);
+        std::advance(local_d_first, local_n_elems - 1);
         d_local_end = local_d_first;
         std::advance(d_local_end, 1);
-        
+
         {
             std::lock_guard<hadoken::thread::spin_lock> _l(_limit_lock);
             limits_vec.push_back(std::make_tuple(d_local_end, *local_d_first));
         }
     });
-    
-    std::sort(limits_vec.begin(), limits_vec.end(), [](const tuple_it_val & v1, const tuple_it_val & v2){
-       return std::get<0>(v1) < std::get<0>(v2); 
-    });
-    
+
+    std::sort(limits_vec.begin(), limits_vec.end(),
+              [](const tuple_it_val& v1, const tuple_it_val& v2) { return std::get<0>(v1) < std::get<0>(v2); });
+
 
     // post sum of each chunk partial sum
-    for_range(policy, d_first, d_end, [&](InputIt local_first, InputIt local_last){
-        
-        if(local_first < std::get<0>(limits_vec[0]))
+    for_range(policy, d_first, d_end, [&](InputIt local_first, InputIt local_last) {
+        if (local_first < std::get<0>(limits_vec[0]))
             return;
-        
+
         value_type val = std::get<1>(limits_vec[0]);
-        
+
         auto limit_it = limits_vec.begin();
         std::advance(limit_it, 1);
-        
-        
-        while(local_first < local_last){
-            while(local_first >= std::get<0>(*limit_it) && limit_it < limits_vec.end()){
+
+
+        while (local_first < local_last) {
+            while (local_first >= std::get<0>(*limit_it) && limit_it < limits_vec.end()) {
                 val = binary_op(val, std::get<1>(*limit_it));
                 limit_it++;
             }
-            
+
             *local_first = binary_op(val, *local_first);
             local_first++;
         };
-
     });
     return d_first;
-
 }
 
-} // detail
+} // namespace detail
 
 // inclusive scan algorithm
-template< class ExecutionPolicy, class InputIt, class OutputIt >
-OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first,
-                         InputIt last, OutputIt d_first ){
+template <class ExecutionPolicy, class InputIt, class OutputIt>
+OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first, InputIt last, OutputIt d_first) {
     using value_type = typename std::iterator_traits<InputIt>::value_type;
-    
+
     return inclusive_scan(std::forward<ExecutionPolicy>(policy), first, last, d_first, std::plus<value_type>());
 }
 
 // inclusive scan algorithm
-template< class ExecutionPolicy, class InputIt, class OutputIt,
-class BinaryOperation>
-OutputIt inclusive_scan( ExecutionPolicy&& policy,
-                         InputIt first, InputIt last, OutputIt d_first,
-                         BinaryOperation binary_op){
-    if(detail::is_parallel_policy(policy)){
+template <class ExecutionPolicy, class InputIt, class OutputIt, class BinaryOperation>
+OutputIt inclusive_scan(ExecutionPolicy&& policy, InputIt first, InputIt last, OutputIt d_first, BinaryOperation binary_op) {
+    if (detail::is_parallel_policy(policy)) {
         // to improve
         return detail::_internal_inclusive_scan(std::forward<ExecutionPolicy>(policy), first, last, d_first, binary_op);
     }
     return std::partial_sum(first, last, d_first, binary_op);
 }
 
-} //parallel
+} // namespace parallel
 
-} // hadoken
+} // namespace hadoken
 
 #endif // PARALLEL_ALGORITHM_GENERICS_HPP

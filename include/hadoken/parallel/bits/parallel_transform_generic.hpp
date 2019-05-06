@@ -24,13 +24,13 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef PARALLEL_TRANSFORM_GENERIC_BITS_HPP
 #define PARALLEL_TRANSFORM_GENERIC_BITS_HPP
 
-#include <tuple>
 #include <algorithm>
+#include <tuple>
 
 #include <boost/iterator/zip_iterator.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -41,51 +41,48 @@
 #include "parallel_generic_utils.hpp"
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
-template< class ExecutionPolicy, class InputIterator1, class InputIterator2, class OutputIterator, class BinaryOperation >
-OutputIterator transform( ExecutionPolicy&& policy, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
-                    OutputIterator d_first, BinaryOperation binary_op ){
-    if(detail::is_parallel_policy(policy)){
+template <class ExecutionPolicy, class InputIterator1, class InputIterator2, class OutputIterator, class BinaryOperation>
+OutputIterator transform(ExecutionPolicy&& policy, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2,
+                         OutputIterator d_first, BinaryOperation binary_op) {
+    if (detail::is_parallel_policy(policy)) {
         InputIterator1 d_last = d_first;
 
-        hadoken::parallel::for_range(policy, first1, last1, [&](InputIterator1 local_begin, InputIterator2 local_end){
-           const std::size_t pos = std::distance(first1, local_begin);
+        hadoken::parallel::for_range(policy, first1, last1, [&](InputIterator1 local_begin, InputIterator2 local_end) {
+            const std::size_t pos = std::distance(first1, local_begin);
 
-           InputIterator2 local_first2 = first2;
-           std::advance(local_first2, pos);
-           OutputIterator d_local_first = d_first;
-           std::advance(d_local_first, pos);
+            InputIterator2 local_first2 = first2;
+            std::advance(local_first2, pos);
+            OutputIterator d_local_first = d_first;
+            std::advance(d_local_first, pos);
 
-           std::transform(local_begin, local_end, local_first2, d_local_first, binary_op);
-
+            std::transform(local_begin, local_end, local_first2, d_local_first, binary_op);
         });
 
         std::advance(d_last, std::distance(first1, last1));
         return d_last;
-    } else{
+    } else {
         return std::transform(first1, last1, first2, d_first, binary_op);
     }
-
 }
 
 
 
-template< class ExecutionPolicy, class InputIt, class OutputIt, class UnaryOperation >
-OutputIt transform( ExecutionPolicy&& policy, InputIt first1, InputIt last1, OutputIt d_first,
-                    UnaryOperation unary_op ){
+template <class ExecutionPolicy, class InputIt, class OutputIt, class UnaryOperation>
+OutputIt transform(ExecutionPolicy&& policy, InputIt first1, InputIt last1, OutputIt d_first, UnaryOperation unary_op) {
     using value_type = typename std::iterator_traits<InputIt>::value_type;
-    return transform(policy, first1, last1, first1, d_first, [&unary_op](const value_type & v1, const value_type & v2){
-        (void) v2;
+    return transform(policy, first1, last1, first1, d_first, [&unary_op](const value_type& v1, const value_type& v2) {
+        (void)v2;
         return unary_op(v1);
     });
 }
 
-} //parallel
+} // namespace parallel
 
-} // hadoken
+} // namespace hadoken
 
 #endif // PARALLEL_ALGORITHM_GENERICS_HPP

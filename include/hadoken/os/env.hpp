@@ -24,24 +24,24 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_ENV_HPP
 #define HADOKEN_ENV_HPP
 
-#include <string>
 #include <hadoken/utility/optional.hpp>
+#include <string>
 
 
-namespace hadoken{
+namespace hadoken {
 
 
 ///
 /// return variable from environment if it exists
 ///
-inline optional<std::string> get_env(const std::string & varname);
+inline optional<std::string> get_env(const std::string& varname);
 
-} //hadoken
+} // namespace hadoken
 
 
 #include "impl/env_impl.hpp"

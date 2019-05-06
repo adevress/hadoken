@@ -24,73 +24,67 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef TEST_HELPERS_HPP
 #define TEST_HELPERS_HPP
 
 #include <algorithm>
-#include <type_traits>
-#include <string>
+#include <cmath>
 #include <memory>
 #include <random>
-#include <cmath>
+#include <string>
+#include <type_traits>
 
 
-template<typename T, typename Extra = void>
-struct content_generator{
+template <typename T, typename Extra = void>
+struct content_generator {
 
     static_assert(sizeof(T) != -1, "Need to be specialized");
-
 };
 
-template<>
-struct content_generator<std::string, void>{
+template <>
+struct content_generator<std::string, void> {
 
-    std::string operator()(std::size_t n){
-        const std::size_t s = std::max<std::size_t>(std::log(n+1), 1) ;
+    std::string operator()(std::size_t n) {
+        const std::size_t s = std::max<std::size_t>(std::log(n + 1), 1);
 
         std::ostringstream ss;
-        for(std::size_t i =0; i < s; ++i){
+        for (std::size_t i = 0; i < s; ++i) {
             ss << "hello world ";
         }
         return ss.str();
     }
-
 };
 
 
-template<>
-struct content_generator<std::unique_ptr<std::string> >{
+template <>
+struct content_generator<std::unique_ptr<std::string>> {
 
-    std::unique_ptr<std::string> operator()(std::size_t n){
+    std::unique_ptr<std::string> operator()(std::size_t n) {
         content_generator<std::string, void> gen;
 
         return std::unique_ptr<std::string>(new std::string(gen(n)));
     }
-
 };
 
 
 
 
-template<typename T>
-struct content_generator<T, typename std::enable_if<std::is_arithmetic<T>::value >::type >{
+template <typename T>
+struct content_generator<T, typename std::enable_if<std::is_arithmetic<T>::value>::type> {
 
-    T operator()(std::size_t n){
-        return T(n) + T(n * 0.1);
-    }
-
+    T operator()(std::size_t n) { return T(n) + T(n * 0.1); }
 };
 
 
-std::string random_string_generator(std::size_t string_size, int seed){
+std::string random_string_generator(std::size_t string_size, int seed) {
     std::string random_string;
     std::mt19937 gen(seed);
 
     random_string.reserve(string_size);
 
-    for(std::size_t i = 0 ; i < string_size; ++i){
+    for (std::size_t i = 0; i < string_size; ++i) {
         random_string.push_back(char(gen()));
     }
     return random_string;

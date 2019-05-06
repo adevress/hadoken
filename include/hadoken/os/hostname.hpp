@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef HADOKEN_HOSTNAME_HPP
 #define HADOKEN_HOSTNAME_HPP
 
@@ -33,7 +33,7 @@
 
 
 
-namespace hadoken{
+namespace hadoken {
 
 ///
 /// return string of the current hostname
@@ -41,7 +41,7 @@ namespace hadoken{
 inline std::string get_hostname();
 
 
-} //hadoken
+} // namespace hadoken
 
 
 #include "impl/hostname_impl.hpp"

@@ -24,63 +24,59 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #pragma once
 
 #include <atomic>
-#include <thread>
+#include <bitset>
 #include <chrono>
 #include <functional>
-#include <vector>
-#include <type_traits>
-#include <bitset>
 #include <iostream>
+#include <thread>
+#include <type_traits>
+#include <vector>
 
+#include <hadoken/containers/concurrent_queue.hpp>
 #include <hadoken/thread/future_helpers.hpp>
 #include <hadoken/threading/std_thread_model.hpp>
-#include <hadoken/containers/concurrent_queue.hpp>
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace details{
+namespace details {
 
-class worker_thread{
-public:
-    inline worker_thread(concurrent_queue<std::function<void ()>> & queue) :
-                    _queue_ref(queue),
-                    exec(),
-                    finished(false) {
-        std::thread runner([this]() { run();});
+class worker_thread {
+  public:
+    inline worker_thread(concurrent_queue<std::function<void()>>& queue) : _queue_ref(queue), exec(), finished(false) {
+        std::thread runner([this]() { run(); });
 
         exec.swap(runner);
     }
 
 
-    inline ~worker_thread(){
+    inline ~worker_thread() {
         finished.store(true);
-        if(exec.joinable()){
+        if (exec.joinable()) {
             exec.join();
         }
     }
 
 
-    inline void run(){
-        while(!finished){
+    inline void run() {
+        while (!finished) {
             auto work_item = _queue_ref.try_pop(std::chrono::milliseconds(10));
-            if(work_item){
+            if (work_item) {
                 work_item.get()();
             }
-
         }
     }
 
-private:
-    worker_thread(const worker_thread &) = delete;
+  private:
+    worker_thread(const worker_thread&) = delete;
 
-    concurrent_queue<std::function<void ()>> & _queue_ref;
+    concurrent_queue<std::function<void()>>& _queue_ref;
 
     std::thread exec;
 
@@ -88,100 +84,84 @@ private:
 };
 
 
-}
+} // namespace details
 
 ///
 /// \brief Executor implementation for a simple thread
 ///
-class thread_pool_executor : public std_thread_model{
-public:
+class thread_pool_executor : public std_thread_model {
+  public:
+    enum class flags : std::size_t { complete_all_before_delete = 0 };
 
-    enum class flags : std::size_t {
-        complete_all_before_delete = 0
-    };
-
-    template<typename T>
+    template <typename T>
     using future = std::future<T>;
 
-    template<typename T>
+    template <typename T>
     using promise = std::promise<T>;
 
-    inline thread_pool_executor(std::size_t n_thread =0) :
-        _flags(0),
-        _work_queue(),
-        _executors(){
+    inline thread_pool_executor(std::size_t n_thread = 0) : _flags(0), _work_queue(), _executors() {
         pthread_key_create(&_recursive_key, NULL);
 
         const std::size_t n_workers = (n_thread > 0) ? n_thread : (std::thread::hardware_concurrency());
-        for(std::size_t i =0; i < n_workers; ++i){
-            _executors.emplace_back( new details::worker_thread(_work_queue));
+        for (std::size_t i = 0; i < n_workers; ++i) {
+            _executors.emplace_back(new details::worker_thread(_work_queue));
         }
     }
 
-    inline ~thread_pool_executor(){
+    inline ~thread_pool_executor() {
         pthread_key_delete(_recursive_key);
-        if(_flags[static_cast<std::size_t>(flags::complete_all_before_delete)]){
+        if (_flags[static_cast<std::size_t>(flags::complete_all_before_delete)]) {
             wait();
         }
     }
 
-    inline void execute(std::function<void (void)> task){
-        _work_queue.push(std::move(task));
-    }
+    inline void execute(std::function<void(void)> task) { _work_queue.push(std::move(task)); }
 
-    template<typename Function>
-    inline future<decltype(std::declval<Function>()())> twoway_execute(Function func){
+    template <typename Function>
+    inline future<decltype(std::declval<Function>()())> twoway_execute(Function func) {
 
         // if our current thread is not part of the pool
         // we execute in the pool
         // if it is already a pooled_thread, we do not to avoid deadlock
-        if(pthread_getspecific(_recursive_key) == NULL){
+        if (pthread_getspecific(_recursive_key) == NULL) {
 
-            auto prom = std::make_shared<promise<decltype(std::declval<Function>()()) > >();
+            auto prom = std::make_shared<promise<decltype(std::declval<Function>()())>>();
             auto future_result = prom->get_future();
 
-            _work_queue.push([prom, func, this]() mutable -> void{
+            _work_queue.push([prom, func, this]() mutable -> void {
                 pthread_setspecific(this->_recursive_key, (void*)1);
-                try{
+                try {
                     set_promise_from_result(*prom, func);
-                } catch(...) {
+                } catch (...) {
                     try {
                         prom->set_exception(std::current_exception());
-                    } catch(...) {
+                    } catch (...) {
                         std::cerr << "error during set_exception in executor" << std::endl;
                     }
                 }
             });
             return future_result;
-        } else{
-            return std::async(std::launch::deferred, [func]() {
-                return func();
-            });
+        } else {
+            return std::async(std::launch::deferred, [func]() { return func(); });
         }
     }
 
-    inline void set_flags(flags flag, bool value){
-        _flags[static_cast<std::size_t>(flag)] = value;
-    }
+    inline void set_flags(flags flag, bool value) { _flags[static_cast<std::size_t>(flag)] = value; }
 
-    inline bool get_flag(flags flag) const {
-        return _flags[static_cast<std::size_t>(flag)];
-    }
+    inline bool get_flag(flags flag) const { return _flags[static_cast<std::size_t>(flag)]; }
 
-    inline void wait(){
-        while(_work_queue.empty() == false){
+    inline void wait() {
+        while (_work_queue.empty() == false) {
             std::this_thread::yield();
         }
     }
 
-private:
+  private:
     std::bitset<32> _flags;
-    concurrent_queue<std::function<void ()>> _work_queue;
-    std::vector<std::unique_ptr<details::worker_thread> > _executors;
+    concurrent_queue<std::function<void()>> _work_queue;
+    std::vector<std::unique_ptr<details::worker_thread>> _executors;
     pthread_key_t _recursive_key;
-
 };
 
 
-}
-
+} // namespace hadoken

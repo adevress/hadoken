@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef _HADOKEN_SPINLOCK_HPP_
 #define _HADOKEN_SPINLOCK_HPP_
 
@@ -34,7 +34,7 @@
 
 namespace hadoken {
 
-namespace thread{
+namespace thread {
 
 ///
 /// \brief The spin_lock class
@@ -44,42 +44,39 @@ namespace thread{
 /// follow the STL requirement for BasicLockable and
 /// can consequently be used by STL/boost lock_guard and unique_lock
 ///
-class spin_lock{
-public:
+class spin_lock {
+  public:
     inline spin_lock() : _lock(0) {}
 
     inline void lock() noexcept {
-            std::uint64_t counter = 1;
-            while(1){
-                if(_lock.exchange(1) == 0){
-                    return;
-                }
-                
+        std::uint64_t counter = 1;
+        while (1) {
+            if (_lock.exchange(1) == 0) {
+                return;
+            }
+
 #ifndef HADOKEN_SPIN_NO_YIELD
-                if(counter % 128 == 0){
-                    std::this_thread::yield();                    
-                }
-#endif                 
-                counter ++;
-             
-           }
+            if (counter % 128 == 0) {
+                std::this_thread::yield();
+            }
+#endif
+            counter++;
+        }
     }
 
-    inline void unlock() noexcept{
-        _lock.exchange(0);
-    }
+    inline void unlock() noexcept { _lock.exchange(0); }
 
-private:
-    spin_lock(const spin_lock &) = delete;
-    spin_lock & operator=(const spin_lock&) = delete;
+  private:
+    spin_lock(const spin_lock&) = delete;
+    spin_lock& operator=(const spin_lock&) = delete;
 
     std::atomic<int> _lock;
 };
 
 
-} // thread
+} // namespace thread
 
 
-} //hadoken
+} // namespace hadoken
 
 #endif // SPINLOCK_HPP

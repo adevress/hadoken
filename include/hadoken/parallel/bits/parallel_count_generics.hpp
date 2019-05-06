@@ -24,8 +24,8 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef PARALLEL_COUNT_GENERICS_BITS_HPP
 #define PARALLEL_COUNT_GENERICS_BITS_HPP
 
@@ -36,68 +36,58 @@
 #include "parallel_generic_utils.hpp"
 
 
-namespace hadoken{
+namespace hadoken {
 
 
-namespace parallel{
+namespace parallel {
 
 
-namespace detail{
+namespace detail {
 
 // count_internal
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-typename std::iterator_traits<InputIterator>::difference_type
- _internal_count_if( ExecutionPolicy&& policy, InputIterator first, InputIterator last,
-                      UnaryPredicate p ){
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+typename std::iterator_traits<InputIterator>::difference_type _internal_count_if(ExecutionPolicy&& policy, InputIterator first,
+                                                                                 InputIterator last, UnaryPredicate p) {
     using result_type = typename std::iterator_traits<InputIterator>::difference_type;
 
-    if(is_parallel_policy(policy)){
+    if (is_parallel_policy(policy)) {
         std::atomic<result_type> res(0);
 
-        ::hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last, [&res, &p](InputIterator local_first,
-                                       InputIterator local_end){
-            result_type local_res = std::count_if(local_first, local_end, p);
-            res += local_res;
-        });
+        ::hadoken::parallel::for_range(std::forward<ExecutionPolicy>(policy), first, last,
+                                       [&res, &p](InputIterator local_first, InputIterator local_end) {
+                                           result_type local_res = std::count_if(local_first, local_end, p);
+                                           res += local_res;
+                                       });
         return res;
-    }else {
+    } else {
         return std::count_if(first, last, p);
     }
 }
 
-} // detail
+} // namespace detail
 
 
 // parallel count_if algorithm
-template< class ExecutionPolicy, class InputIterator, class UnaryPredicate >
-typename std::iterator_traits<InputIterator>::difference_type
-    count_if( ExecutionPolicy&& policy, InputIterator first, InputIterator last, UnaryPredicate p ){
+template <class ExecutionPolicy, class InputIterator, class UnaryPredicate>
+typename std::iterator_traits<InputIterator>::difference_type count_if(ExecutionPolicy&& policy, InputIterator first,
+                                                                       InputIterator last, UnaryPredicate p) {
 
-    return detail::_internal_count_if<ExecutionPolicy,
-            InputIterator,
-            UnaryPredicate>(std::move(policy),
-                                first, last,
-                                p);
+    return detail::_internal_count_if<ExecutionPolicy, InputIterator, UnaryPredicate>(std::move(policy), first, last, p);
 }
 
 // parallel count algorithm
-template< class ExecutionPolicy, class InputIterator, class T >
-typename std::iterator_traits<InputIterator>::difference_type
-    count( ExecutionPolicy&& policy, InputIterator first, InputIterator last, const T &value ){
+template <class ExecutionPolicy, class InputIterator, class T>
+typename std::iterator_traits<InputIterator>::difference_type count(ExecutionPolicy&& policy, InputIterator first,
+                                                                    InputIterator last, const T& value) {
     using value_type = typename std::iterator_traits<InputIterator>::value_type;
 
-    return detail::_internal_count_if<ExecutionPolicy,
-            InputIterator>(std::move(policy),
-                                first, last,
-                            [&value](const value_type & v){
-        return (v == static_cast<value_type>(value));
-    });
-
+    return detail::_internal_count_if<ExecutionPolicy, InputIterator>(
+        std::move(policy), first, last, [&value](const value_type& v) { return (v == static_cast<value_type>(value)); });
 }
 
 
-} //parallel
+} // namespace parallel
 
-} // hadoken
+} // namespace hadoken
 
 #endif // PARALLEL_ALGORITHM_GENERICS_HPP

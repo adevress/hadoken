@@ -24,26 +24,26 @@
  * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
  * DEALINGS IN THE SOFTWARE.
-*
-*/
+ *
+ */
 #ifndef _HADOKEN_UBLAS_HPP_
 #define _HADOKEN_UBLAS_HPP_
 
 #include <boost/numeric/ublas/matrix.hpp>
 
-namespace hadoken{
+namespace hadoken {
 
-namespace ublas{
+namespace ublas {
 
 using namespace boost::numeric::ublas;
 
 ///
 /// Execute a predicate on every element of the matrix
 ///
-template<typename T, typename Fun>
-inline void for_each(boost::numeric::ublas::matrix<T> & mat, Fun f){
-    for(auto it1 = mat.begin1(); it1 < mat.end1(); ++it1){
-        for(auto it = it1.begin(); it < it1.end(); ++it){
+template <typename T, typename Fun>
+inline void for_each(boost::numeric::ublas::matrix<T>& mat, Fun f) {
+    for (auto it1 = mat.begin1(); it1 < mat.end1(); ++it1) {
+        for (auto it = it1.begin(); it < it1.end(); ++it) {
             f(*it);
         }
     }
@@ -53,9 +53,9 @@ inline void for_each(boost::numeric::ublas::matrix<T> & mat, Fun f){
 ///
 /// set all element of the matrix to zero
 ///
-template<typename T>
-inline void zero(boost::numeric::ublas::matrix<T> & mat){
-    for_each(mat, [](T & val){
+template <typename T>
+inline void zero(boost::numeric::ublas::matrix<T>& mat) {
+    for_each(mat, [](T& val) {
         constexpr T null_value = 0;
         val = null_value;
     });
@@ -64,11 +64,9 @@ inline void zero(boost::numeric::ublas::matrix<T> & mat){
 
 
 
+} // namespace ublas
 
 
-} // ublas
-
-
-} // hadoken
+} // namespace hadoken
 
 #endif // UBLAS_HPP
