@@ -46,7 +46,7 @@ struct options_format;
 ///
 class parse_options_error : public std::runtime_error {
   public:
-    inline parse_options_error(const std::string& msg) : std::runtime_error(msg) {}
+    explicit inline parse_options_error(const std::string& msg) : std::runtime_error(msg) {}
 
   private:
 };

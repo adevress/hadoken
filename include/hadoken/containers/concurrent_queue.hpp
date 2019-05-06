@@ -46,7 +46,7 @@ namespace hadoken {
 template <typename T, typename ThreadModel = std_thread_model, typename Allocator = std::allocator<T>>
 class concurrent_queue_stl_mut {
   public:
-    concurrent_queue_stl_mut(const Allocator& allocator = Allocator());
+    explicit concurrent_queue_stl_mut(const Allocator& allocator = Allocator());
 
     void push(T element);
 

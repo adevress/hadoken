@@ -49,7 +49,7 @@ namespace details {
 
 class worker_thread {
   public:
-    inline worker_thread(concurrent_queue<std::function<void()>>& queue) : _queue_ref(queue), exec(), finished(false) {
+    explicit inline worker_thread(concurrent_queue<std::function<void()>>& queue) : _queue_ref(queue), exec(), finished(false) {
         std::thread runner([this]() { run(); });
 
         exec.swap(runner);
@@ -99,7 +99,7 @@ class thread_pool_executor : public std_thread_model {
     template <typename T>
     using promise = std::promise<T>;
 
-    inline thread_pool_executor(std::size_t n_thread = 0) : _flags(0), _work_queue(), _executors() {
+    explicit inline thread_pool_executor(std::size_t n_thread = 0) : _flags(0), _work_queue(), _executors() {
         pthread_key_create(&_recursive_key, NULL);
 
         const std::size_t n_workers = (n_thread > 0) ? n_thread : (std::thread::hardware_concurrency());

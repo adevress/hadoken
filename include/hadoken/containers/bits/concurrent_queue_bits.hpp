@@ -53,9 +53,9 @@ template <typename T, typename ThreadModel, typename Allocator>
 template <typename Duration>
 inline optional<T> concurrent_queue_stl_mut<T, ThreadModel, Allocator>::try_pop(const Duration& d) {
     optional<T> res;
-    bool timeout = false;
 
     {
+        bool timeout = false;
         std::unique_lock<decltype(_qmut)> l(_qmut);
 
         while (!timeout) {

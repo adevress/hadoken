@@ -48,7 +48,7 @@ namespace hadoken {
 template <typename State>
 class state_machine {
   public:
-    state_machine(State init_state);
+    explicit state_machine(State init_state);
 
     /// trigger an event
     ///
@@ -93,7 +93,7 @@ class state_machine {
 template <typename Object>
 class edge_trigger {
   public:
-    edge_trigger(Object&& o);
+    explicit edge_trigger(Object&& o);
 
     void trigger(Object&& o);
 

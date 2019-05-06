@@ -57,7 +57,7 @@ class latch {
     /// \brief construct a new latch
     /// \param value : the initial value of the counter, must be non negative
     ///
-    inline latch(std::ptrdiff_t value) : _counter((value != 0) ? (value) : (unlocked)), _cond(), _latch_lock() {
+    explicit inline latch(std::ptrdiff_t value) : _counter((value != 0) ? (value) : (unlocked)), _cond(), _latch_lock() {
         assert(value >= 0);
     }
 
