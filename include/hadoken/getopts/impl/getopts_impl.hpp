@@ -141,16 +141,22 @@ std::string options_handler::help(const help_format & fmt) const{
                 _get_max_print_table_column_length(8, 2, commands_string.begin(), commands_string.end()));
 
     std::ostringstream ss;
-    ss << margin_str << name() << ": " << help_message() << "\n\n";
-    ss << margin_str << "Commands:" << "\n";
+    ss << margin_str << "Description:\n";
+    ss << margin_str << padding_str << help_message() << "\n\n";
 
-    for(const auto & cmd : sub_commands() ){
-        ss << margin_str << padding_str;
-        _concat_as_colmun(ss, cmd.name(), colmun_length);
-        ss << cmd.help_message() << "\n";
+    if(sub_commands().empty() == false){
+        ss << margin_str << "Commands:" << "\n";
+
+        for(const auto & cmd : sub_commands() ){
+            ss << margin_str << padding_str;
+            _concat_as_colmun(ss, cmd.name(), colmun_length);
+            ss << cmd.help_message() << "\n";
+        }
+
+        ss << "\n";
     }
 
-    ss << "\n";
+
     ss << padding_str << "Options:" << "\n";
 
 
