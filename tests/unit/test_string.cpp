@@ -110,6 +110,10 @@ BOOST_AUTO_TEST_CASE(wildcard_simple) {
     BOOST_CHECK(hadoken::match_wildcard("world*", "hello world") == false);
     BOOST_CHECK(hadoken::match_wildcard("*", "hello world"));
 
+    BOOST_CHECK(hadoken::match_wildcard("hello wo*rld", "hello world"));
+
+    BOOST_CHECK(hadoken::match_wildcard("hello world*", "hello world"));
+
     auto t2 = std::chrono::steady_clock::now();
 
     std::cout << "time taken wildcard " << double(std::chrono::duration_cast<std::chrono::microseconds>(t2 - t1).count())
