@@ -59,8 +59,16 @@ inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterato
             return true;
         }
 
-        if (it_expr >= end_expr || it_str >= end_str) {
+        if (it_expr >= end_expr){
             continue;
+        }
+
+        if( it_str >= end_str){
+            if(*it_expr == '*'){
+                stack_parser.emplace_back(progress_iterator(it_expr + 1, it_str));
+            }else{
+                continue;
+            }
         }
 
 
