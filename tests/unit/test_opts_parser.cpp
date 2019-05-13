@@ -31,6 +31,7 @@
 #define BOOST_TEST_MAIN
 
 #include <iostream>
+#include <algorithm>
 
 #include <boost/test/unit_test.hpp>
 
@@ -229,4 +230,59 @@ BOOST_AUTO_TEST_CASE(opt_parser_alias) {
 
 
     BOOST_CHECK_EQUAL(counter, 2);
+}
+
+
+
+
+
+BOOST_AUTO_TEST_CASE(opt_parser_test_arg_mode) {
+    using namespace hadoken;
+
+    std::string str_value = "awesome_opt";
+
+
+    std::string positional_value0 = "pre_positional";
+
+    std::string positional_value1 = "a normal positional with space";
+
+    std::string positional_value2 = "the end positional";
+
+    int int_value = 42;
+
+    std::vector<std::string> list_pos;
+
+
+    options_handler options("my_prog", "equal versus value option passing");
+
+    options.add_option(option("--opt-str", [&](std::string v) {
+                           BOOST_TEST_CHECKPOINT("should be a valid string opt");
+                           BOOST_CHECK_EQUAL(v, str_value); }, "msg"));
+
+    options.add_option(option("--opt-int", [&](int v) {
+        BOOST_TEST_CHECKPOINT("should be a valid int opt");
+        BOOST_CHECK_EQUAL(v, int_value); }, "msg"));
+
+    options.set_positional_argument_handler([&](const std::string & v){
+        list_pos.emplace_back(v);
+    });
+
+    std::vector<std::string> args_str = {
+                                      positional_value0,
+                                      hadoken::scat("--opt-str" , "=", str_value),
+                                      positional_value1,
+                                      hadoken::scat("--opt-int" , "=", int_value),
+                                      positional_value2};
+
+    std::vector<string_view> args;
+    std::transform(args_str.begin(), args_str.end(), std::back_inserter(args), [](const std::string & v){ return string_view(v); });
+
+    parse_options(options, "binary4", args);
+
+
+    BOOST_CHECK_EQUAL(list_pos.size(), 3);
+    BOOST_CHECK_EQUAL(list_pos.at(0), positional_value0);
+    BOOST_CHECK_EQUAL(list_pos.at(1), positional_value1);
+    BOOST_CHECK_EQUAL(list_pos.at(2), positional_value2);
+
 }
