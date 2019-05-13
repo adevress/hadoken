@@ -47,14 +47,11 @@ struct options_format;
 class parse_options_error : public std::runtime_error {
   public:
     explicit inline parse_options_error(const std::string& msg) : std::runtime_error(msg) {}
-    explicit inline parse_options_error(const std::string& msg, std::vector<std::string> subcmd) :
-        std::runtime_error(msg),
-        _subcmds(subcmd){}
+    explicit inline parse_options_error(const std::string& msg, std::vector<std::string> subcmd)
+        : std::runtime_error(msg), _subcmds(subcmd) {}
 
 
-    inline const std::vector<std::string> & subcommand_stack() const{
-        return _subcmds;
-    }
+    inline const std::vector<std::string>& subcommand_stack() const { return _subcmds; }
 
 
   private:
