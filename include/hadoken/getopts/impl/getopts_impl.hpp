@@ -46,23 +46,6 @@ const std::string _help_opt = "--help";
 
 
 template <typename Iterator>
-void _call_next_argument_string(const option& opt, bool call, Iterator begin_arg, Iterator end_arg) {
-    auto argument = _get_next_argument_generic(opt.name(), begin_arg, end_arg);
-
-    if (_is_prefixed_option(argument)) {
-        throw parse_options_error(scat("invalid option argument for ", opt.name()));
-    }
-
-    try {
-        if (call) {
-            opt._call(argument);
-        }
-    } catch (std::exception& e) {
-        throw parse_options_error(scat("invalid value ", *begin_arg, " for ", opt.name(), " <string> argument"));
-    }
-}
-
-template <typename Iterator>
 std::size_t _get_max_print_table_column_length(std::size_t min, std::size_t min_right_margin, Iterator begin, Iterator end) {
     std::size_t max_size = 0;
     std::for_each(begin, end, [&](const decltype(*begin)& elem) { max_size = std::max<std::size_t>(max_size, elem.size()); });
@@ -208,7 +191,15 @@ inline std::vector<string_view> option::name_and_aliases() const {
 inline void option::add_alias(std::string alias) { _names.emplace_back(alias); }
 
 inline bool option::match(string_view opt) const {
-    return std::any_of(_names.begin(), _names.end(), [&](const std::string& v) { return opt.compare(v) == 0; });
+
+    // find assignment operator if any
+    auto it = std::find(opt.begin(), opt.end(), '=');
+    hadoken::string_view prefix_opt = hadoken::make_string_view(opt.begin(), it);
+
+    return std::any_of(_names.begin(), _names.end(), [&](const std::string& v) {
+        return hadoken::make_string_view(v.begin(), v.end()) == prefix_opt;
+
+    });
 }
 
 inline void option::_call(string_view value) const { _action(to_string(value)); }
@@ -231,16 +222,26 @@ bool _end_of_arguments(string_view candidate_opt) {
 }
 
 template <typename Iterator>
-string_view _get_next_argument_generic(string_view option_name, Iterator begin_arg, Iterator end_arg) {
+std::tuple<Iterator, string_view> _get_next_argument_generic(string_view option_name, Iterator begin_arg, Iterator end_arg) {
+    hadoken::string_view opt_view(*begin_arg);
+
+    // determine if we have "key=value" style argument
+    auto it = std::find(opt_view.begin(), opt_view.end(), '=');
+    if(it != opt_view.end()){
+        return std::make_tuple(begin_arg +1, hadoken::make_string_view(it+1, opt_view.end()));
+    }
+
+    // take the next argument
     if (begin_arg + 1 >= end_arg) {
         throw parse_options_error(scat("missing value for option ", option_name));
     }
-    return *(begin_arg + 1);
+    return std::make_tuple(begin_arg +2, *(begin_arg + 1));
 }
 
 template <typename Iterator>
-void _call_next_argument_int(const option& opt, bool call, Iterator begin_arg, Iterator end_arg) {
-    auto argument = _get_next_argument_generic(opt.name(), begin_arg, end_arg);
+Iterator _call_next_argument_int(const option& opt, bool call, Iterator begin_arg, Iterator end_arg) {
+    auto tuple_args = _get_next_argument_generic(opt.name(), begin_arg, end_arg);
+    string_view argument = std::get<1>(tuple_args);
 
     try {
         (void)std::stoi(to_string(argument));
@@ -250,8 +251,30 @@ void _call_next_argument_int(const option& opt, bool call, Iterator begin_arg, I
     } catch (std::exception& e) {
         throw parse_options_error(scat("invalid value ", *begin_arg, " for ", opt.name(), " <int> argument"));
     }
+
+    return std::get<0>(tuple_args);
 }
 
+
+template <typename Iterator>
+Iterator _call_next_argument_string(const option& opt, bool call, Iterator begin_arg, Iterator end_arg) {
+    auto tuple_args = _get_next_argument_generic(opt.name(), begin_arg, end_arg);
+    string_view argument = std::get<1>(tuple_args);
+
+    if (_is_prefixed_option(argument)) {
+        throw parse_options_error(scat("invalid option argument for ", opt.name()));
+    }
+
+    try {
+        if (call) {
+            opt._call(argument);
+        }
+    } catch (std::exception& e) {
+        throw parse_options_error(scat("invalid value ", *begin_arg, " for ", opt.name(), " <string> argument"));
+    }
+
+    return std::get<0>(tuple_args);
+}
 
 inline std::vector<std::string> _extract_sub_comm_stack(const std::vector<options_handler const*> & stack){
     std::vector<std::string> names;
@@ -311,21 +334,21 @@ inline bool _validate_and_call(std::vector<options_handler const*> stack, string
 
         for (const option& opt : opt_handler.options()) {
             if (opt.match(*begin_arg)) {
-                off_t offset = 1;
+                decltype(begin_arg) next_arg;
+
                 if (opt._get_flag(_option_flag_require_none)) {
                     if (call) {
                         opt._call("");
                     }
+                    next_arg = begin_arg +1;
                 } else if (opt._get_flag(_option_flag_require_int)) {
-                    _call_next_argument_int(opt, call, begin_arg, end_arg);
-                    offset = 2;
+                    next_arg = _call_next_argument_int(opt, call, begin_arg, end_arg);
                 } else if (opt._get_flag(_option_flag_require_str)) {
-                    _call_next_argument_string(opt, call, begin_arg, end_arg);
-                    offset = 2;
+                    next_arg = _call_next_argument_string(opt, call, begin_arg, end_arg);
                 } else {
                     throw parse_options_error("invalid parser configuration", _extract_sub_comm_stack(stack));
                 }
-                return _validate_and_call(stack, prog_name, begin_arg + offset, end_arg, call, positional_only);
+                return _validate_and_call(stack, prog_name, next_arg, end_arg, call, positional_only);
             }
         }
         throw parse_options_error(scat("argument ", *begin_arg, " is not supported"), _extract_sub_comm_stack(stack));
