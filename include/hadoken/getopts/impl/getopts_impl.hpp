@@ -253,6 +253,17 @@ void _call_next_argument_int(const option& opt, bool call, Iterator begin_arg, I
 }
 
 
+inline std::vector<std::string> _extract_sub_comm_stack(const std::vector<options_handler const*> & stack){
+    std::vector<std::string> names;
+    names.reserve(stack.size());
+
+    for(const auto & e : stack){
+        names.emplace_back(to_string(e->name()));
+    }
+    return names;
+}
+
+
 
 template <typename Iterator>
 inline bool _validate_and_call(std::vector<options_handler const*> stack, string_view prog_name, Iterator begin_arg,
@@ -263,7 +274,7 @@ inline bool _validate_and_call(std::vector<options_handler const*> stack, string
     if (begin_arg >= end_arg) {
 
         if (opt_handler.get_flag(options_handler::flag::only_subcmd)) {
-            throw parse_options_error("invalid argument: no subcommand");
+            throw parse_options_error("invalid argument: no subcommand", _extract_sub_comm_stack(stack));
         }
         return true;
     }
@@ -295,7 +306,7 @@ inline bool _validate_and_call(std::vector<options_handler const*> stack, string
                << "\n";
             ss << "\n";
             ss << opt_handler.help();
-            throw parse_options_error(ss.str());
+            throw parse_options_error(ss.str(), _extract_sub_comm_stack(stack));
         }
 
         for (const option& opt : opt_handler.options()) {
@@ -312,12 +323,12 @@ inline bool _validate_and_call(std::vector<options_handler const*> stack, string
                     _call_next_argument_string(opt, call, begin_arg, end_arg);
                     offset = 2;
                 } else {
-                    throw parse_options_error("invalid parser configuration");
+                    throw parse_options_error("invalid parser configuration", _extract_sub_comm_stack(stack));
                 }
                 return _validate_and_call(stack, prog_name, begin_arg + offset, end_arg, call, positional_only);
             }
         }
-        throw parse_options_error(scat("argument ", *begin_arg, " is not supported"));
+        throw parse_options_error(scat("argument ", *begin_arg, " is not supported"), _extract_sub_comm_stack(stack));
     }
 
     // positional argument
@@ -351,7 +362,14 @@ inline void parse_options(const options_handler& opt_handler, string_view prog_n
         ss << prog_name << ": " << e.what();
         ss << "\n";
         ss << prog_name << ": "
-           << "try `" << prog_name << " --help`"
+           << "try `" << prog_name;
+
+
+        auto sub_comms = e.subcommand_stack();
+        for(auto it = sub_comms.begin() +1 ; it < sub_comms.end(); ++it){
+            ss << " " << *it;
+        }
+        ss << " --help`"
            << " for more information ";
         throw parse_options_error(ss.str());
     }
