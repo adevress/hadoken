@@ -56,15 +56,17 @@ class concurrent_queue_stl_mut {
 
     optional<T> try_pop();
 
-
     bool empty() const;
 
     std::size_t size() const;
+
+    void set_small_buffer_size(std::uint64_t alloc_size);
 
   private:
     mutable typename ThreadModel::mutex _qmut;
     typename ThreadModel::condition_variable _qcond;
     std::deque<T, Allocator> _dek;
+    std::uint64_t _buffer_capacity, _small_allocation;
 };
 
 
