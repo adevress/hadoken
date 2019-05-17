@@ -165,13 +165,13 @@ inline option::option(std::string option_name, std::function<void(const std::str
 
 inline option::option(std::string option_name, std::function<void(int)> callback, std::string help_msg)
     : _names({std::move(option_name)}), _help_msg(std::move(help_msg)),
-      _action([callback, this](string_view arg) -> void { callback(std::stoi(to_string(arg))); }) {
+      _action([callback](string_view arg) -> void { callback(std::stoi(to_string(arg))); }) {
     _flags[_option_flag_require_int] = true;
 }
 
 inline option::option(std::string option_name, std::function<void()> callback, std::string help_msg)
     : _names({std::move(option_name)}), _help_msg(std::move(help_msg)),
-      _action([callback, this](string_view) -> void { callback(); }) {
+      _action([callback](string_view) -> void { callback(); }) {
     _flags[_option_flag_require_none] = true;
 }
 
