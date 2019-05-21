@@ -55,7 +55,7 @@ inline std::string format_datetime(const TimePoint  & p, const std::string & fmt
         throw std::invalid_argument("invalid date/time formatting");
     }
     if(ret >= ssize_t(buffer_time.size() -1)){
-        throw std::out_of_range("data/time formatting too large");
+        throw std::out_of_range("data/time format too large");
     }
 
     return std::string(buffer_time.data());
