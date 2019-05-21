@@ -37,6 +37,7 @@
 
 #include <hadoken/format/format.hpp>
 #include <hadoken/format/format_template.hpp>
+#include <hadoken/format/datetime.hpp>
 
 BOOST_AUTO_TEST_CASE(simple_format_concat_test) {
     using namespace hadoken::format;
@@ -105,4 +106,23 @@ BOOST_AUTO_TEST_CASE(format_template_test) {
     // partial replace
     res = format_template(string_template, {std::make_tuple("my_var1", "world")});
     BOOST_CHECK_EQUAL(res, "hello world, from the {my_var2}");
+}
+
+
+
+
+BOOST_AUTO_TEST_CASE(format_template_datetime) {
+    using namespace hadoken::format;
+
+    const std::string date_template = "%Y-%m-%d", bad_format="unknown%Gran";
+
+
+    std::chrono::system_clock::time_point time_test(std::chrono::seconds(1210912996));
+
+    std::string res = format_datetime(time_test, date_template);
+
+
+    BOOST_CHECK_EQUAL(res, "2008-05-16");
+
+
 }
