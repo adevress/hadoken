@@ -50,6 +50,7 @@ public:
         _min(minimum),
         _max(maximum),
         _step_value(step_value),
+        _sum(0),
         _cardinality(0),
         _histo_lock(){
 
@@ -81,6 +82,7 @@ public:
             std::lock_guard<std::mutex> _l(_histo_lock);
             _bins.at(bounded_position) += 1;
             _cardinality += 1;
+            _sum += v;
         }
     }
 
@@ -111,9 +113,14 @@ public:
         return _cardinality;
     }
 
+    value_type sum() const{
+        std::lock_guard<mutex_type> _lock(_histo_lock);
+        return _sum;
+    }
+
 private:
     std::vector<std::uint64_t> _bins;
-    value_type _min, _max, _step_value;
+    value_type _min, _max, _step_value, _sum;
     std::uint64_t _cardinality;
 
     mutable std::mutex _histo_lock;

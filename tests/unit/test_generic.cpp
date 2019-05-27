@@ -152,12 +152,15 @@ BOOST_AUTO_TEST_CASE(basic_histogram_test) {
     // add X bins randomly in middle
     const std::size_t nb_insert = 100;
     for(std::size_t i = 0; i < nb_insert ; ++i){
-        histo.add_value(0);
+        histo.add_value(0.1);
     }
 
     BOOST_CHECK_EQUAL(histo.cardinality(), 102);
 
     auto b_middle = histo.get_bin(4);
     BOOST_CHECK_EQUAL(std::get<2>(b_middle), 100);
+
+    BOOST_CHECK_GE(histo.sum(), 9.9);
+    BOOST_CHECK_LE(histo.sum(), 10.1);
 
 }
