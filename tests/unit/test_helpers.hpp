@@ -37,6 +37,7 @@
 #include <type_traits>
 
 
+
 template <typename T, typename Extra = void>
 struct content_generator {
 

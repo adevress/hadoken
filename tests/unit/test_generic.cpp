@@ -32,6 +32,7 @@
 
 #include <iostream>
 #include <map>
+#include <cmath>
 
 #include <boost/array.hpp>
 #include <boost/math/constants/constants.hpp>
@@ -41,7 +42,10 @@
 
 #include <hadoken/numeric/convert.hpp>
 #include <hadoken/numeric/float.hpp>
+#include <hadoken/numeric/histogram.hpp>
+
 #include <hadoken/string/wildcard.hpp>
+
 #include <hadoken/utility/optional.hpp>
 #include <hadoken/utility/variant.hpp>
 
@@ -103,4 +107,57 @@ BOOST_AUTO_TEST_CASE(integral_convertion) {
     // check floating point
     double d = to_floating<double>("42.88");
     BOOST_CHECK(close_to_abs(42.88, d));
+}
+
+
+
+
+BOOST_AUTO_TEST_CASE(basic_histogram_test) {
+    using namespace hadoken;
+
+    const double pi = 4* std::atan(1);
+    logarithmic_histogram<double> histo(-200, 200, pi);
+
+    BOOST_CHECK_EQUAL(histo.size(), 6);
+
+    BOOST_CHECK_EQUAL(histo.cardinality(), 0);
+
+
+    for(std::size_t i = 0; i < histo.size(); ++i){
+        BOOST_CHECK_EQUAL(std::get<2>(histo.get_bin(i)), 0);
+    }
+
+
+    // add extreme negative value out of scope
+    histo.add_value(-8000);
+    BOOST_CHECK_EQUAL(histo.cardinality(), 1);
+
+    auto b0 = histo.get_bin(0);
+    BOOST_CHECK_EQUAL(std::get<0>(b0), std::numeric_limits<double>::lowest());
+    BOOST_CHECK_EQUAL(std::get<1>(b0), -200 + pi);
+    BOOST_CHECK_EQUAL(std::get<2>(b0), 1);
+
+
+
+    // add extreme positive value out of scope
+    histo.add_value(8000);
+    BOOST_CHECK_EQUAL(histo.cardinality(), 2);
+
+    auto b_end = histo.get_bin(histo.size() -1);
+    BOOST_CHECK_EQUAL(std::get<0>(b_end), -200.0 + std::pow(pi, histo.size() -1));
+    BOOST_CHECK_EQUAL(std::get<1>(b_end), std::numeric_limits<double>::max());
+    BOOST_CHECK_EQUAL(std::get<2>(b_end), 1);
+
+
+    // add X bins randomly in middle
+    const std::size_t nb_insert = 100;
+    for(std::size_t i = 0; i < nb_insert ; ++i){
+        histo.add_value(0);
+    }
+
+    BOOST_CHECK_EQUAL(histo.cardinality(), 102);
+
+    auto b_middle = histo.get_bin(4);
+    BOOST_CHECK_EQUAL(std::get<2>(b_middle), 100);
+
 }

@@ -29,35 +29,16 @@
  */
 
 
-#include <chrono>
+#include <array>
+#include <tuple>
+#include <type_traits>
+
 #include <hadoken/string/string_view.hpp>
 
-namespace hadoken {
 
-
-
-template<typename TimePoint>
-inline std::string format_datetime(const TimePoint  & p, const std::string & fmt){
-    using Clock = typename TimePoint::clock;
-
-
-    std::array<char, 256> buffer_time;
-    std::fill(buffer_time.begin(), buffer_time.end(), '\0');
-
-    std::time_t t = Clock::to_time_t(p);
-    struct tm * tmp_info = std::localtime(&t);
-
-    ssize_t ret = strftime(buffer_time.data(), buffer_time.size() -1 , fmt.c_str(), tmp_info);
-    if(ret <= 0){
-        throw std::invalid_argument("invalid date/time formatting");
-    }
-    if(ret >= ssize_t(buffer_time.size() -1)){
-        throw std::out_of_range("data/time format too large");
-    }
-
-    return std::string(buffer_time.data());
-}
-
+namespace hadoken{
 
 
 } // hadoken
+
+
