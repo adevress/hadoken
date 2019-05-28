@@ -45,7 +45,9 @@ inline std::string format_datetime(const TimePoint  & p, const std::string & fmt
     std::fill(buffer_time.begin(), buffer_time.end(), '\0');
 
     std::time_t t = Clock::to_time_t(p);
-    struct tm * tmp_info = std::localtime(&t);
+
+    struct tm tmp_info_store;
+    struct tm * tmp_info = ::localtime_r(&t, &tmp_info_store);
 
     ssize_t ret = strftime(buffer_time.data(), buffer_time.size() -1 , fmt.c_str(), tmp_info);
     if(ret <= 0){
@@ -55,7 +57,7 @@ inline std::string format_datetime(const TimePoint  & p, const std::string & fmt
         throw std::out_of_range("data/time format too large");
     }
 
-    return std::string(buffer_time.data());
+    return std::string(buffer_time.data(), ret);
 }
 
 
