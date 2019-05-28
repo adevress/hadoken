@@ -28,6 +28,7 @@
  */
 #pragma once
 
+#include <cmath>
 #include <vector>
 #include <limits>
 #include <numeric>
