@@ -36,8 +36,8 @@ namespace hadoken {
 
 
 
-template<typename TimePoint>
-inline std::string format_datetime(const TimePoint  & p, const std::string & fmt){
+template <typename TimePoint>
+inline std::string format_datetime(const TimePoint& p, const std::string& fmt) {
     using Clock = typename TimePoint::clock;
 
 
@@ -47,13 +47,13 @@ inline std::string format_datetime(const TimePoint  & p, const std::string & fmt
     std::time_t t = Clock::to_time_t(p);
 
     struct tm tmp_info_store;
-    struct tm * tmp_info = ::localtime_r(&t, &tmp_info_store);
+    struct tm* tmp_info = ::localtime_r(&t, &tmp_info_store);
 
-    ssize_t ret = strftime(buffer_time.data(), buffer_time.size() -1 , fmt.c_str(), tmp_info);
-    if(ret <= 0){
+    ssize_t ret = strftime(buffer_time.data(), buffer_time.size() - 1, fmt.c_str(), tmp_info);
+    if (ret <= 0) {
         throw std::invalid_argument("invalid date/time formatting");
     }
-    if(ret >= ssize_t(buffer_time.size() -1)){
+    if (ret >= ssize_t(buffer_time.size() - 1)) {
         throw std::out_of_range("data/time format too large");
     }
 
@@ -62,4 +62,4 @@ inline std::string format_datetime(const TimePoint  & p, const std::string & fmt
 
 
 
-} // hadoken
+} // namespace hadoken

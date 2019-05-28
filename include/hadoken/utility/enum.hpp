@@ -36,9 +36,4 @@
 #include <hadoken/string/string_view.hpp>
 
 
-namespace hadoken{
-
-
-} // hadoken
-
-
+namespace hadoken {} // namespace hadoken

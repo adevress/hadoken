@@ -198,7 +198,6 @@ inline bool option::match(string_view opt) const {
 
     return std::any_of(_names.begin(), _names.end(), [&](const std::string& v) {
         return hadoken::make_string_view(v.begin(), v.end()) == prefix_opt;
-
     });
 }
 
@@ -227,15 +226,15 @@ std::tuple<Iterator, string_view> _get_next_argument_generic(string_view option_
 
     // determine if we have "key=value" style argument
     auto it = std::find(opt_view.begin(), opt_view.end(), '=');
-    if(it != opt_view.end()){
-        return std::make_tuple(begin_arg +1, hadoken::make_string_view(it+1, opt_view.end()));
+    if (it != opt_view.end()) {
+        return std::make_tuple(begin_arg + 1, hadoken::make_string_view(it + 1, opt_view.end()));
     }
 
     // take the next argument
     if (begin_arg + 1 >= end_arg) {
         throw parse_options_error(scat("missing value for option ", option_name));
     }
-    return std::make_tuple(begin_arg +2, *(begin_arg + 1));
+    return std::make_tuple(begin_arg + 2, *(begin_arg + 1));
 }
 
 template <typename Iterator>
@@ -276,11 +275,11 @@ Iterator _call_next_argument_string(const option& opt, bool call, Iterator begin
     return std::get<0>(tuple_args);
 }
 
-inline std::vector<std::string> _extract_sub_comm_stack(const std::vector<options_handler const*> & stack){
+inline std::vector<std::string> _extract_sub_comm_stack(const std::vector<options_handler const*>& stack) {
     std::vector<std::string> names;
     names.reserve(stack.size());
 
-    for(const auto & e : stack){
+    for (const auto& e : stack) {
         names.emplace_back(to_string(e->name()));
     }
     return names;
@@ -340,7 +339,7 @@ inline bool _validate_and_call(std::vector<options_handler const*> stack, string
                     if (call) {
                         opt._call("");
                     }
-                    next_arg = begin_arg +1;
+                    next_arg = begin_arg + 1;
                 } else if (opt._get_flag(_option_flag_require_int)) {
                     next_arg = _call_next_argument_int(opt, call, begin_arg, end_arg);
                 } else if (opt._get_flag(_option_flag_require_str)) {
@@ -389,7 +388,7 @@ inline void parse_options(const options_handler& opt_handler, string_view prog_n
 
 
         auto sub_comms = e.subcommand_stack();
-        for(auto it = sub_comms.begin() +1 ; it < sub_comms.end(); ++it){
+        for (auto it = sub_comms.begin() + 1; it < sub_comms.end(); ++it) {
             ss << " " << *it;
         }
         ss << " --help`"

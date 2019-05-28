@@ -29,55 +29,46 @@
 #pragma once
 
 #include <cmath>
-#include <vector>
 #include <limits>
+#include <mutex>
 #include <numeric>
 #include <stdexcept>
-#include <mutex>
+#include <vector>
 
 
 namespace hadoken {
 
 
 
-template<typename Float, typename Mutex = std::mutex>
-class logarithmic_histogram{
-public:
+template <typename Float, typename Mutex = std::mutex>
+class logarithmic_histogram {
+  public:
     using value_type = Float;
     using mutex_type = Mutex;
 
-    logarithmic_histogram(value_type minimum, value_type maximum, value_type step_value) :
-        _bins(),
-        _min(minimum),
-        _max(maximum),
-        _step_value(step_value),
-        _sum(0),
-        _cardinality(0),
-        _histo_lock(){
+    logarithmic_histogram(value_type minimum, value_type maximum, value_type step_value)
+        : _bins(), _min(minimum), _max(maximum), _step_value(step_value), _sum(0), _cardinality(0), _histo_lock() {
 
-        if(_max <= _min){
+        if (_max <= _min) {
             throw std::logic_error("invalid minimum value >= maximum value for histogram");
         }
 
-        if(_step_value <= 0){
+        if (_step_value <= 0) {
             throw std::logic_error("invalid step value for histogram");
         }
 
         const value_type full_range = _max - _min;
 
         const value_type n_bins = std::log(full_range) / std::log(_step_value);
-        const std::size_t bounded_upper_n_bins_size = static_cast<std::size_t>( std::max<value_type>(0, n_bins)) + 1;
+        const std::size_t bounded_upper_n_bins_size = static_cast<std::size_t>(std::max<value_type>(0, n_bins)) + 1;
         _bins.resize(bounded_upper_n_bins_size, 0);
     }
 
-    void add_value(value_type v){
+    void add_value(value_type v) {
         const value_type absolute_value = std::max<value_type>(0, v - _min);
         const value_type position = std::log(absolute_value) / std::log(_step_value);
         const std::size_t bounded_position = static_cast<std::size_t>(
-                            std::min<value_type>(
-                                std::max<value_type>(0,
-                                                     position),
-                                static_cast<value_type>(_bins.size() -1) ));
+            std::min<value_type>(std::max<value_type>(0, position), static_cast<value_type>(_bins.size() - 1)));
 
         {
             std::lock_guard<std::mutex> _l(_histo_lock);
@@ -88,54 +79,47 @@ public:
     }
 
 
-    std::size_t size() const{
-        return _bins.size();
-    }
+    std::size_t size() const { return _bins.size(); }
 
-    std::tuple<value_type, value_type, std::uint64_t> get_bin(std::size_t bin_position) const{
+    std::tuple<value_type, value_type, std::uint64_t> get_bin(std::size_t bin_position) const {
 
-        if(bin_position >= _bins.size()){
+        if (bin_position >= _bins.size()) {
             throw std::out_of_range("bin position >= histogram size");
         }
 
         {
             std::lock_guard<mutex_type> _lock(_histo_lock);
 
-            return std::make_tuple(
-                            _boundary_bin(bin_position),
-                            _boundary_bin(bin_position + 1),
-                            _bins.at(bin_position)
-            );
+            return std::make_tuple(_boundary_bin(bin_position), _boundary_bin(bin_position + 1), _bins.at(bin_position));
         }
     }
 
-    std::size_t cardinality() const{
+    std::size_t cardinality() const {
         std::lock_guard<mutex_type> _lock(_histo_lock);
         return _cardinality;
     }
 
-    value_type sum() const{
+    value_type sum() const {
         std::lock_guard<mutex_type> _lock(_histo_lock);
         return _sum;
     }
 
-private:
+  private:
     std::vector<std::uint64_t> _bins;
     value_type _min, _max, _step_value, _sum;
     std::uint64_t _cardinality;
 
     mutable std::mutex _histo_lock;
 
-    value_type _boundary_bin(const std::size_t pos) const{
-        if (pos == 0){
+    value_type _boundary_bin(const std::size_t pos) const {
+        if (pos == 0) {
             return std::numeric_limits<value_type>::lowest();
         }
-        if(pos >= size()){
+        if (pos >= size()) {
             return std::numeric_limits<value_type>::max();
         }
         return _min + std::pow<value_type>(_step_value, static_cast<value_type>(pos));
     }
-
 };
 
 
