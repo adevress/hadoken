@@ -44,7 +44,7 @@ inline void concurrent_queue_stl_mut<T, ThreadModel, Allocator>::push(T element)
         std::lock_guard<std::mutex> l(_qmut);
 
         _dek.push_back(std::move(element));
-        _buffer_capacity += 1;
+        _buffer_capacity = std::max<std::uint64_t>(_dek.size(), _buffer_capacity);
         _qcond.notify_one();
     }
 }
