@@ -26,10 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef _HADOKEN_SHA1_HPP_
-#define _HADOKEN_SHA1_HPP_
-
-
+#pragma once
 
 
 #include <algorithm>
@@ -253,4 +250,3 @@ class sha1 {
 } // namespace hadoken
 
 
-#endif
