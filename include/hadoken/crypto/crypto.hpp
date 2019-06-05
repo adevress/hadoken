@@ -29,4 +29,5 @@
 #pragma once
 
 #include "sha/sha1.hpp"
+#include "base/base64.hpp"
 

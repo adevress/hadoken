@@ -43,6 +43,45 @@
 
 
 
+void test_base64_base(const std::string & origin, const std::string & encoded){
+    auto mencoded = hadoken::base64::encode(origin);
+    BOOST_CHECK_EQUAL(mencoded, encoded);
+
+    auto mdecoded = hadoken::base64::decode(mencoded);
+    BOOST_CHECK_EQUAL(mdecoded, origin);
+}
+
+
+
+BOOST_AUTO_TEST_CASE(base64_tests) {
+
+    // test empty
+    test_base64_base("", "");
+
+    // test simple \n double complement
+    test_base64_base("\n", "Cg==");
+
+    // test simple complement
+    test_base64_base("hello world", "aGVsbG8gd29ybGQ=");
+
+    // test no complement
+    test_base64_base("hel", "aGVs");
+
+
+    // test invalid content decode
+    std::string binary_content;
+    for(unsigned char a = 0; a < std::numeric_limits<unsigned char>::max(); ++a){
+        binary_content.push_back(char(a));
+    }
+
+    BOOST_CHECK_THROW({
+        auto res = hadoken::base64::decode(binary_content);
+        BOOST_FAIL("should not reach here");
+
+    }, hadoken::base64::base64_exception
+    );
+}
+
 BOOST_AUTO_TEST_CASE(sha1_basic_tests) {
     std::string str("hello world");
     std::string hash_str("2aae6c35c94fcfb415dbe95f408b9ce91ee846ed");
