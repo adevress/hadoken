@@ -49,7 +49,7 @@ namespace base64{
 ///
 class base64_exception : public std::runtime_error{
 public:
-    inline base64_exception(const std::string & err) : std::runtime_error(err){}
+    inline explicit base64_exception(const std::string & err) : std::runtime_error(err){}
 
 };
 
