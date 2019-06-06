@@ -118,7 +118,7 @@ class logarithmic_histogram {
         if (pos >= size()) {
             return std::numeric_limits<value_type>::max();
         }
-        return _min + std::pow<value_type>(_step_value, static_cast<value_type>(pos));
+        return _min + std::pow(_step_value, static_cast<value_type>(pos));
     }
 };
 
