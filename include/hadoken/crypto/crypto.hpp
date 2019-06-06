@@ -26,10 +26,8 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef _HADOKEN_CRYPTO_HPP_
-#define _HADOKEN_CRYPTO_HPP_
-
+#pragma once
 
 #include "sha/sha1.hpp"
+#include "base/base64.hpp"
 
-#endif // _HADOKEN_CRYPTO_HPP_
