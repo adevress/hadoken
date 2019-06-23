@@ -26,9 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef HADOKEN_ENV_IMPL_HPP
-#define HADOKEN_ENV_IMPL_HPP
-
+#pragma once
 #include "../env.hpp"
 
 #include <cstdlib>
@@ -47,7 +45,3 @@ optional<std::string> get_env(const std::string& varname) {
 }
 
 } // namespace hadoken
-
-
-
-#endif // HOSTNAME_HPP

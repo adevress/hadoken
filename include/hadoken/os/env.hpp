@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, Adrien Devresse <adrien.devresse@epfl.ch>
+ * Copyright (c) 2019, Adrien Devresse <adrien.devresse@epfl.ch>
  *
  * Boost Software License - Version 1.0
  *
@@ -26,8 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef HADOKEN_ENV_HPP
-#define HADOKEN_ENV_HPP
+#pragma once
 
 #include <hadoken/utility/optional.hpp>
 #include <string>
@@ -46,4 +45,3 @@ inline optional<std::string> get_env(const std::string& varname);
 
 #include "impl/env_impl.hpp"
 
-#endif // ENV_HPP

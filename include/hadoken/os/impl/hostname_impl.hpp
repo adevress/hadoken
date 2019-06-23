@@ -26,8 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef HADOKEN_HOSTNAME_IMPL_HPP
-#define HADOKEN_HOSTNAME_IMPL_HPP
+#pragma once
 
 #include "../hostname.hpp"
 
@@ -53,4 +52,3 @@ std::string get_hostname() {
 
 
 
-#endif // HOSTNAME_HPP

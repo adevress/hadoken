@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2016, Adrien Devresse <adrien.devresse@epfl.ch>
+ * Copyright (c) 2019, Adrien Devresse <adrien.devresse@epfl.ch>
  *
  * Boost Software License - Version 1.0
  *
@@ -26,8 +26,7 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef HADOKEN_HOSTNAME_HPP
-#define HADOKEN_HOSTNAME_HPP
+#pragma once
 
 #include <string>
 
@@ -46,4 +45,3 @@ inline std::string get_hostname();
 
 #include "impl/hostname_impl.hpp"
 
-#endif // HOSTNAME_HPP
