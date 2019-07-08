@@ -92,27 +92,36 @@ BOOST_AUTO_TEST_CASE(string_tokenize_view) {
     BOOST_CHECK_EQUAL(res.size(), 4);
 }
 
+
+void test_wildcard(const std::string & wildcard, const std::string & str, bool result){
+    const bool res = hadoken::match_wildcard(wildcard, str);
+    std::cout << " test " << wildcard << " " << str << "\n";
+    BOOST_CHECK_EQUAL(res, result);
+}
+
 BOOST_AUTO_TEST_CASE(wildcard_simple) {
 
     auto t1 = std::chrono::steady_clock::now();
 
-    BOOST_CHECK(hadoken::match_wildcard("hello*ld", "hello world"));
+    std::vector<std::tuple<std::string, std::string, bool> > test_cases = {
+        { "hello*ld", "hello world", true },
+        { "dude" , "hello world", false},
+        { "h**", "hello world", true },
+        { "*hello*", "hello world", true },
+        { "world*", "hello world", false },
+        { "*", "hello world", true },
+        { "**dude**", "hello world", false },
+        { "**blabla", "blafdfd", false },
+        { "***", "hello*world*", true },
+        { "**deb", "debug1", false },
+        { "hello wo*rld", "hello world", true},
+        { "hello world*", "hello world", true}
+    };
 
-    BOOST_CHECK(hadoken::match_wildcard("dude", "hello world") == false);
+    for(const auto & t : test_cases){
+        test_wildcard(std::get<0>(t), std::get<1>(t), std::get<2>(t));
+    }
 
-    BOOST_CHECK(hadoken::match_wildcard("h*", "hello world"));
-
-    BOOST_CHECK(hadoken::match_wildcard("hello world", "hello*") == false);
-
-    BOOST_CHECK(hadoken::match_wildcard("h**", "hello world"));
-    BOOST_CHECK(hadoken::match_wildcard("*hello*", "hello world"));
-
-    BOOST_CHECK(hadoken::match_wildcard("world*", "hello world") == false);
-    BOOST_CHECK(hadoken::match_wildcard("*", "hello world"));
-
-    BOOST_CHECK(hadoken::match_wildcard("hello wo*rld", "hello world"));
-
-    BOOST_CHECK(hadoken::match_wildcard("hello world*", "hello world"));
 
     auto t2 = std::chrono::steady_clock::now();
 

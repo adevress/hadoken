@@ -55,7 +55,7 @@ inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterato
         const auto it_expr = std::get<0>(top);
         const auto it_str = std::get<1>(top);
 
-        if (it_expr == end_expr && it_str == end_str) {
+        if (it_expr >= end_expr && it_str >= end_str) {
             return true;
         }
 
@@ -64,11 +64,10 @@ inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterato
         }
 
         if (it_str >= end_str) {
-            if (*it_expr == '*') {
+            if(*it_expr == '*'){
                 stack_parser.emplace_back(progress_iterator(it_expr + 1, it_str));
-            } else {
-                continue;
             }
+            continue;
         }
 
 
@@ -81,8 +80,8 @@ inline bool __match_wildcard_rec(Iterator begin_expr, Iterator end_expr, Iterato
             continue;
         }
 
-        stack_parser.emplace_back(progress_iterator(it_expr, it_str + 1));
         stack_parser.emplace_back(progress_iterator(it_expr + 1, it_str + 1));
+        stack_parser.emplace_back(progress_iterator(it_expr, it_str + 1));
         stack_parser.emplace_back(progress_iterator(it_expr + 1, it_str));
     }
 
