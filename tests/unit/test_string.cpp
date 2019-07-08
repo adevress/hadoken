@@ -95,7 +95,7 @@ BOOST_AUTO_TEST_CASE(string_tokenize_view) {
 
 void test_wildcard(const std::string & wildcard, const std::string & str, bool result){
     const bool res = hadoken::match_wildcard(wildcard, str);
-    std::cout << " test " << wildcard << " " << str << "\n";
+  //  std::cout << " test " << wildcard << " " << str << "\n";
     BOOST_CHECK_EQUAL(res, result);
 }
 
