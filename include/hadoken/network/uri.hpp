@@ -61,8 +61,8 @@ class uri {
     typedef std::tuple<std::string, std::string> query_pair;
 
     inline explicit uri(std::string uri_string);
-    inline explicit uri(const uri&) = default;
-    inline explicit uri(uri&&) = default;
+    inline uri(const uri&) = default;
+    inline uri(uri&&) = default;
     inline ~uri();
 
     inline bool is_valid() const;
