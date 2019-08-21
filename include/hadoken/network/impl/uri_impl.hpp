@@ -9,6 +9,7 @@
 
 #include <hadoken/format/format.hpp>
 #include <hadoken/string/string_view.hpp>
+#include <hadoken/string/algorithm.hpp>
 
 #ifndef HADOKEN_URI_HPP
 #include "../uri.hpp"
@@ -192,6 +193,22 @@ std::string uri::get_query() const {
     using namespace details;
     check_validity(_str_uri, _state);
     return string_from_view(_query);
+}
+
+
+
+hadoken::optional<std::string> uri::get_query_with_key(string_view key) const {
+    using namespace details;
+    std::string key_extended = to_string(key);
+    key_extended.append("=");
+
+    hadoken::optional<std::string> res;
+    hadoken::string::split_string_view(get_query(), "&",[&res, &key_extended](hadoken::string_view query_fragment){
+        if(query_fragment.compare(0, key_extended.size(), key_extended) == 0){
+            res = to_string(query_fragment.substr(key_extended.size(), query_fragment.size()));
+        }
+    });
+    return res;
 }
 
 std::string uri::get_fragment() const {

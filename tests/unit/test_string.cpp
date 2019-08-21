@@ -82,6 +82,25 @@ BOOST_AUTO_TEST_CASE(string_view_simple) {
 
 
 
+BOOST_AUTO_TEST_CASE(string_view_compare_sbustr) {
+    using namespace hadoken;
+
+    const char* msg = "hello bob #42~€é";
+
+    string_view msg_view(msg);
+    std::string msg_str(msg);
+
+    string_view msg_view_str(msg_str);
+
+    BOOST_CHECK_EQUAL(msg_view.compare(0, 6, msg_str.substr(0, 6)), 0);
+
+    BOOST_CHECK_EQUAL(msg_view.compare(msg_view_str), 0);
+    BOOST_CHECK_EQUAL(msg_view.compare(0, /* way larger */ 1024, msg_view_str), 0);
+    BOOST_CHECK_EQUAL(msg_view.compare(1 , 1024, msg_view_str), -1);
+
+}
+
+
 BOOST_AUTO_TEST_CASE(string_tokenize_view) {
     using namespace hadoken;
 
