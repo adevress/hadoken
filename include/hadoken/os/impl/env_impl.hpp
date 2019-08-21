@@ -44,4 +44,10 @@ optional<std::string> get_env(const std::string& varname) {
     return optional<std::string>();
 }
 
+
+
+void set_env(const std::string &varname, const std::string &value, bool override){
+    ::setenv(varname.c_str(), value.c_str(), int(override));
+}
+
 } // namespace hadoken

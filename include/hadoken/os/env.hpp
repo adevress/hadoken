@@ -40,6 +40,9 @@ namespace hadoken {
 ///
 inline optional<std::string> get_env(const std::string& varname);
 
+
+void set_env(const std::string& varname, const std::string & value, bool override = true);
+
 } // namespace hadoken
 
 
