@@ -36,7 +36,7 @@ namespace hadoken {
 
 
 
-optional<std::string> get_env(const std::string& varname) {
+inline optional<std::string> get_env(const std::string& varname) {
     char* ptr_env = ::getenv(varname.c_str());
     if (ptr_env) {
         return std::string(ptr_env);
@@ -46,7 +46,7 @@ optional<std::string> get_env(const std::string& varname) {
 
 
 
-void set_env(const std::string &varname, const std::string &value, bool override){
+inline void set_env(const std::string &varname, const std::string &value, bool override){
     ::setenv(varname.c_str(), value.c_str(), int(override));
 }
 

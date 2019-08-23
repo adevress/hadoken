@@ -38,7 +38,7 @@ namespace hadoken {
 ///
 /// return variable from environment if it exists
 ///
-inline optional<std::string> get_env(const std::string& varname);
+optional<std::string> get_env(const std::string& varname);
 
 
 void set_env(const std::string& varname, const std::string & value, bool override = true);
