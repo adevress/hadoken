@@ -109,6 +109,10 @@ BOOST_AUTO_TEST_CASE(string_tokenize_view) {
     std::vector<std::string> res = string::split_string(msg, " ");
 
     BOOST_CHECK_EQUAL(res.size(), 4);
+
+    std::string reconstruct = string::join(res, " ");
+
+    BOOST_CHECK_EQUAL(std::string(msg), reconstruct);
 }
 
 
