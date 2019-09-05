@@ -33,7 +33,6 @@
 #include <memory>
 
 
-#include <boost/type_traits.hpp>
 
 #include "ptr_iterator.hpp"
 
@@ -57,8 +56,8 @@ class small_vector {
 
     // not implemented now
     //    typedef std::reverse_iterator<const_iterator>  const_reverse_iterator;
-    //    typedef std::reverse_iterator<iterator>		 reverse_iterator;
-    //    typedef _Alloc                        		 allocator_type;
+    //    typedef std::reverse_iterator<iterator>        reverse_iterator;
+    //    typedef _Alloc                                 allocator_type;
 
     ///
     /// \brief default constructor, empty small_vector
@@ -134,7 +133,16 @@ class small_vector {
     ///
     const_reference front() const noexcept;
 
+    ///
+    /// \brief back
+    /// \return reference to the last element of the vector
+    ///
+    const_reference back() const noexcept;
 
+    ///
+    /// \brief back
+    /// \return reference to the last element of the vector
+    ///
     reference& back();
 
     ///

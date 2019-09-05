@@ -171,6 +171,12 @@ typename small_vector<T, N>::reference small_vector<T, N>::back() {
 }
 
 template <typename T, std::size_t N>
+typename small_vector<T, N>::const_reference small_vector<T, N>::back() const noexcept {
+    assert((_end - _begin) >= 1);
+    return *((std::max(_begin, _end - 1)));
+}
+
+template <typename T, std::size_t N>
 typename small_vector<T, N>::pointer small_vector<T, N>::data() noexcept {
     return &(*_begin);
 }
@@ -198,7 +204,7 @@ typename small_vector<T, N>::reference small_vector<T, N>::operator[](std::size_
 template <typename T, std::size_t N>
 typename small_vector<T, N>::const_reference small_vector<T, N>::operator[](std::size_t pos) const noexcept {
     assert(std::ptrdiff_t(pos) < (_end - _begin));
-    return _begin + static_cast<std::ptrdiff_t>(pos);
+    return *(_begin + static_cast<std::ptrdiff_t>(pos));
 }
 
 
