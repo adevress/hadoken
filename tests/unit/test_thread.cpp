@@ -42,6 +42,7 @@
 #include <hadoken/executor/thread_pool_executor.hpp>
 #include <hadoken/thread/latch.hpp>
 #include <hadoken/thread/spinlock.hpp>
+#include <hadoken/executor/multiplexer_executor.hpp>
 
 
 BOOST_AUTO_TEST_CASE(spin_lock_simple_test) {
@@ -134,6 +135,132 @@ BOOST_AUTO_TEST_CASE(executor_pool_thread_wait) {
     }
 
     BOOST_CHECK_EQUAL(counter, 256);
+}
+
+
+BOOST_AUTO_TEST_CASE(multiplexer_test) {
+    std::mutex lock;
+    const std::size_t iterations = 256;
+
+    {
+        hadoken::thread_pool_executor exec_thread(32);
+
+        hadoken::multiplexer<std::string, int> mux;
+
+
+        std::vector<std::shared_future<int>> res;
+        std::mutex res_protect;
+
+        std::size_t counter = 0;
+
+
+        std::function<int ()> super_function = [&]() -> int {
+                // make this operation pretty heavy
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                counter += 1;
+                return counter;
+        };
+
+        //
+        // execute session 1
+        for (std::size_t i = 0; i < iterations; ++i) {
+            exec_thread.execute([&]() {
+                std::shared_future<int> f = mux.execute("hello", std::function<int ()> (super_function));
+
+                {
+                    std::lock_guard<std::mutex> guard(res_protect);
+                    res.emplace_back(std::move(f));
+                }
+            });
+        }
+
+        for(auto & f : res){
+            int v = f.get();
+            BOOST_CHECK_GE(v, 1);
+        }
+
+        BOOST_CHECK_GE(counter, 1);
+
+        res.clear();
+
+        //
+        // execute session 2
+        for (std::size_t i = 0; i < iterations; ++i) {
+            exec_thread.execute([&]() {
+
+                std::shared_future<int> f = mux.execute("hello", std::function<int ()> (super_function));
+
+                {
+                    std::lock_guard<std::mutex> guard(res_protect);
+                    res.emplace_back(std::move(f));
+                }
+            });
+        }
+
+        for(auto & f : res){
+            int v = f.get();
+            BOOST_CHECK_GE(v, 2);
+        }
+
+
+        BOOST_CHECK_GE(counter, 2);
+
+
+        res.clear();
+
+        //
+        // execute session 2
+        for (std::size_t i = 0; i < iterations; ++i) {
+            exec_thread.execute([&]() {
+
+                std::shared_future<int> f = mux.execute("world", [&]() -> int{
+                   return 100;
+                });
+
+                {
+                    std::lock_guard<std::mutex> guard(res_protect);
+                    res.emplace_back(std::move(f));
+                }
+            });
+        }
+
+
+        BOOST_CHECK_GE(counter, 2);
+
+        for(auto & f : res){
+            int v = f.get();
+            BOOST_CHECK_EQUAL(v, 100);
+        }
+
+
+
+        res.clear();
+
+        //
+        // execute session throw
+        for (std::size_t i = 0; i < iterations; ++i) {
+            exec_thread.execute([&]() {
+
+                std::shared_future<int> f = mux.execute("test", [&]() -> int{
+                   throw std::runtime_error("that's all");
+                });
+
+                {
+                    std::lock_guard<std::mutex> guard(res_protect);
+                    res.emplace_back(std::move(f));
+                }
+            });
+        }
+
+        for(auto & f : res){
+            BOOST_CHECK_THROW({
+            int v = f.get();
+            (void) v;
+            }, std::runtime_error);
+        }
+
+    }
+
 }
 
 
