@@ -34,6 +34,7 @@
 #include <vector>
 
 #include <hadoken/string/string_view.hpp>
+#include <hadoken/utility/optional.hpp>
 
 
 namespace hadoken {
@@ -61,8 +62,8 @@ class uri {
     typedef std::tuple<std::string, std::string> query_pair;
 
     inline explicit uri(std::string uri_string);
-    inline explicit uri(const uri&) = default;
-    inline explicit uri(uri&&) = default;
+    inline uri(const uri&) = default;
+    inline uri(uri&&) = default;
     inline ~uri();
 
     inline bool is_valid() const;
@@ -80,6 +81,8 @@ class uri {
     inline std::string get_path() const;
 
     inline std::string get_query() const;
+
+    inline hadoken::optional<std::string> get_query_with_key(string_view key) const;
 
     inline std::string get_fragment() const;
 

@@ -93,7 +93,10 @@ class string_view {
     size_type max_size() const noexcept;
 
     // operations
-    int compare(const string_view& other) const noexcept;
+    int compare(string_view other) const;
+    int compare(size_type pos1, size_type n1, string_view s) const;
+
+    string_view substr(size_type pos1, size_type n1) const;
 
     // utility
     void swap(string_view& other) noexcept;

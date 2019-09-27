@@ -90,6 +90,20 @@ inline std::vector<std::string> split_string(const std::string& str, const std::
 }
 
 
+inline std::string join(const std::vector<std::string> & elements, string_view link_element = " "){
+    std::string result;
+    if(elements.size() == 0){
+        return result;
+    }
+    result.append(elements[0]);
+
+    for(std::size_t i = 1; i < elements.size(); ++i){
+        result.append(to_string(link_element));
+        result.append(elements[i]);
+    }
+    return result;
+}
+
 
 } // namespace string
 

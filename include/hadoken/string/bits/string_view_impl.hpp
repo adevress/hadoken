@@ -62,7 +62,7 @@ inline bool string_view::empty() const noexcept { return (_len == 0); }
 inline string_view::size_type string_view::max_size() const noexcept { return std::numeric_limits<decltype(_len)>::max(); }
 
 
-inline int string_view::compare(const string_view& other) const noexcept {
+inline int string_view::compare(string_view other) const {
     const size_type min_size = std::min(_len, other._len);
 
     for (size_type i = 0; i < min_size; ++i) {
@@ -76,6 +76,19 @@ inline int string_view::compare(const string_view& other) const noexcept {
     if (_len > other._len)
         return 1;
     return 0;
+}
+
+inline int string_view::compare(size_type pos1, size_type n1, string_view other) const{
+    return this->substr(pos1, n1).compare(other);
+}
+
+inline string_view string_view::substr(size_type pos1, size_type n1) const{
+    if(pos1 > _len){
+        throw std::out_of_range("pos1 larger than string_view size");
+    }
+    const size_type bounded_pos = std::min<size_type>(_len, pos1);
+    const size_type bounded_size = std::min<size_type>((_len - bounded_pos), n1);
+    return string_view(data() + bounded_pos, bounded_size);
 }
 
 inline string_view::const_pointer string_view::data() const noexcept { return _pstr; }
