@@ -139,7 +139,6 @@ BOOST_AUTO_TEST_CASE(executor_pool_thread_wait) {
 
 
 BOOST_AUTO_TEST_CASE(multiplexer_test) {
-    std::mutex lock;
     const std::size_t iterations = 256;
 
     {
@@ -174,6 +173,8 @@ BOOST_AUTO_TEST_CASE(multiplexer_test) {
             });
         }
 
+        exec_thread.wait();
+
         for(auto & f : res){
             int v = f.get();
             BOOST_CHECK_GE(v, 1);
@@ -196,6 +197,8 @@ BOOST_AUTO_TEST_CASE(multiplexer_test) {
                 }
             });
         }
+
+        exec_thread.wait();
 
         for(auto & f : res){
             int v = f.get();
@@ -224,6 +227,7 @@ BOOST_AUTO_TEST_CASE(multiplexer_test) {
             });
         }
 
+        exec_thread.wait();
 
         BOOST_CHECK_GE(counter, 2);
 
@@ -238,7 +242,7 @@ BOOST_AUTO_TEST_CASE(multiplexer_test) {
 
         //
         // execute session throw
-        for (std::size_t i = 0; i < iterations; ++i) {
+       for (std::size_t i = 0; i < iterations; ++i) {
             exec_thread.execute([&]() {
 
                 std::shared_future<int> f = mux.execute("test", [&]() -> int{
