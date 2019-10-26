@@ -1,3 +1,4 @@
+#pragma once
 /**
  * Copyright (c) 2016, Adrien Devresse <adrien.devresse@epfl.ch>
  *
@@ -26,8 +27,6 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef HADOKEN_URI_HPP
-#define HADOKEN_URI_HPP
 
 #include <string>
 #include <tuple>
@@ -105,6 +104,3 @@ std::string percent_decode(hadoken::string_view encoded_string);
 
 
 #include "impl/uri_impl.hpp"
-
-
-#endif // URI_HPP

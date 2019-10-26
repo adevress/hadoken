@@ -1,5 +1,4 @@
-#ifndef HADOKEN_URI_IMPL_HPP
-#define HADOKEN_URI_IMPL_HPP
+#pragma once
 
 #include <algorithm>
 #include <cstring>
@@ -425,5 +424,3 @@ inline std::string percent_decode(hadoken::string_view encoded_origin) {
 
 
 } // namespace hadoken
-
-#endif // URI_IMPL_HPP

@@ -1,3 +1,4 @@
+#pragma once
 /**
  * Copyright (c) 2018, Adrien Devresse <adrien.devresse@epfl.ch>
  *
@@ -26,8 +27,6 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef HADOKEN_STRING_VIEW_IMPL_HPP
-#define HADOKEN_STRING_VIEW_IMPL_HPP
 
 #include "../string_view.hpp"
 
@@ -36,6 +35,8 @@
 #include <limits>
 
 namespace hadoken {
+
+#if !defined(HADOKEN_USE_CPP17_STRING_VIEW)
 
 inline string_view::string_view() noexcept : _pstr(nullptr), _len(0) {}
 
@@ -113,8 +114,9 @@ inline std::ostream& operator<<(std::ostream& o, const string_view& sv) {
     return o;
 }
 
+#endif
+
 inline std::string to_string(const string_view& sv) { return std::string(sv.data(), sv.size()); }
 
 } // namespace hadoken
 
-#endif // STRING_VIEW_IMPL_HPP

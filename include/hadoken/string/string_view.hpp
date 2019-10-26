@@ -1,3 +1,4 @@
+#pragma once
 /**
  * Copyright (c) 2018, Adrien Devresse <adrien.devresse@epfl.ch>
  *
@@ -26,16 +27,25 @@
  * DEALINGS IN THE SOFTWARE.
  *
  */
-#ifndef HADOKEN_STRING_VIEW_HPP
-#define HADOKEN_STRING_VIEW_HPP
 
 #include <cstdint>
 #include <ostream>
 #include <string>
 #include <utility>
 
+#if __cplusplus >= 201703L && !defined(HADOKEN_NO_CPP17_STRING_VIEW)
+#define HADOKEN_USE_CPP17_STRING_VIEW
+#include <string_view>
+#endif
+
 namespace hadoken {
 
+
+#ifdef HADOKEN_USE_CPP17_STRING_VIEW
+
+using string_view = std::string_view;
+
+#else
 ///
 /// backport implementation of the C++17 string_view class
 ///
@@ -121,6 +131,9 @@ bool operator==(const string_view& first, const string_view& second);
 
 std::ostream& operator<<(std::ostream& o, const string_view& sv);
 
+
+#endif
+
 ///
 /// \brief to_string
 ///
@@ -142,5 +155,3 @@ string_view make_string_view(StIterator first, StIterator last) {
 
 
 #include "bits/string_view_impl.hpp"
-
-#endif // STRING_VIEW_HPP
