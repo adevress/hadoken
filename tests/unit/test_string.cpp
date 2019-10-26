@@ -125,20 +125,21 @@ void test_wildcard(const std::string & wildcard, const std::string & str, bool r
 BOOST_AUTO_TEST_CASE(wildcard_simple) {
 
     auto t1 = std::chrono::steady_clock::now();
+    auto maker = std::make_tuple<std::string, std::string, bool>;
 
     std::vector<std::tuple<std::string, std::string, bool> > test_cases = {
-        { "hello*ld", "hello world", true },
-        { "dude" , "hello world", false},
-        { "h**", "hello world", true },
-        { "*hello*", "hello world", true },
-        { "world*", "hello world", false },
-        { "*", "hello world", true },
-        { "**dude**", "hello world", false },
-        { "**blabla", "blafdfd", false },
-        { "***", "hello*world*", true },
-        { "**deb", "debug1", false },
-        { "hello wo*rld", "hello world", true},
-        { "hello world*", "hello world", true}
+        { maker("hello*ld", "hello world", true) },
+        { maker("dude" , "hello world", false)},
+        { maker("h**", "hello world", true) },
+        { maker("*hello*", "hello world", true) },
+        { maker("world*", "hello world", false) },
+        { maker("*", "hello world", true) },
+        { maker("**dude**", "hello world", false) },
+        { maker("**blabla", "blafdfd", false) },
+        { maker("***", "hello*world*", true) },
+        { maker("**deb", "debug1", false) },
+        { maker("hello wo*rld", "hello world", true) },
+        { maker("hello world*", "hello world", true) }
     };
 
     for(const auto & t : test_cases){
