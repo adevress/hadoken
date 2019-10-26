@@ -7,10 +7,16 @@ set(HADOKEN_VERSION_MAJOR "1")
 set(HADOKEN_VERSION_MINOR "0")
 add_definitions( -DHADOKEN_VERSION_MAJOR=\"${HADOKEN_VERSION_MAJOR}\" -DHADOKEN_VERSION_MINOR=\"${HADOKEN_VERSION_MINOR}\")
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  set(CUR_PROJ ON)
+else()
+  set(CUR_PROJ OFF)
+endif()
 
-option(HADOKEN_DISABLE_INSTALL "Disable the installation for this component" TRUE)
-option(HADOKEN_UNIT_TESTS "Enable or disable unit tests execution" TRUE)
-option(HADOKEN_PERF_TESTS "Enable or disable performance tests execution" FALSE)
+include(CMakeDependentOption)
+cmake_dependent_option(HADOKEN_DISABLE_INSTALL "Disable the installation for this component" ON "CUR_PROJ" ON)
+cmake_dependent_option(HADOKEN_UNIT_TESTS "Enable or disable unit tests execution" ON "CUR_PROJ" OFF)
+cmake_dependent_option(HADOKEN_PERF_TESTS "Enable or disable performance tests execution" OFF "CUR_PROJ" OFF)
 
 list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/CMake
       ${PROJECT_SOURCE_DIR}/CMake/portability
